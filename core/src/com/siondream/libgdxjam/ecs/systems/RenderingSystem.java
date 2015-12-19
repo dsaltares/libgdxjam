@@ -12,6 +12,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -19,6 +23,8 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.components.SizeComponent;
+import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class RenderingSystem extends SortedIteratingSystem implements Disposable {
@@ -43,8 +49,18 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	private ShapeRenderer shapeRenderer;
 	private Box2DDebugRenderer box2DRenderer;
 	
+	private Rectangle frustum = new Rectangle();
+	private Vector2 upperRight = new Vector2();
+	private Vector2 bottomRight = new Vector2();
+	private Vector2 bottomLeft = new Vector2();
+	private Vector2 upperLeft = new Vector2();
+	
 	public RenderingSystem(Stage stage, World world) {
-		super(Family.all(TransformComponent.class).get(), new ZComparator());
+		super(
+			Family.all(TransformComponent.class)
+				  .one(TextureComponent.class).get(),
+			new ZComparator()
+		);
 		
 		this.stage = stage;
 		this.world = world;
@@ -118,7 +134,51 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	
 	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
+		if (!inFrustum(entity)) return;
 		
+		TransformComponent t = Mappers.transform.get(entity);
+		SizeComponent s = Mappers.size.get(entity);
+		TextureComponent tex = Mappers.texture.get(entity);
+		
+		float originX = s.width * 0.5f;
+		float originY = s.height * 0.5f;
+		
+		batch.draw(
+			tex.region,
+			t.position.x - originX,
+			t.position.y - originY,
+			originX,
+			originY,
+			s.width,
+			s.height,
+			t.scale,
+			t.scale,
+			MathUtils.radiansToDegrees * (t.angle * -1)
+		);
+	}
+	
+	private boolean inFrustum(Entity entity) {
+		TransformComponent t = Mappers.transform.get(entity);
+		SizeComponent s = Mappers.size.get(entity);
+		
+		frustum.x = camera.position.x - viewport.getWorldWidth() * 0.5f;
+		frustum.y = camera.position.y - viewport.getWorldHeight() * 0.5f;
+		frustum.width = viewport.getWorldWidth();
+		frustum.height = viewport.getWorldHeight();
+		
+		upperRight.x = t.position.x + s.width * 0.5f * t.scale;
+		upperRight.y = t.position.x + s.height * 0.5f * t.scale;
+		upperLeft.x = t.position.x - s.width * 0.5f * t.scale;
+		upperLeft.y = t.position.x + s.height * 0.5f * t.scale;
+		bottomRight.x = t.position.x + s.width * 0.5f * t.scale;
+		bottomRight.y = t.position.x - s.height * 0.5f * t.scale;
+		bottomLeft.x = t.position.x - s.width * 0.5f * t.scale;
+		bottomLeft.y = t.position.x - s.height * 0.5f * t.scale;
+		
+		return frustum.contains(upperRight) ||
+			   frustum.contains(upperLeft) ||
+			   frustum.contains(bottomRight) ||
+			   frustum.contains(bottomLeft);
 	}
 	
 	private void drawWorld(float deltaTime) {
