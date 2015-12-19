@@ -6,21 +6,20 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.SortedIteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
@@ -28,20 +27,10 @@ import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class RenderingSystem extends SortedIteratingSystem implements Disposable {
-	private final static float MIN_WORLD_WIDTH = 9.6f;
-	private final static float MIN_WORLD_HEIGHT = 7.2f;
-	private final static float MAX_WORLD_WIDTH = 12.8f;
-	private final static float MAX_WORLD_HEIGHT = 7.2f;
-	
-	private final static int MIN_UI_WIDTH = 960;
-	private final static int MIN_UI_HEIGHT = 720;
-	private final static int MAX_UI_WIDTH = 1280;
-	private final static int MAX_UI_HEIGHT = 720;
+
 	
 	private SpriteBatch batch;
-	private OrthographicCamera camera;
 	private Viewport viewport;
-	private OrthographicCamera uiCamera;
 	private Viewport uiViewport;
 	private Stage stage;
 	private World world;
@@ -49,41 +38,24 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	private ShapeRenderer shapeRenderer;
 	private Box2DDebugRenderer box2DRenderer;
 	
-	private Rectangle frustum = new Rectangle();
-	private Vector2 upperRight = new Vector2();
-	private Vector2 bottomRight = new Vector2();
-	private Vector2 bottomLeft = new Vector2();
-	private Vector2 upperLeft = new Vector2();
+	private BoundingBox bounds = new BoundingBox();
 	
-	public RenderingSystem(Stage stage, World world) {
+	public RenderingSystem(Viewport viewport,
+						   Viewport uiViewport,
+						   Stage stage,
+						   World world) {
 		super(
 			Family.all(TransformComponent.class)
 				  .one(TextureComponent.class).get(),
 			new ZComparator()
 		);
 		
+		this.viewport = viewport;
+		this.uiViewport = uiViewport;
 		this.stage = stage;
 		this.world = world;
 		
 		batch = new SpriteBatch();
-		
-		camera = new OrthographicCamera();
-		viewport = new ExtendViewport(
-			MIN_WORLD_WIDTH,
-			MIN_WORLD_HEIGHT,
-			MAX_WORLD_WIDTH,
-			MAX_WORLD_HEIGHT,
-			camera
-		);
-		
-		uiCamera = new OrthographicCamera();
-		uiViewport = new ExtendViewport(
-			MIN_UI_WIDTH,
-			MIN_UI_HEIGHT,
-			MAX_UI_WIDTH,
-			MAX_UI_HEIGHT,
-			uiCamera
-		);
 		
 		stage.setViewport(uiViewport);
 		
@@ -118,12 +90,7 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	public void dispose() {
 		batch.dispose();
 	}
-	
-	public void resize(int width, int height) {
-		viewport.update(width, height);
-		uiViewport.update(width, height);
-	}
-	
+
 	public void toggleDebug() {
 		debug = !debug;
 	}
@@ -160,28 +127,18 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	private boolean inFrustum(Entity entity) {
 		TransformComponent t = Mappers.transform.get(entity);
 		SizeComponent s = Mappers.size.get(entity);
+		float radius = Math.max(s.width, s.height) * t.scale * 0.5f;
 		
-		frustum.x = camera.position.x - viewport.getWorldWidth() * 0.5f;
-		frustum.y = camera.position.y - viewport.getWorldHeight() * 0.5f;
-		frustum.width = viewport.getWorldWidth();
-		frustum.height = viewport.getWorldHeight();
+		bounds.max.x = t.position.x + radius;
+		bounds.max.y = t.position.y + radius;
+		bounds.min.x = t.position.x - radius;
+		bounds.min.y = t.position.y - radius;
 		
-		upperRight.x = t.position.x + s.width * 0.5f * t.scale;
-		upperRight.y = t.position.x + s.height * 0.5f * t.scale;
-		upperLeft.x = t.position.x - s.width * 0.5f * t.scale;
-		upperLeft.y = t.position.x + s.height * 0.5f * t.scale;
-		bottomRight.x = t.position.x + s.width * 0.5f * t.scale;
-		bottomRight.y = t.position.x - s.height * 0.5f * t.scale;
-		bottomLeft.x = t.position.x - s.width * 0.5f * t.scale;
-		bottomLeft.y = t.position.x - s.height * 0.5f * t.scale;
-		
-		return frustum.contains(upperRight) ||
-			   frustum.contains(upperLeft) ||
-			   frustum.contains(bottomRight) ||
-			   frustum.contains(bottomLeft);
+		return viewport.getCamera().frustum.boundsInFrustum(bounds);
 	}
 	
 	private void drawWorld(float deltaTime) {
+		Camera camera = viewport.getCamera();
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
@@ -190,7 +147,7 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	}
 	
 	private void drawUI() {
-		uiCamera.update();
+		uiViewport.getCamera().update();
 		stage.draw();
 	}
 	
@@ -198,37 +155,27 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 		if (!debug) return;
 		
 		drawGrid();
-		box2DRenderer.render(world, camera.combined);
+		box2DRenderer.render(world, viewport.getCamera().combined);
 	}
 	
 	private void drawGrid() {
-		shapeRenderer.setProjectionMatrix(camera.combined);
+		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.setColor(Color.PINK);
 		shapeRenderer.begin(ShapeType.Line);
 		
-		shapeRenderer.line(
-			-MAX_WORLD_WIDTH, 0.0f,
-			MAX_WORLD_WIDTH, 0.0f
-		);
-		shapeRenderer.line(
-			0.0f, -MAX_WORLD_HEIGHT,
-			0.0f, MAX_WORLD_HEIGHT
-		);
+		int halfArea = 200;
+		float width = viewport.getWorldWidth();
+		float height = viewport.getWorldHeight();
+		
+		shapeRenderer.line(-width * halfArea, 0.0f, width * halfArea, 0.0f);
+		shapeRenderer.line(0.0f, -height * halfArea, 0.0f, height * halfArea);
 		
 		shapeRenderer.setColor(Color.WHITE);
 		
-		for (int i = -200; i < 200; ++i) {
+		for (int i = -halfArea; i < halfArea; ++i) {
 			if (i == 0) continue;
-			
-			shapeRenderer.line(
-				-MAX_WORLD_WIDTH, i,
-				MAX_WORLD_WIDTH, i
-			);
-			
-			shapeRenderer.line(
-				i, -MAX_WORLD_HEIGHT,
-				i, MAX_WORLD_HEIGHT
-			);
+			shapeRenderer.line(-width * halfArea, i, width * halfArea, i);
+			shapeRenderer.line(i, -height * halfArea, i, height * halfArea);
 		}
 		
 		shapeRenderer.end();
