@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
-import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+//import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
@@ -82,13 +82,13 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		renderingSystem.setDebug(true);
 		engine.addSystem(renderingSystem);
 		
-		CameraSystem cameraSystem = new CameraSystem(
+		/*CameraSystem cameraSystem = new CameraSystem(
 			camera,
 			inputMultiplexer
 		);
 		
 		engine.addSystem(cameraSystem);
-		
+		*/
 		texture = new Texture(Gdx.files.internal("badlogic.jpg"));
 		
 		createLogoEntity(2.0f, 2.0f, 1.0f, 0.0f, 1.0f, 1.0f);
