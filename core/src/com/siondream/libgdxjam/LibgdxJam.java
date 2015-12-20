@@ -10,6 +10,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -19,12 +20,14 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.NodeRemovalSystem;
+import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
@@ -42,6 +45,8 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private final static int MIN_UI_HEIGHT = 720;
 	private final static int MAX_UI_WIDTH = 1280;
 	private final static int MAX_UI_HEIGHT = 720;
+	
+	private final static float UI_TO_WORLD = (float) MAX_WORLD_WIDTH / (float)MAX_UI_WIDTH;
 	
 	private Engine engine = new Engine();
 	private Stage stage;
@@ -96,6 +101,9 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		
 		engine.addSystem(cameraSystem);
 		
+		ParticleSystem particleSystem = new ParticleSystem(UI_TO_WORLD);
+		engine.addSystem(particleSystem);
+		
 		NodeRemovalSystem removalSystem = new NodeRemovalSystem(engine);
 		engine.addEntityListener(
 			Family.all(NodeComponent.class).get(),
@@ -110,6 +118,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		Entity logo2 = createLogoEntity(logo1, 2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
 		Entity logo3 = createLogoEntity(logo1, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
 		Entity logo4 = createLogoEntity(logo1, -2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
+		Entity particle = createParticleEntity(logo1, 0.0f, 0.0f);
 		
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
@@ -239,5 +248,29 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		return entity;
 	}
 	
-	
+	private Entity createParticleEntity(Entity parent,
+										float x,
+							  	  		float y) {
+		Entity entity = new Entity();
+		ParticleComponent particle = new ParticleComponent();
+		TransformComponent t = new TransformComponent();
+		SizeComponent size = new SizeComponent();
+		NodeComponent node = new NodeComponent();
+		
+		particle.effect = new ParticleEffect();
+		particle.effect.load(Gdx.files.internal("bigFire"), Gdx.files.internal("."));
+		t.position.x = x;
+		t.position.y = y;
+		
+		node.parent = parent;
+		Mappers.node.get(parent).children.add(entity);
+		
+		entity.add(t);
+		entity.add(size);
+		entity.add(particle);
+		entity.add(node);
+		engine.addEntity(entity);
+		
+		return entity;
+	}
 }

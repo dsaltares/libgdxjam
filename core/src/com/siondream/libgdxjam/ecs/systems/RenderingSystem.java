@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -21,7 +19,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
@@ -73,7 +73,14 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 			drawContacts
 		);
 		
-		renderable = Family.one(TextureComponent.class).get();
+		renderable = Family.all(
+			NodeComponent.class,
+			TransformComponent.class,
+			SizeComponent.class
+		).one(
+			TextureComponent.class,
+			ParticleComponent.class
+		).get();
 	}
 	
 	@Override public void update(float deltaTime) {
@@ -90,12 +97,25 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		renderChildren(entity);
 	}
 	
+	@Override
+	public void dispose() {
+		batch.dispose();
+	}
+
+	public void toggleDebug() {
+		debug = !debug;
+	}
+	
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+	
 	private void renderChildren(Entity entity) {
 		NodeComponent node = Mappers.node.get(entity);
 		
 		for (Entity child : node.children) {
 			if (Mappers.node.has(child)) {
-				computeTransform(child, node.world);
+				NodeUtils.computeTransformFromParent(child, entity);
 				applyTransform(child);
 			}
 			
@@ -112,38 +132,12 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		if (!inFrustum(world, size)) { return; }
 		
-		TextureComponent texture = Mappers.texture.get(entity);
-		
-		renderTexture(texture, size);
-	}
-	
-	@Override
-	public void dispose() {
-		batch.dispose();
-	}
-
-	public void toggleDebug() {
-		debug = !debug;
-	}
-	
-	public void setDebug(boolean debug) {
-		this.debug = debug;
-	}
-	
-	private void computeTransform(Entity entity, Affine2 parent) {
-		NodeComponent node = Mappers.node.get(entity);
-		TransformComponent t = Mappers.transform.get(entity);
-		
-		node.world.setToTrnRotScl(
-			t.position.x,
-			t.position.y,
-			MathUtils.radiansToDegrees * t.angle,
-			t.scale,
-			t.scale
-		);
-		
-		node.world.preMul(parent);
-		node.computed.set(node.world);
+		if (Mappers.texture.has(entity)) {
+			renderTexture(entity);
+		}
+		else if (Mappers.particle.has(entity)) {
+			renderParticle(entity);
+		}
 	}
 	
 	private void applyTransform(Entity entity) {
@@ -151,23 +145,26 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		batch.setTransformMatrix(node.computed);
 	}
 	
-	private void renderTexture(TextureComponent texture,
-							   SizeComponent size) {
+	private void renderTexture(Entity entity) {
+		SizeComponent size = Mappers.size.get(entity);
+		TextureComponent texture = Mappers.texture.get(entity);
+		
 		float originX = size.width * 0.5f;
 		float originY = size.height * 0.5f;
 		
 		batch.draw(
 			texture.region,
-			-originX,
-			-originY,
-			originX,
-			originY,
-			size.width,
-			size.height,
-			1.0f,
-			1.0f,
+			-originX, -originY,
+			originX, originY,
+			size.width, size.height,
+			1.0f, 1.0f,
 			0.0f
 		);
+	}
+	
+	private void renderParticle(Entity entity) {
+		ParticleComponent particle = Mappers.particle.get(entity);
+		particle.effect.draw(batch);
 	}
 	
 	private boolean inFrustum(Matrix4 world, SizeComponent size) {
