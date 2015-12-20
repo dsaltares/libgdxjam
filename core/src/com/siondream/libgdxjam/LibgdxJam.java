@@ -14,6 +14,10 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -22,6 +26,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
@@ -31,6 +36,7 @@ import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.LayerSystem;
 import com.siondream.libgdxjam.ecs.systems.NodeRemovalSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
+import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
@@ -64,6 +70,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	
 	private Entity root;
+	private Entity ball;
 	
 	@Override
 	public void create () {
@@ -87,6 +94,9 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		
 		stage = new Stage();
 		world = new World(GRAVITY, DO_SLEEP);
+		
+		PhysicsSystem physicsSystem = new PhysicsSystem(world);
+		engine.addSystem(physicsSystem);
 		
 		CameraSystem cameraSystem = new CameraSystem(
 			camera,
@@ -125,6 +135,8 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		Entity logo3 = createLogoEntity(root, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f, "second");
 		Entity logo4 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f, "third");
 		Entity particle = createParticleEntity(root, 0.0f, 0.0f, "second");
+		ball = createPhysicsEntity(root, -4.0f, 3.0f, 1.0f, MathUtils.PI * 1.5f, 1.0f, 1.0f, "third");
+		Entity ground = createGround();
 		
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
@@ -161,6 +173,10 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		
 		if (keycode == Keys.W) {
 			engine.removeEntity(root);
+		}
+		
+		if (keycode == Keys.A) {
+			engine.removeEntity(ball);
 		}
 		
 		return false;
@@ -289,6 +305,83 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		entity.add(particle);
 		entity.add(node);
 		entity.add(index);
+		engine.addEntity(entity);
+		
+		return entity;
+	}
+	
+	private Entity createPhysicsEntity(Entity parent,
+									   float x,
+							  	  	   float y,
+							  	  	   float scale,
+							  	  	   float angle,
+							  	  	   float width,
+							  	  	   float height,
+							  	  	   String layer) {
+		Entity entity = new Entity();
+		TextureComponent tex = new TextureComponent();
+		TransformComponent t = new TransformComponent();
+		SizeComponent size = new SizeComponent();
+		NodeComponent node = new NodeComponent();
+		ZIndexComponent index = new ZIndexComponent();
+		PhysicsComponent physics = new PhysicsComponent();
+		
+		tex.region = new TextureRegion(texture);
+		t.position.x = x;
+		t.position.y = y;
+		t.scale = scale;
+		size.width = width;
+		size.height = height;
+		t.angle = angle;
+		index.layer = layer;
+		
+		BodyDef def = new BodyDef();
+		def.fixedRotation = false;
+		def.position.x = x;
+		def.position.y = y;
+		def.type = BodyDef.BodyType.DynamicBody;
+		physics.body = world.createBody(def);
+		
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(width * 0.5f, height * 0.5f);
+		FixtureDef fDef = new FixtureDef();
+		fDef.shape = shape;
+		fDef.restitution = 0.8f;
+		physics.body.createFixture(fDef);
+		
+		node.parent = parent;
+		Mappers.node.get(parent).children.add(entity);
+		
+		entity.add(t);
+		entity.add(size);
+		entity.add(tex);
+		entity.add(node);
+		entity.add(index);
+		entity.add(physics);
+		engine.addEntity(entity);
+		
+		return entity;
+	}
+	
+	private Entity createGround() {
+		Entity entity = new Entity();
+		PhysicsComponent physics = new PhysicsComponent();
+		
+		
+		BodyDef def = new BodyDef();
+		def.position.x = 0.0f;
+		def.position.y = 0.0f;
+		def.type = BodyDef.BodyType.StaticBody;
+		physics.body = world.createBody(def);
+		
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(50.0f, 0.1f);
+		FixtureDef fDef = new FixtureDef();
+		fDef.shape = shape;
+		fDef.restitution = 0.5f;
+		physics.body.createFixture(fDef);
+		
+		entity.add(physics);
 		engine.addEntity(entity);
 		
 		return entity;

@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
@@ -17,4 +18,5 @@ public class Mappers {
 	public static ComponentMapper<ParticleComponent> particle = ComponentMapper.getFor(ParticleComponent.class);
 	public static ComponentMapper<LayerComponent> layer = ComponentMapper.getFor(LayerComponent.class);
 	public static ComponentMapper<ZIndexComponent> index = ComponentMapper.getFor(ZIndexComponent.class);
+	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
 }
