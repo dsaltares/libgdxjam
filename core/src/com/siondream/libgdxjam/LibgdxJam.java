@@ -2,6 +2,7 @@ package com.siondream.libgdxjam;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -16,10 +18,16 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ParticleComponent;
+import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
-//import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.NodeRemovalSystem;
+import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
@@ -38,6 +46,8 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private final static int MAX_UI_WIDTH = 1280;
 	private final static int MAX_UI_HEIGHT = 720;
 	
+	private final static float UI_TO_WORLD = (float) MAX_WORLD_WIDTH / (float)MAX_UI_WIDTH;
+	
 	private Engine engine = new Engine();
 	private Stage stage;
 	private World world;
@@ -49,6 +59,8 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private Viewport uiViewport;
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	
+	private Entity root;
 	
 	@Override
 	public void create () {
@@ -82,20 +94,33 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		renderingSystem.setDebug(true);
 		engine.addSystem(renderingSystem);
 		
-		/*CameraSystem cameraSystem = new CameraSystem(
+		CameraSystem cameraSystem = new CameraSystem(
 			camera,
 			inputMultiplexer
 		);
 		
 		engine.addSystem(cameraSystem);
-		*/
+		
+		ParticleSystem particleSystem = new ParticleSystem(UI_TO_WORLD);
+		engine.addSystem(particleSystem);
+		
+		NodeRemovalSystem removalSystem = new NodeRemovalSystem(engine);
+		engine.addEntityListener(
+			Family.all(NodeComponent.class).get(),
+			removalSystem
+		);
+		
 		texture = new Texture(Gdx.files.internal("badlogic.jpg"));
 		
-		createLogoEntity(2.0f, 2.0f, 1.0f, 0.0f, 1.0f, 1.0f);
-		createLogoEntity(2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
-		createLogoEntity(-2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
-		createLogoEntity(-2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
+		root = createRootEntity();
 		
+		Entity logo1 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, MathUtils.PI * 0.25f, 1.0f, 1.0f);
+		Entity logo2 = createLogoEntity(logo1, 2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
+		Entity logo3 = createLogoEntity(logo1, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
+		Entity logo4 = createLogoEntity(logo1, -2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
+		Entity particle = createParticleEntity(logo1, 0.0f, 0.0f);
+		
+		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 	
@@ -126,6 +151,10 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		if (keycode == Keys.D) {
 			engine.getSystem(RenderingSystem.class).toggleDebug();
 			return true;
+		}
+		
+		if (keycode == Keys.W) {
+			engine.removeEntity(root);
 		}
 		
 		return false;
@@ -173,16 +202,31 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 	
-	private void createLogoEntity(float x,
-							  	  float y,
-							  	  float scale,
-							  	  float angle,
-							  	  float width,
-							  	  float height) {
+	private Entity createRootEntity() {
+		Entity entity = new Entity();
+		NodeComponent node = new NodeComponent();
+		RootComponent root = new RootComponent();
+		
+		entity.add(node);
+		entity.add(root);
+		
+		engine.addEntity(entity);
+		
+		return entity;
+	}
+	
+	private Entity createLogoEntity(Entity parent,
+									float x,
+							  	  	float y,
+							  	  	float scale,
+							  	  	float angle,
+							  	  	float width,
+							  	  	float height) {
 		Entity entity = new Entity();
 		TextureComponent tex = new TextureComponent();
 		TransformComponent t = new TransformComponent();
 		SizeComponent size = new SizeComponent();
+		NodeComponent node = new NodeComponent();
 		
 		tex.region = new TextureRegion(texture);
 		t.position.x = x;
@@ -192,9 +236,41 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		size.height = height;
 		t.angle = angle;
 		
+		node.parent = parent;
+		Mappers.node.get(parent).children.add(entity);
+		
 		entity.add(t);
 		entity.add(size);
 		entity.add(tex);
+		entity.add(node);
 		engine.addEntity(entity);
+		
+		return entity;
+	}
+	
+	private Entity createParticleEntity(Entity parent,
+										float x,
+							  	  		float y) {
+		Entity entity = new Entity();
+		ParticleComponent particle = new ParticleComponent();
+		TransformComponent t = new TransformComponent();
+		SizeComponent size = new SizeComponent();
+		NodeComponent node = new NodeComponent();
+		
+		particle.effect = new ParticleEffect();
+		particle.effect.load(Gdx.files.internal("bigFire"), Gdx.files.internal("."));
+		t.position.x = x;
+		t.position.y = y;
+		
+		node.parent = parent;
+		Mappers.node.get(parent).children.add(entity);
+		
+		entity.add(t);
+		entity.add(size);
+		entity.add(particle);
+		entity.add(node);
+		engine.addEntity(entity);
+		
+		return entity;
 	}
 }

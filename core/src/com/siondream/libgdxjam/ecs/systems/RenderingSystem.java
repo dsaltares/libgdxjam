@@ -1,10 +1,8 @@
 package com.siondream.libgdxjam.ecs.systems;
 
-import java.util.Comparator;
-
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.SortedIteratingSystem;
+import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -12,7 +10,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
@@ -20,13 +19,16 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ParticleComponent;
+import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
-public class RenderingSystem extends SortedIteratingSystem implements Disposable {
+public class RenderingSystem extends IteratingSystem implements Disposable {
 
-	
 	private SpriteBatch batch;
 	private Viewport viewport;
 	private Viewport uiViewport;
@@ -35,18 +37,15 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 	private boolean debug;
 	private ShapeRenderer shapeRenderer;
 	private Box2DDebugRenderer box2DRenderer;
-	
+	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
+	private Vector3 position = new Vector3();
 	
 	public RenderingSystem(Viewport viewport,
 						   Viewport uiViewport,
 						   Stage stage,
 						   World world) {
-		super(
-			Family.all(TransformComponent.class)
-				  .one(TextureComponent.class).get(),
-			new ZComparator()
-		);
+		super(Family.all(RootComponent.class, NodeComponent.class).get());
 		
 		this.viewport = viewport;
 		this.uiViewport = uiViewport;
@@ -73,15 +72,29 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 			drawVelocities,
 			drawContacts
 		);
+		
+		renderable = Family.all(
+			NodeComponent.class,
+			TransformComponent.class,
+			SizeComponent.class
+		).one(
+			TextureComponent.class,
+			ParticleComponent.class
+		).get();
 	}
 	
 	@Override public void update(float deltaTime) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		drawWorld(deltaTime);
-		drawUI();
-		drawDebug();
+		renderWorld(deltaTime);
+		renderUI();
+		renderDebug();
+	}
+	
+	@Override
+	protected void processEntity(Entity entity, float deltaTime) {
+		renderChildren(entity);
 	}
 	
 	@Override
@@ -97,45 +110,76 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 		this.debug = debug;
 	}
 	
-	@Override
-	protected void processEntity(Entity entity, float deltaTime) {
-		if (!inFrustum(entity)) return;
+	private void renderChildren(Entity entity) {
+		NodeComponent node = Mappers.node.get(entity);
 		
-		TransformComponent t = Mappers.transform.get(entity);
-		SizeComponent s = Mappers.size.get(entity);
-		TextureComponent tex = Mappers.texture.get(entity);
+		for (Entity child : node.children) {
+			if (Mappers.node.has(child)) {
+				NodeUtils.computeTransformFromParent(child, entity);
+				applyTransform(child);
+			}
+			
+			renderEntity(child);
+			renderChildren(child);
+		}
+	}
+	
+	private void renderEntity(Entity entity) {
+		if (!renderable.matches(entity)) { return; }
 		
-		float originX = s.width * 0.5f;
-		float originY = s.height * 0.5f;
+		SizeComponent size = Mappers.size.get(entity);
+		Matrix4 world = Mappers.node.get(entity).computed;
+		
+		if (!inFrustum(world, size)) { return; }
+		
+		if (Mappers.texture.has(entity)) {
+			renderTexture(entity);
+		}
+		else if (Mappers.particle.has(entity)) {
+			renderParticle(entity);
+		}
+	}
+	
+	private void applyTransform(Entity entity) {
+		NodeComponent node = Mappers.node.get(entity);
+		batch.setTransformMatrix(node.computed);
+	}
+	
+	private void renderTexture(Entity entity) {
+		SizeComponent size = Mappers.size.get(entity);
+		TextureComponent texture = Mappers.texture.get(entity);
+		
+		float originX = size.width * 0.5f;
+		float originY = size.height * 0.5f;
 		
 		batch.draw(
-			tex.region,
-			t.position.x - originX,
-			t.position.y - originY,
-			originX,
-			originY,
-			s.width,
-			s.height,
-			t.scale,
-			t.scale,
-			MathUtils.radiansToDegrees * (t.angle * -1)
+			texture.region,
+			-originX, -originY,
+			originX, originY,
+			size.width, size.height,
+			1.0f, 1.0f,
+			0.0f
 		);
 	}
 	
-	private boolean inFrustum(Entity entity) {
-		TransformComponent t = Mappers.transform.get(entity);
-		SizeComponent s = Mappers.size.get(entity);
-		float radius = Math.max(s.width, s.height) * t.scale * 0.5f;
+	private void renderParticle(Entity entity) {
+		ParticleComponent particle = Mappers.particle.get(entity);
+		particle.effect.draw(batch);
+	}
+	
+	private boolean inFrustum(Matrix4 world, SizeComponent size) {
+		float radius = Math.max(size.width, size.height) * world.getScaleX() * 0.5f;
+		world.getTranslation(position);
 		
-		bounds.max.x = t.position.x + radius;
-		bounds.max.y = t.position.y + radius;
-		bounds.min.x = t.position.x - radius;
-		bounds.min.y = t.position.y - radius;
+		bounds.max.x = position.x + radius;
+		bounds.max.y = position.y + radius;
+		bounds.min.x = position.x - radius;
+		bounds.min.y = position.y - radius;
 		
 		return viewport.getCamera().frustum.boundsInFrustum(bounds);
 	}
 	
-	private void drawWorld(float deltaTime) {
+	private void renderWorld(float deltaTime) {
 		Camera camera = viewport.getCamera();
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
@@ -144,19 +188,19 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 		batch.end();
 	}
 	
-	private void drawUI() {
+	private void renderUI() {
 		uiViewport.getCamera().update();
 		stage.draw();
 	}
 	
-	private void drawDebug() {
+	private void renderDebug() {
 		if (!debug) return;
 		
-		drawGrid();
+		renderGrid();
 		box2DRenderer.render(world, viewport.getCamera().combined);
 	}
 	
-	private void drawGrid() {
+	private void renderGrid() {
 		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.setColor(Color.PINK);
 		shapeRenderer.begin(ShapeType.Line);
@@ -177,15 +221,5 @@ public class RenderingSystem extends SortedIteratingSystem implements Disposable
 		}
 		
 		shapeRenderer.end();
-	}
-	
-	private static class ZComparator implements Comparator<Entity> {
-		@Override
-		public int compare(Entity e1, Entity e2) {
-			return (int)Math.signum(
-				Mappers.transform.get(e1).position.z - 
-				Mappers.transform.get(e2).position.z
-			);
-		}
 	}
 }
