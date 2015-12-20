@@ -2,6 +2,7 @@ package com.siondream.libgdxjam;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -16,10 +17,14 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.NodeRemovalSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
@@ -49,6 +54,8 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private Viewport uiViewport;
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	
+	private Entity root;
 	
 	@Override
 	public void create () {
@@ -89,13 +96,22 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		
 		engine.addSystem(cameraSystem);
 		
+		NodeRemovalSystem removalSystem = new NodeRemovalSystem(engine);
+		engine.addEntityListener(
+			Family.all(NodeComponent.class).get(),
+			removalSystem
+		);
+		
 		texture = new Texture(Gdx.files.internal("badlogic.jpg"));
 		
-		createLogoEntity(2.0f, 2.0f, 1.0f, 0.0f, 1.0f, 1.0f);
-		createLogoEntity(2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
-		createLogoEntity(-2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
-		createLogoEntity(-2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
+		root = createRootEntity();
 		
+		Entity logo1 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f);
+		Entity logo2 = createLogoEntity(logo1, 2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
+		Entity logo3 = createLogoEntity(logo1, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
+		Entity logo4 = createLogoEntity(logo1, -2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
+		
+		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 	
@@ -126,6 +142,10 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		if (keycode == Keys.D) {
 			engine.getSystem(RenderingSystem.class).toggleDebug();
 			return true;
+		}
+		
+		if (keycode == Keys.W) {
+			engine.removeEntity(root);
 		}
 		
 		return false;
@@ -173,16 +193,31 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 	
-	private void createLogoEntity(float x,
-							  	  float y,
-							  	  float scale,
-							  	  float angle,
-							  	  float width,
-							  	  float height) {
+	private Entity createRootEntity() {
+		Entity entity = new Entity();
+		NodeComponent node = new NodeComponent();
+		RootComponent root = new RootComponent();
+		
+		entity.add(node);
+		entity.add(root);
+		
+		engine.addEntity(entity);
+		
+		return entity;
+	}
+	
+	private Entity createLogoEntity(Entity parent,
+									float x,
+							  	  	float y,
+							  	  	float scale,
+							  	  	float angle,
+							  	  	float width,
+							  	  	float height) {
 		Entity entity = new Entity();
 		TextureComponent tex = new TextureComponent();
 		TransformComponent t = new TransformComponent();
 		SizeComponent size = new SizeComponent();
+		NodeComponent node = new NodeComponent();
 		
 		tex.region = new TextureRegion(texture);
 		t.position.x = x;
@@ -192,9 +227,17 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		size.height = height;
 		t.angle = angle;
 		
+		node.parent = parent;
+		Mappers.node.get(parent).children.add(entity);
+		
 		entity.add(t);
 		entity.add(size);
 		entity.add(tex);
+		entity.add(node);
 		engine.addEntity(entity);
+		
+		return entity;
 	}
+	
+	
 }
