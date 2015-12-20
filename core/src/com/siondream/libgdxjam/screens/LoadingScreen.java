@@ -2,14 +2,17 @@ package com.siondream.libgdxjam.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.LibgdxJam.Screens;
 
-public class LoadingScreen implements Screen
+public class LoadingScreen implements Screen, AssetErrorListener
 {
 	private final AssetManager m_assetMgr;
 	
@@ -69,7 +72,7 @@ public class LoadingScreen implements Screen
 		if(m_assetMgr.update())
 		{
 			m_logger.info("Assets loaded");
-			// Go to another screen
+			Env.getGame().setScreen(Screens.GAME_SCREEN);
 		}
 	}
 
@@ -101,6 +104,13 @@ public class LoadingScreen implements Screen
 	public void dispose() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void error(AssetDescriptor asset, Throwable throwable)
+	{
+		m_logger.error("error loading " + asset.fileName + " message: " + throwable.getMessage());
 	}
 
 }
