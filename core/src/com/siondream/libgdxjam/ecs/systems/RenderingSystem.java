@@ -13,14 +13,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
@@ -42,8 +40,6 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
 	private Vector3 position = new Vector3();
-	private Quaternion rotation = new Quaternion();
-	private Logger logger = new Logger(RenderingSystem.class.getName(), Logger.INFO);
 	
 	public RenderingSystem(Viewport viewport,
 						   Viewport uiViewport,
@@ -99,7 +95,8 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		for (Entity child : node.children) {
 			if (Mappers.node.has(child)) {
-				applyTransform(child, node.world);
+				computeTransform(child, node.world);
+				applyTransform(child);
 			}
 			
 			renderEntity(child);
@@ -117,7 +114,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		TextureComponent texture = Mappers.texture.get(entity);
 		
-		renderTexture(texture, size, world);
+		renderTexture(texture, size);
 	}
 	
 	@Override
@@ -133,7 +130,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		this.debug = debug;
 	}
 	
-	private void applyTransform(Entity entity, Affine2 parent) {
+	private void computeTransform(Entity entity, Affine2 parent) {
 		NodeComponent node = Mappers.node.get(entity);
 		TransformComponent t = Mappers.transform.get(entity);
 		
@@ -149,28 +146,27 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		node.computed.set(node.world);
 	}
 	
+	private void applyTransform(Entity entity) {
+		NodeComponent node = Mappers.node.get(entity);
+		batch.setTransformMatrix(node.computed);
+	}
+	
 	private void renderTexture(TextureComponent texture,
-							   SizeComponent size,
-							   Matrix4 world) {
+							   SizeComponent size) {
 		float originX = size.width * 0.5f;
 		float originY = size.height * 0.5f;
-		float scale = world.getScaleX();
-		
-		boolean normalizeAxes = false;
-		world.getRotation(rotation, normalizeAxes);
-		world.getTranslation(position);
 		
 		batch.draw(
 			texture.region,
-			position.x - originX,
-			position.y - originY,
+			-originX,
+			-originY,
 			originX,
 			originY,
 			size.width,
 			size.height,
-			scale,
-			scale,
-			rotation.getAngle()
+			1.0f,
+			1.0f,
+			0.0f
 		);
 	}
 	

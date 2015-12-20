@@ -106,7 +106,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		
 		root = createRootEntity();
 		
-		Entity logo1 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f);
+		Entity logo1 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, MathUtils.PI * 0.25f, 1.0f, 1.0f);
 		Entity logo2 = createLogoEntity(logo1, 2.0f, -2.0f, 1.0f, MathUtils.PI * 0.5f, 1.0f, 1.0f);
 		Entity logo3 = createLogoEntity(logo1, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f);
 		Entity logo4 = createLogoEntity(logo1, -2.0f, 2.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f);
