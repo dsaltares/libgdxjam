@@ -22,7 +22,7 @@ public class NodeRemovalSystem implements EntityListener {
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		NodeComponent node = nodes.get(entity);
+		NodeComponent node = nodes.remove(entity);
 		
 		if (node.parent != null) {
 			NodeComponent parentNode = Mappers.node.get(node.parent);
