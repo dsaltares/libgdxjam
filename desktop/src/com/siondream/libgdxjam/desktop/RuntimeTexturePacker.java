@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
+import com.siondream.libgdxjam.Env;
 
 /**
  * @brief 
@@ -15,17 +16,16 @@ import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
  */
 public class RuntimeTexturePacker 
 {
-	private static final String TEXTURES_FOLDER = "./textures/";
 
 	public static final void generateAtlases(Settings settings)
 	{
 		// Clean atlas files if already exist
 		System.out.println("--- Cleaning textures folders...");
-		cleanFolder(TEXTURES_FOLDER);
+		cleanFolder(Env.TEXTURES_FOLDER);
 		
 		// Process folders
 		System.out.println("--- Packaging textures...");
-		processFolder(settings, TEXTURES_FOLDER);
+		processFolder(settings, Env.TEXTURES_FOLDER);
 
 		System.out.println("--- Packaging done");
 	}

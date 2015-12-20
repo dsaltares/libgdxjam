@@ -4,10 +4,15 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetErrorListener;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -16,6 +21,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
@@ -32,8 +38,9 @@ import com.siondream.libgdxjam.ecs.systems.LayerSystem;
 import com.siondream.libgdxjam.ecs.systems.NodeRemovalSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
+import com.siondream.libgdxjam.screens.LoadingScreen;
 
-public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
+public class LibgdxJam extends Game implements InputProcessor, AssetErrorListener {
 	private final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
 	private final static boolean DO_SLEEP = true;
 	private final static int VELOCITY_ITERATIONS = 10;
@@ -65,8 +72,25 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	
 	private Entity root;
 	
+	private AssetManager m_assetManager;
+	
+	private Logger m_logger;
+	
+	private Screen m_currentScreen;
+	
 	@Override
 	public void create () {
+		
+		// Init environment
+		Env.Init(this);
+		
+		m_logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
+		
+		m_assetManager = new AssetManager();
+		
+		m_currentScreen = new LoadingScreen();
+		setScreen( m_currentScreen );
+		
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(
 			MIN_WORLD_WIDTH,
@@ -141,15 +165,18 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		stage.dispose();
 		engine.getSystem(RenderingSystem.class).dispose();
 		texture.dispose();
+		m_assetManager.dispose();
 	}
 
 	@Override
 	public void render () {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		
-		stage.act(deltaTime);
-		world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-		engine.update(deltaTime);
+		//stage.act(deltaTime);
+		//world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+		//engine.update(deltaTime);
+		
+		m_currentScreen.render(deltaTime);
 	}
 
 	@Override
@@ -292,5 +319,20 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		engine.addEntity(entity);
 		
 		return entity;
+	}
+	
+	// ============================
+	// Getters
+	// ============================
+	public final AssetManager getAssetManager()
+	{
+		return m_assetManager;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void error(AssetDescriptor asset, Throwable throwable)
+	{
+		m_logger.error("error loading " + asset.fileName + " message: " + throwable.getMessage());
 	}
 }
