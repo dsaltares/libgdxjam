@@ -20,6 +20,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.ecs.Mappers;
@@ -42,8 +43,9 @@ import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
 	private final static boolean DO_SLEEP = true;
-	private final static int VELOCITY_ITERATIONS = 10;
-	private final static int POSITION_ITERATIONS = 10;
+
+	private final static float STEP = 1.0f / 60.0f;
+	private final static float MAX_STEP = 0.25f;
 	
 	private final static float MIN_WORLD_WIDTH = 9.6f;
 	private final static float MIN_WORLD_HEIGHT = 7.2f;
@@ -58,6 +60,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private final static float UI_TO_WORLD = (float) MAX_WORLD_WIDTH / (float)MAX_UI_WIDTH;
 	
 	private Engine engine = new Engine();
+	private RenderingSystem renderingSystem;
 	private Stage stage;
 	private World world;
 	private Texture texture;
@@ -68,6 +71,9 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 	private Viewport uiViewport;
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	
+	private double accumulator;
+	private double currentTime;
 	
 	private Entity root;
 	private Entity ball;
@@ -111,7 +117,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		LayerSystem layerSystem = new LayerSystem();
 		engine.addSystem(layerSystem);
 		
-		RenderingSystem renderingSystem = new RenderingSystem(
+		renderingSystem = new RenderingSystem(
 			viewport,
 			uiViewport,
 			stage,
@@ -119,6 +125,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		);
 		renderingSystem.setDebug(true);
 		engine.addSystem(renderingSystem);
+		renderingSystem.setProcessing(false);
 		
 		NodeRemovalSystem removalSystem = new NodeRemovalSystem(engine);
 		engine.addEntityListener(
@@ -135,7 +142,7 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 		Entity logo3 = createLogoEntity(root, -2.0f, -2.0f, 1.5f, MathUtils.PI, 1.0f, 1.0f, "second");
 		Entity logo4 = createLogoEntity(root, 0.0f, 0.0f, 1.0f, MathUtils.PI * 1.5f, 2.0f, 1.0f, "third");
 		Entity particle = createParticleEntity(root, 0.0f, 0.0f, "second");
-		ball = createPhysicsEntity(root, -4.0f, 3.0f, 1.0f, MathUtils.PI * 1.5f, 1.0f, 1.0f, "third");
+		ball = createPhysicsEntity(root, -4.0f, 20.0f, 1.0f, MathUtils.PI * 1.5f, 1.0f, 1.0f, "third");
 		Entity ground = createGround();
 		
 		inputMultiplexer.addProcessor(this);
@@ -157,11 +164,21 @@ public class LibgdxJam extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public void render () {
-		float deltaTime = Gdx.graphics.getDeltaTime();
+		double newTime = TimeUtils.millis() / 1000.0;
+		double frameTime = Math.min(newTime - currentTime, MAX_STEP);
+		float deltaTime = (float)frameTime;
 		
-		stage.act(deltaTime);
-		world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-		engine.update(deltaTime);
+		currentTime = newTime;
+		accumulator += frameTime;
+		
+		while (accumulator >= STEP) {
+			engine.update(deltaTime);
+			stage.act(STEP);
+			accumulator -= STEP;
+			engine.getSystem(PhysicsSystem.class).setAlpha((float)accumulator / STEP);
+		}
+		
+		renderingSystem.update(STEP);
 	}
 
 	@Override
