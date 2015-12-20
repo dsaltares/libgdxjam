@@ -20,7 +20,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	
 	public LoadingScreen()
 	{
-		m_logger = new Logger(LoadingScreen.class.getName(), Logger.INFO);
+		m_logger = new Logger(LoadingScreen.class.getSimpleName(), Logger.INFO);
 		
 		// Retrieve AssetManager
 		m_assetMgr = Env.getAssetManager();
