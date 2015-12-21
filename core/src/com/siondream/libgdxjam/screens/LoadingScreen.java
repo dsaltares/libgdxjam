@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
-import com.siondream.libgdxjam.LibgdxJam.Screens;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
@@ -72,7 +71,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		if(m_assetMgr.update())
 		{
 			m_logger.info("Assets loaded");
-			Env.getGame().setScreen(Screens.GAME_SCREEN);
+			Env.getGame().setScreen(Screens.getGameScreen());
 		}
 	}
 

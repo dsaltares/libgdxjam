@@ -2,18 +2,16 @@ package com.siondream.libgdxjam;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.siondream.libgdxjam.screens.GameScreen;
-import com.siondream.libgdxjam.screens.LoadingScreen;
+import com.siondream.libgdxjam.screens.Screens;
 
 public class LibgdxJam extends Game {
-
-	public enum Screens {LOADING_SCREEN, GAME_SCREEN};
 	
 	private Logger m_logger;
 	
@@ -44,7 +42,7 @@ public class LibgdxJam extends Game {
 		
 		stage = new Stage();
 		
-		setScreen( Screens.LOADING_SCREEN );
+		setScreen( Screens.getLoadingScreen() );
 
 	}
 	
@@ -82,18 +80,12 @@ public class LibgdxJam extends Game {
 	// ============================
 	// Setters
 	// ============================
-	public void setScreen(Screens screen)
+	@Override
+	public void setScreen (Screen screen)
 	{
 		// We could perform screen transitions here
-		switch(screen)
-		{
-			case LOADING_SCREEN:
-				setScreen(new LoadingScreen());
-				break;
-			case GAME_SCREEN:
-				setScreen(new GameScreen());
-				break;
-		}
+		
+		setScreen( screen );
 	}
 	
 
