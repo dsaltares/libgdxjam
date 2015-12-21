@@ -22,7 +22,7 @@ public class Mappers {
 	public static ComponentMapper<ZIndexComponent> index = ComponentMapper.getFor(ZIndexComponent.class);
 	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
 	
-	// IA states
+	// AI states
 	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);
 	public static ComponentMapper<AttackComponent> attack = ComponentMapper.getFor(AttackComponent.class);
 }
