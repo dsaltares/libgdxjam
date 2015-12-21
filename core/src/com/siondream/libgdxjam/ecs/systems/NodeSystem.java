@@ -7,17 +7,23 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 
-public class NodeRemovalSystem implements EntityListener {
+public class NodeSystem implements EntityListener {
 	private ObjectMap<Entity, NodeComponent> nodes = new ObjectMap<Entity, NodeComponent>();
 	private Engine engine;
 	
-	public NodeRemovalSystem(Engine engine) {
+	public NodeSystem(Engine engine) {
 		this.engine = engine;
 	}
 	
 	@Override
 	public void entityAdded(Entity entity) {
 		nodes.put(entity, Mappers.node.get(entity));
+		
+		NodeComponent node = nodes.remove(entity);
+		
+		for (Entity child : node.children) {
+			engine.addEntity(child);
+		}
 	}
 
 	@Override

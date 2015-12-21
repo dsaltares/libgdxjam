@@ -64,7 +64,7 @@ public class LayerSystem extends IteratingSystem {
 			ZIndexComponent index1 = Mappers.index.get(e1);
 			ZIndexComponent index2 = Mappers.index.get(e2);
 			
-			return layer.map.get(index2.layer) - layer.map.get(index1.layer);
+			return layer.map.get(index1.layer) - layer.map.get(index2.layer);
 		}
 	}
 }

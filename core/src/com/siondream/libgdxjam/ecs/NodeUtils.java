@@ -21,12 +21,14 @@ public class NodeUtils {
 		NodeComponent parentNode = Mappers.node.get(node.parent);
 	
 		node.world.setToTrnRotScl(
-			t.position.x,
-			t.position.y,
+			t.position.x + t.origin.x,
+			t.position.y + t.origin.y,
 			MathUtils.radiansToDegrees * t.angle,
-			t.scale,
-			t.scale
+			t.scale.x,
+			t.scale.y
 		);
+		
+		node.world.translate(-t.origin.x, -t.origin.y);
 		
 		node.world.preMul(parentNode.world);
 		node.computed.set(node.world);

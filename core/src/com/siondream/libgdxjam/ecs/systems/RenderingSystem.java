@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -40,7 +41,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
 	private Vector3 position = new Vector3();
-	
+
 	public RenderingSystem(Viewport viewport,
 						   Viewport uiViewport,
 						   Stage stage,
@@ -129,10 +130,11 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		if (!renderable.matches(entity)) { return; }
 		
 		SizeComponent size = Mappers.size.get(entity);
+		Vector2 origin = Mappers.transform.get(entity).origin;
 		Matrix4 world = Mappers.node.get(entity).computed;
 		
-		if (!inFrustum(world, size)) { return; }
-		
+		if (!inFrustum(world, size, origin)) { return; }
+
 		if (Mappers.texture.has(entity)) {
 			renderTexture(entity);
 		}
@@ -149,16 +151,17 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private void renderTexture(Entity entity) {
 		SizeComponent size = Mappers.size.get(entity);
 		TextureComponent texture = Mappers.texture.get(entity);
+		TransformComponent transform = Mappers.transform.get(entity);
 		
-		float originX = size.width * 0.5f;
-		float originY = size.height * 0.5f;
+		float originX = 0;//size.width * 0.5f;
+		float originY = 0;//size.height * 0.5f;
 		
 		batch.draw(
 			texture.region,
 			-originX, -originY,
 			originX, originY,
 			size.width, size.height,
-			1.0f, 1.0f,
+			transform.scale.x, transform.scale.y,
 			0.0f
 		);
 	}
@@ -168,14 +171,14 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		particle.effect.draw(batch);
 	}
 	
-	private boolean inFrustum(Matrix4 world, SizeComponent size) {
+	private boolean inFrustum(Matrix4 world, SizeComponent size, Vector2 origin) {
 		float radius = Math.max(size.width, size.height) * world.getScaleX() * 0.5f;
 		world.getTranslation(position);
 		
-		bounds.max.x = position.x + radius;
-		bounds.max.y = position.y + radius;
-		bounds.min.x = position.x - radius;
-		bounds.min.y = position.y - radius;
+		bounds.max.x = position.x + origin.x + radius;
+		bounds.max.y = position.y + origin.y + radius;
+		bounds.min.x = position.x + origin.x - radius;
+		bounds.min.y = position.y + origin.y - radius;
 		
 		return viewport.getCamera().frustum.boundsInFrustum(bounds);
 	}

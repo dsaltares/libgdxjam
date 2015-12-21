@@ -1,9 +1,13 @@
 package com.siondream.libgdxjam;
 
+import overlap.OverlapScene;
+import overlap.OverlapSceneLoader;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
@@ -30,7 +34,11 @@ public class LibgdxJam extends Game {
 		m_logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
 				
 		m_assetManager = new AssetManager();
-
+		m_assetManager.setLoader(
+			OverlapScene.class,
+			new OverlapSceneLoader(new InternalFileHandleResolver())
+		);
+		
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ExtendViewport(
 			Env.MIN_UI_WIDTH,
@@ -40,10 +48,8 @@ public class LibgdxJam extends Game {
 			uiCamera
 		);
 		
-		stage = new Stage();
-		
+		stage = new Stage();	
 		setScreen( Screens.getLoadingScreen() );
-
 	}
 	
 	@Override
@@ -85,7 +91,7 @@ public class LibgdxJam extends Game {
 	{
 		// We could perform screen transitions here
 		
-		setScreen( screen );
+		super.setScreen( screen );
 	}
 	
 

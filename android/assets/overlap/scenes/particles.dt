@@ -1,0 +1,1 @@
+{"sceneName":"particles","composite":{"sParticleEffects":[{"uniqueId":2,"tags":[],"x":-12,"y":-15,"originX":0,"originY":0,"layerName":"Default","particleName":"bigFire"},{"uniqueId":3,"tags":[],"x":249,"y":40,"originX":0,"originY":0,"zIndex":1,"layerName":"Default","particleName":"bigFire"}],"layers":[{"layerName":"Default","isVisible":true}]},"physicsPropertiesVO":{}}
