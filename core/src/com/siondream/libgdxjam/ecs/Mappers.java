@@ -9,6 +9,8 @@ import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
+import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
+import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 
 public class Mappers {
 	public static ComponentMapper<TransformComponent> transform = ComponentMapper.getFor(TransformComponent.class);
@@ -19,4 +21,8 @@ public class Mappers {
 	public static ComponentMapper<LayerComponent> layer = ComponentMapper.getFor(LayerComponent.class);
 	public static ComponentMapper<ZIndexComponent> index = ComponentMapper.getFor(ZIndexComponent.class);
 	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
+	
+	// IA states
+	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);
+	public static ComponentMapper<AttackComponent> attack = ComponentMapper.getFor(AttackComponent.class);
 }
