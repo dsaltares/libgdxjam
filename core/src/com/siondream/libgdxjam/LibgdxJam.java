@@ -61,6 +61,7 @@ public class LibgdxJam extends Game {
 	public void dispose() {
 		getScreen().dispose();
 		stage.dispose();
+		m_assetManager.dispose();
 	}
 
 	@Override
