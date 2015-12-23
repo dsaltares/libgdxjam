@@ -7,12 +7,17 @@ import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
-import com.badlogic.gdx.assets.loaders.ParticleEffectLoader.ParticleEffectParameter;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -21,6 +26,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
@@ -37,6 +43,12 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	
 	private Logger logger = new Logger(OverlapSceneLoader.class.getSimpleName(), Logger.INFO);
 	
+	// Final scene
+	protected OverlapScene m_map;
+	
+	// Cache to avoid creating a new array per physics component
+	protected static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
+	
 	public OverlapSceneLoader(FileHandleResolver resolver) {
 		super(resolver);
 	}
@@ -44,6 +56,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	public static class Parameters extends AssetLoaderParameters<OverlapScene> {
 		public float units = 1.0f;
 		public String atlas = "";
+		public World world;
 	}
 
 	@Override
@@ -51,7 +64,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 						  String fileName,
 						  FileHandle file,
 						  Parameters parameter) {
-		loadInternal(manager, fileName, file, parameter);
+		m_map = loadInternal(manager, fileName, file, parameter);
 	}
 
 	@Override
@@ -60,7 +73,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 								 FileHandle file,
 								 Parameters parameter) {
 		
-		return loadInternal(manager, fileName, file, parameter);
+		return m_map;
 	}
 
 	@Override
@@ -81,6 +94,8 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 						 	  		  Parameters parameter) {
 		this.parameters = parameter;
 		this.atlas = manager.get(parameters.atlas, TextureAtlas.class);
+		
+		logger.info("Parsing scene...");
 		
 		JsonValue root = reader.parse(file);
 		
@@ -173,6 +188,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		loadTransform(transform, value);
 		loadLayers(entity, value.get("layers"));
+		loadPolygon(entity, transform, value);
 		
 		JsonValue composite = value.get("composite");
 		loadImages(scene, entity, composite.get("sImages"));
@@ -242,6 +258,69 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(index);
 		
 		return entity;
+	}
+	
+	private void loadPolygon(Entity entity, TransformComponent transform, JsonValue value)
+	{
+		if (this.parameters.world == null) { return; }
+		
+		// Polygon shape
+		JsonValue polygonInfo = value.get("shape");
+		if (polygonInfo == null || polygonInfo.size == 0) { return; }
+		
+		// Parse vertices
+		JsonValue shapeInfo = polygonInfo.get("polygons");
+		shapeInfo = shapeInfo.child;
+		
+		float[] vertices = new float[shapeInfo.size * 2];
+		int vertexIndex = 0;
+		for (JsonValue vertex = shapeInfo.child; vertex != null; vertex = vertex.next)
+		{
+			// Set polygon vertices and adapt it to "potato" coords. Zero is default value
+			vertices[vertexIndex++] = vertex.has("x") ? vertex.getFloat("x") * parameters.units : 0f;
+			vertices[vertexIndex++] = vertex.has("y") ? vertex.getFloat("y") * parameters.units : 0f; 
+		}
+		
+		// Create a polygon from the parsed vertices
+		PolygonShape polygon = new PolygonShape();
+		polygon.set(vertices);
+		
+		// Physical properties
+		JsonValue physicsInfo = value.get("physics");
+		Body body;
+		BodyDef bodyDef = new BodyDef();
+		FixtureDef fixtureDef = new FixtureDef();
+		if (physicsInfo == null || physicsInfo.size == 0) // TODO: default material?
+		{ 
+			polygon.dispose(); 
+			return; 
+		}
+		
+		logger.info("Loading physic body: " + value.getString("layerName"));
+		
+		// Body properties
+		bodyDef.type = s_bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
+		bodyDef.allowSleep = physicsInfo.has("allowSleep") ? physicsInfo.getBoolean("allowSleep") : true;
+		bodyDef.awake = physicsInfo.has("awake") ? physicsInfo.getBoolean("awake") : true;
+		
+		// Material properties
+		fixtureDef.density = physicsInfo.has("density") ? physicsInfo.getFloat("density") : 0f;
+		fixtureDef.friction = physicsInfo.has("friction") ? physicsInfo.getFloat("friction") : 0f;
+		fixtureDef.restitution = physicsInfo.has("restitution") ? physicsInfo.getFloat("restitution") : 0f;
+		fixtureDef.shape = polygon;
+		
+		// Create the body
+		body = this.parameters.world.createBody(bodyDef);
+		body.createFixture(fixtureDef);
+		body.setTransform(transform.position, transform.angle);
+		
+		// Create the physics component
+		PhysicsComponent physicsComponent = new PhysicsComponent();
+		physicsComponent.body = body; 
+		
+		entity.add(physicsComponent);
+		
+		polygon.dispose();
 	}
 	
 	private void loadTransform(TransformComponent transform, JsonValue value) {

@@ -27,6 +27,7 @@ import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 
 public class RenderingSystem extends IteratingSystem implements Disposable {
 
@@ -200,7 +201,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private void renderDebug() {
 		if (!debug) return;
 		
-		renderGrid();
+		//renderGrid();
 		box2DRenderer.render(world, viewport.getCamera().combined);
 	}
 	

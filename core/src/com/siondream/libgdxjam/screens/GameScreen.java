@@ -114,6 +114,7 @@ public class GameScreen implements Screen, InputProcessor
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
 		sceneParameters.units = Env.UI_TO_WORLD;
 		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
+		sceneParameters.world = world;
 		manager.load(
 			"overlap/scenes/MainScene.dt",
 			OverlapScene.class,
