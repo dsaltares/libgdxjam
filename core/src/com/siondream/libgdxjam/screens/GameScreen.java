@@ -2,6 +2,7 @@ package com.siondream.libgdxjam.screens;
 
 import overlap.OverlapScene;
 import overlap.OverlapSceneLoader;
+import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
@@ -27,6 +28,7 @@ import com.siondream.libgdxjam.ecs.systems.NodeSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
+import com.siondream.libgdxjam.ecs.systems.SpineAnimationSystem;
 
 public class GameScreen implements Screen, InputProcessor
 {
@@ -42,6 +44,7 @@ public class GameScreen implements Screen, InputProcessor
 	private Engine engine = new Engine();
 	private RenderingSystem renderingSystem;
 	private World world;
+	private RayHandler rayHandler;
 
 	private double accumulator;
 	private double currentTime;
@@ -72,6 +75,8 @@ public class GameScreen implements Screen, InputProcessor
 				);
 
 		world = new World(Env.GRAVITY, Env.DO_SLEEP);
+		rayHandler = new RayHandler(world);
+		rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 0.25f);
 
 		PhysicsSystem physicsSystem = new PhysicsSystem(world);
 		engine.addSystem(physicsSystem);
@@ -88,12 +93,16 @@ public class GameScreen implements Screen, InputProcessor
 
 		LayerSystem layerSystem = new LayerSystem();
 		engine.addSystem(layerSystem);
-
+		
+		SpineAnimationSystem spineAnimationSystem = new SpineAnimationSystem();
+		engine.addSystem(spineAnimationSystem);
+		
 		renderingSystem = new RenderingSystem(
 				viewport,
 				uiViewport,
 				stage,
-				world
+				world,
+				rayHandler
 				);
 		renderingSystem.setDebug(true);
 		engine.addSystem(renderingSystem);
@@ -114,7 +123,9 @@ public class GameScreen implements Screen, InputProcessor
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
 		sceneParameters.units = Env.UI_TO_WORLD;
 		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
+		sceneParameters.spineFolder = "overlap/assets/orig/spine-animations/";
 		sceneParameters.world = world;
+		sceneParameters.rayHandler = rayHandler;
 		manager.load(
 			"overlap/scenes/MainScene.dt",
 			OverlapScene.class,

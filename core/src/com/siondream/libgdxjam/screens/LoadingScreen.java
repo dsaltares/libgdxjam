@@ -54,7 +54,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 					resourceType = Texture.class;
 				}
 				m_assetMgr.load(file.path(), resourceType);
-				m_logger.info(" +" + file.name() + ", loaded as a " + resourceType.toGenericString());
+				m_logger.info(" +" + file.name() + ", loaded as a " + resourceType.toString());
 			}
 		}
 	}

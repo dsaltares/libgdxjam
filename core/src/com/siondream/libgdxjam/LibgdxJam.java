@@ -2,6 +2,7 @@ package com.siondream.libgdxjam;
 
 import overlap.OverlapScene;
 import overlap.OverlapSceneLoader;
+import spine.SkeletonDataLoader;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.esotericsoftware.spine.SkeletonData;
 import com.siondream.libgdxjam.screens.Screens;
 
 public class LibgdxJam extends Game {
@@ -34,6 +36,10 @@ public class LibgdxJam extends Game {
 		m_logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
 				
 		m_assetManager = new AssetManager();
+		m_assetManager.setLoader(
+				SkeletonData.class,
+				new SkeletonDataLoader(new InternalFileHandleResolver())
+			);
 		m_assetManager.setLoader(
 			OverlapScene.class,
 			new OverlapSceneLoader(new InternalFileHandleResolver())

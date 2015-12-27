@@ -1,5 +1,11 @@
 package overlap;
 
+import spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
+import box2dLight.ConeLight;
+import box2dLight.Light;
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
+
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
@@ -8,9 +14,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.AsynchronousAssetLoader;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -22,19 +30,28 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Logger;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.esotericsoftware.spine.AnimationState;
+import com.esotericsoftware.spine.AnimationStateData;
+import com.esotericsoftware.spine.Skeleton;
+import com.esotericsoftware.spine.SkeletonData;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
+import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 
 public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, OverlapSceneLoader.Parameters> {
 	private static final String ASSETS_DIR = "overlap/assets/orig/";
+	private static final String SPINE_ANIMS_DIR = ASSETS_DIR + "spine-animations/";
 	private static final String PARTICLES_DIR = ASSETS_DIR + "particles/";
 	
 	private JsonReader reader = new JsonReader();
@@ -44,10 +61,12 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Logger logger = new Logger(OverlapSceneLoader.class.getSimpleName(), Logger.INFO);
 	
 	// Final scene
-	protected OverlapScene m_map;
+	private OverlapScene m_map;
 	
 	// Cache to avoid creating a new array per physics component
-	protected static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
+	private static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
+	private static final Vector2 s_v2Utils1 = new Vector2();
+	private static final Vector2 s_v2Utils2 = new Vector2();
 	
 	public OverlapSceneLoader(FileHandleResolver resolver) {
 		super(resolver);
@@ -56,7 +75,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	public static class Parameters extends AssetLoaderParameters<OverlapScene> {
 		public float units = 1.0f;
 		public String atlas = "";
+		public String spineFolder = "";
 		public World world;
+		public RayHandler rayHandler;
 	}
 
 	@Override
@@ -83,7 +104,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		Array<AssetDescriptor> dependencies = new Array<AssetDescriptor>();
 		dependencies.add(new AssetDescriptor(parameter.atlas, TextureAtlas.class));
-		//findParticles(reader.parse(file), dependencies, parameter);
+		findSpineAnims(reader.parse(file), dependencies);
 		
 		return dependencies;
 	}
@@ -123,8 +144,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		loadLayers(entity, value.get("layers"));
 		loadImages(scene, entity, value.get("sImages"));
+		loadSpineAnimations(scene, entity, value.get("sSpineAnimations"));
 		loadComposites(scene, entity, value.get("sComposites"));
 		loadParticles(scene, entity, value.get("sParticleEffects"));
+		loadLights(scene, entity, value.get("sLights"));
 			
 		return entity;
 	}
@@ -136,6 +159,21 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		for (int i = 0; i < value.size; ++i) {
 			Entity child = loadImage(scene, value.get(i));
+			NodeComponent childNode = Mappers.node.get(child);
+			
+			node.children.add(child);
+			childNode.parent = parent;
+		}
+	}
+	
+	private void loadSpineAnimations(OverlapScene scene, Entity parent, JsonValue value)
+	{
+		if (value == null || value.size == 0) { return; }
+		
+		NodeComponent node = Mappers.node.get(parent);
+		
+		for (int i = 0; i < value.size; ++i) {
+			Entity child = loadSpineAnimation(value.get(i));
 			NodeComponent childNode = Mappers.node.get(child);
 			
 			node.children.add(child);
@@ -171,6 +209,21 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		}
 	}
 	
+	private void loadLights(OverlapScene scene, Entity parent, JsonValue value)
+	{
+		if (value == null || value.size == 0) { return; }
+		
+		NodeComponent node = Mappers.node.get(parent);
+		
+		for (int i = 0; i < value.size; ++i) {
+			Entity child = loadLight(scene, value.get(i));
+			NodeComponent childNode = Mappers.node.get(child);
+			
+			node.children.add(child);
+			childNode.parent = parent;
+		}
+	}
+	
 	private Entity loadComposite(OverlapScene scene, JsonValue value) {
 		Entity entity = new Entity();
 		
@@ -194,6 +247,8 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		loadImages(scene, entity, composite.get("sImages"));
 		loadComposites(scene, entity, composite.get("sComposites"));
 		loadParticles(scene, entity, composite.get("sParticleEffects"));
+		loadLights(scene, entity, composite.get("sLights"));
+		loadSpineAnimations(scene, entity, value.get("sSpineAnimations"));
 		
 		return entity;
 	}
@@ -323,6 +378,169 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		polygon.dispose();
 	}
 	
+	private Entity loadLight(OverlapScene scene, JsonValue value) 
+	{
+		Entity entity = new Entity();
+		
+		logger.info("Loading light: " + (value.has("itemIdentifier") ? value.getString("itemIdentifier") : "default") );
+		
+		NodeComponent node = new NodeComponent();
+		TransformComponent transform = new TransformComponent();
+		ZIndexComponent index = new ZIndexComponent();
+		LightComponent light = new LightComponent();
+		
+		loadTransform(transform, value);
+		
+		index.layer = value.getString("layerName");
+				
+		// Create a new light
+		light.m_light = createLight(value.getString("type"), transform, value);
+		
+		entity.add(node);
+		entity.add(transform);
+		entity.add(index);
+		entity.add(light);
+		
+		return entity;
+	}
+	
+	private Light createLight(String type, TransformComponent transform, JsonValue params)
+	{
+		Light light = null;
+		
+		// Common attributes for the constructor
+		Color color = (params.has("tint") ? getColor(params.get("tint").asFloatArray()) : Color.WHITE);
+		int rays = params.has("rays") ? params.getInt("rays") : 12; // Default is 12
+		float distance = params.has("distance") ? params.getFloat("distance") : 300f;
+		
+		switch(type)
+		{
+			case "CONE": 
+				light = new ConeLight(
+						parameters.rayHandler, 
+						rays,
+						color, 
+						distance, 
+						transform.position.x, 
+						transform.position.y, 
+						params.has("directionDegree") ? params.getFloat("directionDegree") : 0f, 
+						params.has("coneDegree") ? params.getFloat("coneDegree") : 45f);
+
+				break;
+			case "POINT":
+				light = new PointLight(
+						parameters.rayHandler, 
+						rays, 
+						color,
+						distance, 
+						transform.position.x, 
+						transform.position.y);
+				
+				break;
+		}
+		
+		light.setStaticLight( params.has("isStatic") ? false : true );
+		light.setXray( params.has("isXRay") ? false : true );
+		light.setSoftnessLength( params.has("softnessLength") ? params.getFloat("softnessLength") : 1.5f );
+		
+		return light;
+	}
+	
+	private Color getColor(float[] colorArray)
+	{
+		if(colorArray.length < 4)
+		{
+			logger.error("Light color couldn't be parsed");
+			return Color.WHITE;
+		}
+
+		Color color = new Color();
+		color.r = colorArray[0];
+		color.g = colorArray[1];
+		color.b = colorArray[2];
+		color.a = colorArray[3];
+		
+		return color;
+	}
+	
+	private Entity loadSpineAnimation(JsonValue value)
+	{
+		Entity entity = new Entity();
+		
+		logger.info("Loading spine anim: " + value.getString("animationName"));
+		
+		NodeComponent node = new NodeComponent();
+		TransformComponent transform = new TransformComponent();
+		ZIndexComponent index = new ZIndexComponent();
+		SizeComponent size = new SizeComponent();
+		SpineComponent spine = new SpineComponent();
+		
+		loadTransform(transform, value);
+		index.layer = value.getString("layerName");
+		
+		// Load custom info
+		ObjectMap<String, String> extraInfo = 
+				getExtraInfo(value.has("customVars") ? value.getString("customVars") : null);
+
+		// Get animation asset path
+		String animationName = value.getString("animationName");
+		String animationPathWithoutExtension = 
+				parameters.spineFolder + animationName + "/" + animationName;
+		
+		// Load spine atlas
+		SkeletonData skeletonData = Env.getAssetManager().get(
+				animationPathWithoutExtension + ".json", 
+				SkeletonData.class);
+		
+		// Load spine skeleton
+		spine.skeleton = new Skeleton(skeletonData);
+		
+		// Load animation state data
+		AnimationStateData stateData = new AnimationStateData(skeletonData);
+		spine.state = new AnimationState(stateData);
+		spine.skeleton.setSkin(skeletonData.getSkins().first());
+		spine.state.setAnimation(
+				0, 
+				value.getString("currentAnimationName"), 
+				extraInfo.containsKey("loop") ? Boolean.valueOf(extraInfo.get("loop")) : false);
+
+		// Update bounds and origin
+		spine.skeleton.updateWorldTransform();
+		spine.skeleton.getBounds(s_v2Utils1, s_v2Utils2);
+		size.width = s_v2Utils2.x;
+		size.height = s_v2Utils2.y;
+		transform.origin.set(s_v2Utils1);
+		// Fix to position spine anim in the right coords... TODO: Is there a good solution?
+		transform.position.add(size.width * 0.5f, 0f);
+
+		entity.add(node);
+		entity.add(size);
+		entity.add(transform);
+		entity.add(index);
+		entity.add(spine);
+		
+		return entity;
+	}
+	
+	private ObjectMap<String, String> getExtraInfo(String extraInfo)
+	{
+		ObjectMap<String, String> extraInfoTable = new ObjectMap<String, String>();
+		
+		if(extraInfo == null)
+		{
+			return extraInfoTable;
+		}
+		
+		String[] extraInfoData = extraInfo.split(";");
+		for(String entry : extraInfoData)
+		{
+			String[] keyValue = entry.split(":");
+			extraInfoTable.put(keyValue[0], keyValue[1]);
+		}
+		
+		return extraInfoTable;
+	}
+	
 	private void loadTransform(TransformComponent transform, JsonValue value) {
 		transform.position.x = value.getFloat("x", 0.0f) * parameters.units;
 		transform.position.y = value.getFloat("y", 0.0f) * parameters.units;
@@ -343,6 +561,45 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		}
 		
 		entity.add(layer);
+	}
+	
+	private void findSpineAnims(JsonValue value, Array<AssetDescriptor> dependencies)
+	{
+		if (value.has("composite"))
+		{
+			findSpineAnims(value.get("composite"), dependencies);
+		}
+		if (value.has("sComposites"))
+		{
+			JsonValue composites = value.get("sComposites");
+
+			for (int i = 0; i < composites.size; ++i)
+			{
+				findSpineAnims(composites.get(i), dependencies);
+			}
+		}
+		if (value.has("sSpineAnimations"))
+		{
+			JsonValue animations = value.get("sSpineAnimations");
+
+			for (int i = 0; i < animations.size; ++i)
+			{
+				String animationName = animations.get(i).getString("animationName");
+
+				logger.info("-- Found spine animation: " + animationName);
+
+				String fileWithoutExtension = SPINE_ANIMS_DIR + animationName + "/" + animationName;
+				
+				SkeletonDataLoaderParameter skeletonParams = new SkeletonDataLoaderParameter();
+				skeletonParams.atlasName = fileWithoutExtension + ".atlas";
+				
+				dependencies.add(new AssetDescriptor(
+						fileWithoutExtension + ".json",
+						SkeletonData.class,
+						skeletonParams
+						));
+			}
+		}
 	}
 	
 //	private void findParticles(JsonValue value,

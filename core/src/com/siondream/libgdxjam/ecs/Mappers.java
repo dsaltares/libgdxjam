@@ -2,10 +2,12 @@ package com.siondream.libgdxjam.ecs;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
+import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
@@ -21,6 +23,8 @@ public class Mappers {
 	public static ComponentMapper<LayerComponent> layer = ComponentMapper.getFor(LayerComponent.class);
 	public static ComponentMapper<ZIndexComponent> index = ComponentMapper.getFor(ZIndexComponent.class);
 	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
+	public static ComponentMapper<LightComponent> light = ComponentMapper.getFor(LightComponent.class);
+	public static ComponentMapper<SpineComponent> spine = ComponentMapper.getFor(SpineComponent.class);
 	
 	// AI states
 	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);

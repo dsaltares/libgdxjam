@@ -112,4 +112,9 @@ public class PhysicsSystem extends EntitySystem implements EntityListener {
 		
 		pendingRemoval.clear();
 	}
+	
+	public void dispose()
+	{
+		world.dispose();
+	}
 }

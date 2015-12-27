@@ -1,5 +1,7 @@
 package com.siondream.libgdxjam.ecs.systems;
 
+import box2dLight.RayHandler;
+
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -19,15 +21,17 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.esotericsoftware.spine.SkeletonRenderer;
+import com.esotericsoftware.spine.SkeletonRendererDebug;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 
 public class RenderingSystem extends IteratingSystem implements Disposable {
 
@@ -36,9 +40,12 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private Viewport uiViewport;
 	private Stage stage;
 	private World world;
+	private RayHandler rayHandler;
 	private boolean debug;
 	private ShapeRenderer shapeRenderer;
 	private Box2DDebugRenderer box2DRenderer;
+	private SkeletonRenderer spineRenderer;
+	private SkeletonRendererDebug spineDebugRenderer;
 	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
 	private Vector3 position = new Vector3();
@@ -46,13 +53,15 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	public RenderingSystem(Viewport viewport,
 						   Viewport uiViewport,
 						   Stage stage,
-						   World world) {
+						   World world,
+						   RayHandler rayHandler) {
 		super(Family.all(RootComponent.class, NodeComponent.class).get());
 		
 		this.viewport = viewport;
 		this.uiViewport = uiViewport;
 		this.stage = stage;
 		this.world = world;
+		this.rayHandler = rayHandler;
 		
 		batch = new SpriteBatch();
 		
@@ -75,14 +84,19 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 			drawContacts
 		);
 		
+		spineRenderer = new SkeletonRenderer();
+		spineDebugRenderer = new SkeletonRendererDebug();
+		
 		renderable = Family.all(
 			NodeComponent.class,
 			TransformComponent.class,
 			SizeComponent.class
 		).one(
 			TextureComponent.class,
-			ParticleComponent.class
+			ParticleComponent.class,
+			SpineComponent.class
 		).get();
+
 	}
 	
 	@Override
@@ -91,6 +105,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		renderWorld(deltaTime);
+		renderLights();
 		renderUI();
 		renderDebug();
 	}
@@ -142,6 +157,9 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		else if (Mappers.particle.has(entity)) {
 			renderParticle(entity);
 		}
+		else if(Mappers.spine.has(entity)) {
+			renderSpineAnimation(entity);
+		}
 	}
 	
 	private void applyTransform(Entity entity) {
@@ -172,6 +190,16 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		particle.effect.draw(batch);
 	}
 	
+	private void renderSpineAnimation(Entity entity)
+	{
+		SpineComponent spine = Mappers.spine.get(entity);
+		spineRenderer.draw(batch, spine.skeleton);
+		if(debug)
+		{
+			//spineDebugRenderer.draw(spine.skeleton);
+		}
+	}
+	
 	private boolean inFrustum(Matrix4 world, SizeComponent size, Vector2 origin) {
 		float radius = Math.max(size.width, size.height) * world.getScaleX() * 0.5f;
 		world.getTranslation(position);
@@ -193,6 +221,12 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		batch.end();
 	}
 	
+	private void renderLights()
+	{
+		rayHandler.setCombinedMatrix(viewport.getCamera().combined);
+		rayHandler.updateAndRender();
+	}
+	
 	private void renderUI() {
 		uiViewport.getCamera().update();
 		stage.draw();
@@ -201,7 +235,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private void renderDebug() {
 		if (!debug) return;
 		
-		//renderGrid();
+		renderGrid();
 		box2DRenderer.render(world, viewport.getCamera().combined);
 	}
 	
