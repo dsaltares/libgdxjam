@@ -48,6 +48,7 @@ import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
+import com.siondream.libgdxjam.physics.Material;
 
 public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, OverlapSceneLoader.Parameters> {
 	private static final String ASSETS_DIR = "overlap/assets/orig/";
@@ -65,6 +66,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	
 	// Cache to avoid creating a new array per physics component
 	private static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
+	// Cache to avoid creating new vectors in spine anims component
 	private static final Vector2 s_v2Utils1 = new Vector2();
 	private static final Vector2 s_v2Utils2 = new Vector2();
 	
@@ -319,6 +321,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	{
 		if (this.parameters.world == null) { return; }
 		
+		// Other possible required properties
+		ObjectMap<String, String> extraInfo = 
+				getExtraInfo(value.has("customVars") ? value.getString("customVars") : null);
+		
 		// Polygon shape
 		JsonValue polygonInfo = value.get("shape");
 		if (polygonInfo == null || polygonInfo.size == 0) { return; }
@@ -345,23 +351,55 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		Body body;
 		BodyDef bodyDef = new BodyDef();
 		FixtureDef fixtureDef = new FixtureDef();
-		if (physicsInfo == null || physicsInfo.size == 0) // TODO: default material?
-		{ 
-			polygon.dispose(); 
-			return; 
-		}
 		
 		logger.info("Loading physic body: " + value.getString("layerName"));
 		
-		// Body properties
-		bodyDef.type = s_bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
-		bodyDef.allowSleep = physicsInfo.has("allowSleep") ? physicsInfo.getBoolean("allowSleep") : true;
-		bodyDef.awake = physicsInfo.has("awake") ? physicsInfo.getBoolean("awake") : true;
+		// If it has not physics component, search for material and if not, set to default material
+		Material material;
 		
-		// Material properties
-		fixtureDef.density = physicsInfo.has("density") ? physicsInfo.getFloat("density") : 0f;
-		fixtureDef.friction = physicsInfo.has("friction") ? physicsInfo.getFloat("friction") : 0f;
-		fixtureDef.restitution = physicsInfo.has("restitution") ? physicsInfo.getFloat("restitution") : 0f;
+		if (physicsInfo == null || physicsInfo.size == 0)
+		{
+			if(extraInfo.containsKey("material"))
+			{
+				material = Material.getMaterial(extraInfo.get("material"));
+			}
+			else
+			{
+				material = Material.DEFAULT;
+			}
+
+			fixtureDef.density = material.getDensity();
+			fixtureDef.friction = material.getFriction();
+			fixtureDef.restitution = material.getRestitution();
+			
+			// Default body properties
+			bodyDef.type = BodyType.StaticBody;
+			bodyDef.allowSleep = true;
+			bodyDef.awake = true;
+		}
+		else
+		{
+			// Body properties
+			bodyDef.type = s_bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
+			bodyDef.allowSleep = physicsInfo.has("allowSleep") ? physicsInfo.getBoolean("allowSleep") : true;
+			bodyDef.awake = physicsInfo.has("awake") ? physicsInfo.getBoolean("awake") : true;
+			
+			// Material properties, if not present, set the physics component properties
+			if(extraInfo.containsKey("material"))
+			{
+				material = Material.getMaterial(extraInfo.get("material"));
+				fixtureDef.density = material.getDensity();
+				fixtureDef.friction = material.getFriction();
+				fixtureDef.restitution = material.getRestitution();
+			}
+			else
+			{
+				fixtureDef.density = physicsInfo.has("density") ? physicsInfo.getFloat("density") : 0f;
+				fixtureDef.friction = physicsInfo.has("friction") ? physicsInfo.getFloat("friction") : 0f;
+				fixtureDef.restitution = physicsInfo.has("restitution") ? physicsInfo.getFloat("restitution") : 0f;
+			}
+		}
+		
 		fixtureDef.shape = polygon;
 		
 		// Create the body
