@@ -11,6 +11,7 @@ import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
+import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 
@@ -25,6 +26,9 @@ public class Mappers {
 	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
 	public static ComponentMapper<LightComponent> light = ComponentMapper.getFor(LightComponent.class);
 	public static ComponentMapper<SpineComponent> spine = ComponentMapper.getFor(SpineComponent.class);
+	
+	// Agents
+	public static ComponentMapper<CCTvComponent> cctv = ComponentMapper.getFor(CCTvComponent.class);
 	
 	// AI states
 	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);

@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
-import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class SpineAnimationSystem extends IteratingSystem
 {

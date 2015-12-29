@@ -2,6 +2,8 @@ package com.siondream.libgdxjam.screens;
 
 import overlap.OverlapScene;
 import overlap.OverlapSceneLoader;
+import overlap.plugins.CCTvLoader;
+import overlap.plugins.OverlapLoaderPlugin;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
@@ -29,6 +31,7 @@ import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 import com.siondream.libgdxjam.ecs.systems.SpineAnimationSystem;
+import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
 
 public class GameScreen implements Screen, InputProcessor
 {
@@ -118,8 +121,10 @@ public class GameScreen implements Screen, InputProcessor
 		
 		inputMultiplexer.addProcessor(this);
 		Gdx.input.setInputProcessor(inputMultiplexer);
-		
+				
 		AssetManager manager = Env.getAssetManager();
+		
+		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
 		sceneParameters.units = Env.UI_TO_WORLD;
 		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
@@ -136,6 +141,9 @@ public class GameScreen implements Screen, InputProcessor
 		
 		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
 		scene.addToEngine(engine);
+		
+		CCTvSystem cctvSystem = new CCTvSystem();
+		engine.addSystem(cctvSystem);
 	}
 
 	@Override

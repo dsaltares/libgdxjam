@@ -6,5 +6,5 @@ import com.badlogic.ashley.core.Component;
 
 public class LightComponent implements Component 
 {
-	public Light m_light;
+	public Light light;
 }

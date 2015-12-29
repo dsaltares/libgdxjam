@@ -1,5 +1,6 @@
 package overlap;
 
+import overlap.plugins.OverlapLoaderPlugin;
 import spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import box2dLight.ConeLight;
 import box2dLight.Light;
@@ -64,6 +65,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	// Final scene
 	private OverlapScene m_map;
 	
+	// Plugin mapper
+	private static final ObjectMap<String, OverlapLoaderPlugin > pluginMapper =
+			new ObjectMap<String, OverlapLoaderPlugin >();
+	
 	// Cache to avoid creating a new array per physics component
 	private static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
 	// Cache to avoid creating new vectors in spine anims component
@@ -109,6 +114,11 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		findSpineAnims(reader.parse(file), dependencies);
 		
 		return dependencies;
+	}
+	
+	public static void registerPlugin(String typeName, OverlapLoaderPlugin loaderClass)
+	{
+		pluginMapper.put(typeName, loaderClass);
 	}
 	
 	private OverlapScene loadInternal(AssetManager manager,
@@ -251,6 +261,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		loadParticles(scene, entity, composite.get("sParticleEffects"));
 		loadLights(scene, entity, composite.get("sLights"));
 		loadSpineAnimations(scene, entity, value.get("sSpineAnimations"));
+		if(value.has("customVars"))
+		{
+			loadTypeProperties(entity, getExtraInfo(value.getString("customVars")));
+		}
 		
 		return entity;
 	}
@@ -432,7 +446,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		index.layer = value.getString("layerName");
 				
 		// Create a new light
-		light.m_light = createLight(value.getString("type"), transform, value);
+		light.light = createLight(value.getString("type"), transform, value);
 		
 		entity.add(node);
 		entity.add(transform);
@@ -451,6 +465,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		int rays = params.has("rays") ? params.getInt("rays") : 12; // Default is 12
 		float distance = params.has("distance") ? params.getFloat("distance") : 300f;
 		
+		// Light direction
+		transform.angle = params.has("directionDegree") ? params.getFloat("directionDegree") : 0f;
+		
 		switch(type)
 		{
 			case "CONE": 
@@ -461,7 +478,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 						distance, 
 						transform.position.x, 
 						transform.position.y, 
-						params.has("directionDegree") ? params.getFloat("directionDegree") : 0f, 
+						transform.angle, 
 						params.has("coneDegree") ? params.getFloat("coneDegree") : 45f);
 
 				break;
@@ -599,6 +616,16 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		}
 		
 		entity.add(layer);
+	}
+	
+	private void loadTypeProperties(Entity entity, ObjectMap<String, String> value)
+	{
+		if (value == null || value.size == 0) { return; }
+		
+		if (!value.containsKey("type")) { return; }
+		
+		OverlapLoaderPlugin loader = pluginMapper.get(value.get("type"));
+		loader.load(entity, value);
 	}
 	
 	private void findSpineAnims(JsonValue value, Array<AssetDescriptor> dependencies)
