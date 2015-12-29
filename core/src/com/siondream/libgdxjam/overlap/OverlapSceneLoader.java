@@ -63,17 +63,17 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Logger logger = new Logger(OverlapSceneLoader.class.getSimpleName(), Logger.INFO);
 	
 	// Final scene
-	private OverlapScene m_map;
+	private OverlapScene map;
 	
 	// Plugin mapper
 	private static final ObjectMap<String, OverlapLoaderPlugin > pluginMapper =
 			new ObjectMap<String, OverlapLoaderPlugin >();
 	
 	// Cache to avoid creating a new array per physics component
-	private static final BodyType[] s_bodyTypesCache = BodyDef.BodyType.values();
+	private static final BodyType[] bodyTypesCache = BodyDef.BodyType.values();
 	// Cache to avoid creating new vectors in spine anims component
-	private static final Vector2 s_v2Utils1 = new Vector2();
-	private static final Vector2 s_v2Utils2 = new Vector2();
+	private static final Vector2 v2Utils1 = new Vector2();
+	private static final Vector2 v2Utils2 = new Vector2();
 	
 	public OverlapSceneLoader(FileHandleResolver resolver) {
 		super(resolver);
@@ -92,7 +92,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 						  String fileName,
 						  FileHandle file,
 						  Parameters parameter) {
-		m_map = loadInternal(manager, fileName, file, parameter);
+		map = loadInternal(manager, fileName, file, parameter);
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 								 FileHandle file,
 								 Parameters parameter) {
 		
-		return m_map;
+		return map;
 	}
 
 	@Override
@@ -394,7 +394,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		else
 		{
 			// Body properties
-			bodyDef.type = s_bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
+			bodyDef.type = bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
 			bodyDef.allowSleep = physicsInfo.has("allowSleep") ? physicsInfo.getBoolean("allowSleep") : true;
 			bodyDef.awake = physicsInfo.has("awake") ? physicsInfo.getBoolean("awake") : true;
 			
@@ -558,10 +558,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 
 		// Update bounds and origin
 		spine.skeleton.updateWorldTransform();
-		spine.skeleton.getBounds(s_v2Utils1, s_v2Utils2);
-		size.width = s_v2Utils2.x;
-		size.height = s_v2Utils2.y;
-		transform.origin.set(s_v2Utils1);
+		spine.skeleton.getBounds(v2Utils1, v2Utils2);
+		size.width = v2Utils2.x;
+		size.height = v2Utils2.y;
+		transform.origin.set(v2Utils1);
 		// Fix to position spine anim in the right coords... TODO: Is there a good solution?
 		transform.position.add(size.width * 0.5f, 0f);
 

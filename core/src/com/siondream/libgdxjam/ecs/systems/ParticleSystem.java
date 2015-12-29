@@ -3,12 +3,16 @@ package com.siondream.libgdxjam.ecs.systems;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.ParticleEffectPool;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.ParticleComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class ParticleSystem extends IteratingSystem {	
 	private float scale = 1.0f;
+	private ObjectMap<FileHandle, ParticleEffectPool> pools = new ObjectMap<FileHandle, ParticleEffectPool>();
 	
 	public ParticleSystem(float scale) {
 		super(Family.all(ParticleComponent.class).get());

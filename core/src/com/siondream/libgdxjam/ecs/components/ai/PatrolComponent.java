@@ -6,5 +6,5 @@ import com.badlogic.gdx.utils.Array;
 
 public class PatrolComponent implements Component
 {
-	public Array<Vector2> m_path;
+	public Array<Vector2> path;
 }

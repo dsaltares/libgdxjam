@@ -13,16 +13,16 @@ import com.siondream.libgdxjam.Env;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
-	private final AssetManager m_assetMgr;
+	private final AssetManager assetMgr;
 	
-	private Logger m_logger;
+	private Logger logger;
 	
 	public LoadingScreen()
 	{
-		m_logger = new Logger(LoadingScreen.class.getSimpleName(), Logger.INFO);
+		logger = new Logger(LoadingScreen.class.getSimpleName(), Logger.INFO);
 		
 		// Retrieve AssetManager
-		m_assetMgr = Env.getAssetManager();
+		assetMgr = Env.getAssetManager();
 		
 		// Start Loading files
 		loadAllAssets();
@@ -30,7 +30,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	
 	private void loadAllAssets()
 	{
-		m_logger.info("-Loading Textures");
+		logger.info("-Loading Textures");
 		loadTextureFolder(Env.TEXTURES_FOLDER);
 	}
 	
@@ -53,8 +53,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				{
 					resourceType = Texture.class;
 				}
-				m_assetMgr.load(file.path(), resourceType);
-				m_logger.info(" +" + file.name() + ", loaded as a " + resourceType.toString());
+				assetMgr.load(file.path(), resourceType);
+				logger.info(" +" + file.name() + ", loaded as a " + resourceType.toString());
 			}
 		}
 	}
@@ -68,9 +68,9 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	@Override
 	public void render(float delta)
 	{
-		if(m_assetMgr.update())
+		if(assetMgr.update())
 		{
-			m_logger.info("Assets loaded");
+			logger.info("Assets loaded");
 			Env.getGame().setScreen(Screens.getGameScreen());
 		}
 	}
@@ -109,7 +109,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	@Override
 	public void error(AssetDescriptor asset, Throwable throwable)
 	{
-		m_logger.error("error loading " + asset.fileName + " message: " + throwable.getMessage());
+		logger.error("error loading " + asset.fileName + " message: " + throwable.getMessage());
 	}
 
 }

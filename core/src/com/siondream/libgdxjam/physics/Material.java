@@ -8,15 +8,15 @@ public class Material
 	public static final Material GRASS = new Material(0.8f, 0.5f, 0.2f);
 	public static final Material DEFAULT = GRASS;
 	
-	private float m_density;
-	private float m_friction;
-	private float m_restitution;
+	private float density;
+	private float friction;
+	private float restitution;
 	
 	public Material(float density, float friction, float restitution)
 	{
-		m_density = density;
-		m_friction = friction;
-		m_restitution = restitution;
+		this.density = density;
+		this.friction = friction;
+		this.restitution = restitution;
 	}
 	
 	public static Material getMaterial(String material)
@@ -33,32 +33,32 @@ public class Material
 	
 	public float getDensity()
 	{
-		return m_density;
+		return density;
 	}
 
 	public void setDensity(float density)
 	{
-		this.m_density = density;
+		this.density = density;
 	}
 
 	public float getFriction()
 	{
-		return m_friction;
+		return friction;
 	}
 
 	public void setFriction(float friction)
 	{
-		this.m_friction = friction;
+		this.friction = friction;
 	}
 
 	public float getRestitution() 
 	{
-		return m_restitution;
+		return restitution;
 	}
 
 	public void setRestitution(float restitution)
 	{
-		this.m_restitution = restitution;
+		this.restitution = restitution;
 	}
 	
 }

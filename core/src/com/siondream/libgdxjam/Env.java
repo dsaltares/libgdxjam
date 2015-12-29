@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Env
 {
-	private static LibgdxJam s_game;
+	private static LibgdxJam game;
 
 	public final static String TEXTURES_FOLDER = "./textures";
 	public final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
@@ -28,16 +28,16 @@ public class Env
 	
 	public static void init(LibgdxJam game)
 	{
-		s_game = game;
+		Env.game = game;
 	}
 	
 	public static LibgdxJam getGame()
 	{
-		return s_game;
+		return game;
 	}
 	
 	public static AssetManager getAssetManager()
 	{
-		return s_game.getAssetManager();
+		return game.getAssetManager();
 	}
 }

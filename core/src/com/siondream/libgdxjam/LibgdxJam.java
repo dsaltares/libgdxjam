@@ -1,9 +1,5 @@
 package com.siondream.libgdxjam;
 
-import overlap.OverlapScene;
-import overlap.OverlapSceneLoader;
-import spine.SkeletonDataLoader;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -15,32 +11,35 @@ import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.spine.SkeletonData;
+import com.esotericsoftware.spine.SkeletonDataLoader;
+import com.siondream.libgdxjam.overlap.OverlapScene;
+import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.screens.Screens;
 
 public class LibgdxJam extends Game {
 	
-	private Logger m_logger;
+	private Logger logger;
 	
 	private Stage stage;
 
 	private OrthographicCamera uiCamera;
 	private Viewport uiViewport;
 	
-	private AssetManager m_assetManager;
+	private AssetManager assetManager;
 	
 	@Override
 	public void create () {
 		// Init environment
 		Env.init(this);
 				
-		m_logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
+		logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
 				
-		m_assetManager = new AssetManager();
-		m_assetManager.setLoader(
+		assetManager = new AssetManager();
+		assetManager.setLoader(
 				SkeletonData.class,
 				new SkeletonDataLoader(new InternalFileHandleResolver())
 			);
-		m_assetManager.setLoader(
+		assetManager.setLoader(
 			OverlapScene.class,
 			new OverlapSceneLoader(new InternalFileHandleResolver())
 		);
@@ -67,7 +66,7 @@ public class LibgdxJam extends Game {
 	public void dispose() {
 		getScreen().dispose();
 		stage.dispose();
-		m_assetManager.dispose();
+		assetManager.dispose();
 	}
 
 	@Override
@@ -82,7 +81,7 @@ public class LibgdxJam extends Game {
 	// ============================
 	public final AssetManager getAssetManager()
 	{
-		return m_assetManager;
+		return assetManager;
 	}
 	
 	public final Stage getUIStage()

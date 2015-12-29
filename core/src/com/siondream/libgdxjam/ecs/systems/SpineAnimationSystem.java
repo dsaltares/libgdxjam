@@ -8,11 +8,9 @@ import com.siondream.libgdxjam.ecs.components.SpineComponent;
 
 public class SpineAnimationSystem extends IteratingSystem
 {
-	private static final Family s_family = Family.all(SpineComponent.class).get();
-	
 	public SpineAnimationSystem()
 	{
-		super(s_family);
+		super(Family.all(SpineComponent.class).get());
 	}
 	
 	@Override
