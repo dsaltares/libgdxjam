@@ -24,6 +24,7 @@ import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.LayerSystem;
+import com.siondream.libgdxjam.ecs.systems.LightSystem;
 import com.siondream.libgdxjam.ecs.systems.NodeSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
@@ -93,6 +94,9 @@ public class GameScreen implements Screen, InputProcessor
 
 		engine.addSystem(cameraSystem);
 
+		LightSystem lightSystem = new LightSystem();
+		engine.addSystem(lightSystem);
+		
 		ParticleSystem particleSystem = new ParticleSystem(Env.UI_TO_WORLD);
 		engine.addSystem(particleSystem);
 

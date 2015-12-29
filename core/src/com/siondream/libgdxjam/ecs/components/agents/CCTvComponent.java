@@ -1,6 +1,7 @@
 package com.siondream.libgdxjam.ecs.components.agents;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.math.MathUtils;
 
 public class CCTvComponent implements Component
 {
@@ -27,11 +28,13 @@ public class CCTvComponent implements Component
 	};
 	
 	// Test values, must be replaced on CCTVLoader -> load method
-	public int degreesPerSecond = 40;
-	public int maxAngle = 360;
-	public int minAngle = 270;
-	public float waitTimeMaxAngleInSec = 0.5f;
-	public float waitTimeMinAngleInSec = 0.5f;
-	public float timeToWaitInSec = 0;
-	public Direction growingDirection = Direction.COUNTERCLOCKWISE;
+	public float angularVelocity = 40.0f;
+	public float maxAngle = 360.0f;
+	public float minAngle = 0.0f;
+	public float currentAngle = 0.0f;
+	public float waitTimeMaxAngle = 0.5f;
+	public float waitTimeMinAngle = 0.5f;
+	public float waitTime = 0.0f;
+	public Direction direction = Direction.COUNTERCLOCKWISE;
+	public boolean started = false;
 }

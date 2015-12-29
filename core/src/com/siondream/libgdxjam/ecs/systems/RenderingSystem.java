@@ -13,9 +13,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
@@ -49,7 +47,6 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private SkeletonRendererDebug spineDebugRenderer;
 	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
-	private Vector3 position = new Vector3();
 
 	public RenderingSystem(Viewport viewport,
 						   Viewport uiViewport,
@@ -134,7 +131,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		for (Entity child : node.children) {
 			if (Mappers.node.has(child)) {
-				NodeUtils.computeTransformFromParent(child, entity);
+				NodeUtils.computeTransform(child, entity);
 				applyTransform(child);
 			}
 			
@@ -148,9 +145,9 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		SizeComponent size = Mappers.size.get(entity);
 		Vector2 origin = Mappers.transform.get(entity).origin;
-		Matrix4 world = Mappers.node.get(entity).computed;
+		NodeComponent node = Mappers.node.get(entity);
 		
-		if (!inFrustum(world, size, origin)) { return; }
+		if (!inFrustum(node, size, origin)) { return; }
 
 		if (Mappers.texture.has(entity)) {
 			renderTexture(entity);
@@ -201,14 +198,14 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		}
 	}
 	
-	private boolean inFrustum(Matrix4 world, SizeComponent size, Vector2 origin) {
-		float radius = Math.max(size.width, size.height) * world.getScaleX() * 0.5f;
-		world.getTranslation(position);
+	private boolean inFrustum(NodeComponent node, SizeComponent size, Vector2 origin) {
+		float scale = Math.max(node.scale.x, node.scale.y);
+		float radius = Math.max(size.width, size.height) * scale * 0.5f;
 		
-		bounds.max.x = position.x + origin.x + radius;
-		bounds.max.y = position.y + origin.y + radius;
-		bounds.min.x = position.x + origin.x - radius;
-		bounds.min.y = position.y + origin.y - radius;
+		bounds.max.x = node.position.x + origin.x + radius;
+		bounds.max.y = node.position.y + origin.y + radius;
+		bounds.min.x = node.position.x + origin.x - radius;
+		bounds.min.y = node.position.y + origin.y - radius;
 		
 		return viewport.getCamera().frustum.boundsInFrustum(bounds);
 	}

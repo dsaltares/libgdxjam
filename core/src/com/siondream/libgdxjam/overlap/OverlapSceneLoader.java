@@ -600,7 +600,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		transform.origin.y = value.getFloat("originY", 0.0f) * parameters.units;
 		transform.scale.x = value.getFloat("scaleX", 1.0f);
 		transform.scale.y = value.getFloat("scaleY", 1.0f);
-		transform.angle = value.getFloat("rotation", 0.0f) * MathUtils.degreesToRadians;
+		transform.angle = value.getFloat("rotation", 0.0f);
 	}
 	
 	private void loadLayers(Entity entity, JsonValue value) {
