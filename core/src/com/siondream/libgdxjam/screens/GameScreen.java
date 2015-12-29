@@ -3,17 +3,14 @@ package com.siondream.libgdxjam.screens;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
@@ -35,8 +32,7 @@ import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
 
-public class GameScreen implements Screen, InputProcessor
-{
+public class GameScreen implements Screen, InputProcessor {
 	private Stage stage;
 	private OrthographicCamera uiCamera;
 	private Viewport uiViewport;
@@ -48,11 +44,7 @@ public class GameScreen implements Screen, InputProcessor
 
 	private double accumulator;
 	private double currentTime;
-
-	private Entity root;
-	private Entity ball;
-
-	private Texture texture;
+	
 	private OverlapScene scene;
 	
 	public GameScreen() {
@@ -75,13 +67,6 @@ public class GameScreen implements Screen, InputProcessor
 	
 	@Override
 	public void show() {
-		texture = new Texture(Gdx.files.internal("badlogic.jpg"));
-		
-		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
-		
-		inputMultiplexer.addProcessor(this);
-		inputMultiplexer.addProcessor(engine.getSystem(CameraSystem.class));
-				
 		AssetManager manager = Env.getAssetManager();
 		World world = engine.getSystem(PhysicsSystem.class).getWorld();
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
@@ -103,6 +88,8 @@ public class GameScreen implements Screen, InputProcessor
 		
 		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
 		scene.addToEngine(engine);
+		
+		addInputProcessors();
 	}
 
 	@Override
@@ -147,6 +134,7 @@ public class GameScreen implements Screen, InputProcessor
 	@Override
 	public void hide() {
 		scene.removeFromEngine(engine);
+		removeInputProcessors();
 	}
 
 	@Override
@@ -156,7 +144,6 @@ public class GameScreen implements Screen, InputProcessor
 				((Disposable)system).dispose();
 			}
 		}
-		texture.dispose();
 	}
 	
 	@Override
@@ -164,14 +151,6 @@ public class GameScreen implements Screen, InputProcessor
 		if (keycode == Keys.D) {
 			engine.getSystem(RenderingSystem.class).toggleDebug();
 			return true;
-		}
-		
-		if (keycode == Keys.W) {
-			engine.removeEntity(root);
-		}
-		
-		if (keycode == Keys.A) {
-			engine.removeEntity(ball);
 		}
 		
 		return false;
@@ -263,5 +242,28 @@ public class GameScreen implements Screen, InputProcessor
 		renderingSystem.setDebug(true);
 		renderingSystem.setProcessing(false);
 	}
-
+	
+	private void addInputProcessors() {
+		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
+		
+		inputMultiplexer.addProcessor(this);
+		
+		for (EntitySystem system : engine.getSystems()) {
+			if (system instanceof InputProcessor) {
+				inputMultiplexer.addProcessor((InputProcessor)system);
+			}
+		}
+	}
+	
+	private void removeInputProcessors() {
+		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
+		
+		inputMultiplexer.removeProcessor(this);
+		
+		for (EntitySystem system : engine.getSystems()) {
+			if (system instanceof InputProcessor) {
+				inputMultiplexer.removeProcessor((InputProcessor)system);
+			}
+		}
+	}
 }
