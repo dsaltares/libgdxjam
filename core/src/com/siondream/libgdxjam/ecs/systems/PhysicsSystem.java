@@ -7,14 +7,16 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 
-public class PhysicsSystem extends EntitySystem implements EntityListener {
+public class PhysicsSystem extends EntitySystem implements EntityListener, Disposable {
 	private static final Family family = Family.all(PhysicsComponent.class).get();
 	private final static int VELOCITY_ITERATIONS = 10;
 	private final static int POSITION_ITERATIONS = 10;
@@ -27,8 +29,17 @@ public class PhysicsSystem extends EntitySystem implements EntityListener {
 	private World world;
 	private float alpha;
 	
-	public PhysicsSystem(World world) {
-		this.world = world;
+	public PhysicsSystem() {
+		world = new World(Env.GRAVITY, Env.DO_SLEEP);
+	}
+	
+	public World getWorld() {
+		return world;
+	}
+	
+	@Override
+	public void dispose() {
+		world.dispose();
 	}
 	
 	public void setAlpha(float alpha) {
@@ -111,10 +122,5 @@ public class PhysicsSystem extends EntitySystem implements EntityListener {
 		}
 		
 		pendingRemoval.clear();
-	}
-	
-	public void dispose()
-	{
-		world.dispose();
 	}
 }
