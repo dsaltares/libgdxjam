@@ -1,6 +1,4 @@
-package spine;
-
-import spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
+package com.esotericsoftware.spine;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
@@ -13,8 +11,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonValue.JsonIterator;
 import com.badlogic.gdx.utils.Logger;
-import com.esotericsoftware.spine.AnimationStateData;
-import com.esotericsoftware.spine.SkeletonData;
+import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 
 public class AnimationStateDataLoader

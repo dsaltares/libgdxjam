@@ -1,7 +1,5 @@
-package overlap;
+package com.siondream.libgdxjam.overlap;
 
-import overlap.plugins.OverlapLoaderPlugin;
-import spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import box2dLight.ConeLight;
 import box2dLight.Light;
 import box2dLight.PointLight;
@@ -36,6 +34,7 @@ import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
+import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
@@ -49,6 +48,7 @@ import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
+import com.siondream.libgdxjam.overlap.plugins.OverlapLoaderPlugin;
 import com.siondream.libgdxjam.physics.Material;
 
 public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, OverlapSceneLoader.Parameters> {
@@ -468,32 +468,29 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		// Light direction
 		transform.angle = params.has("directionDegree") ? params.getFloat("directionDegree") : 0f;
 		
-		switch(type)
-		{
-			case "CONE": 
-				light = new ConeLight(
-						parameters.rayHandler, 
-						rays,
-						color, 
-						distance, 
-						transform.position.x, 
-						transform.position.y, 
-						transform.angle, 
-						params.has("coneDegree") ? params.getFloat("coneDegree") : 45f);
-
-				break;
-			case "POINT":
-				light = new PointLight(
-						parameters.rayHandler, 
-						rays, 
-						color,
-						distance, 
-						transform.position.x, 
-						transform.position.y);
-				
-				break;
+		if (type.equals("CONE")) {
+			light = new ConeLight(
+				parameters.rayHandler, 
+				rays,
+				color, 
+				distance, 
+				transform.position.x, 
+				transform.position.y, 
+				transform.angle, 
+				params.has("coneDegree") ? params.getFloat("coneDegree") : 45f
+			);
 		}
-		
+		else if (type.equals("POINT")) {
+			light = new PointLight(
+				parameters.rayHandler, 
+				rays, 
+				color,
+				distance, 
+				transform.position.x, 
+				transform.position.y
+			);
+		}
+
 		light.setStaticLight( params.has("isStatic") ? false : true );
 		light.setXray( params.has("isXRay") ? false : true );
 		light.setSoftnessLength( params.has("softnessLength") ? params.getFloat("softnessLength") : 1.5f );

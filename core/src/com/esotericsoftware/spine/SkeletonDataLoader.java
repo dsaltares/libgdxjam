@@ -1,4 +1,4 @@
-package spine;
+package com.esotericsoftware.spine;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
@@ -8,9 +8,6 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.spine.SkeletonBinary;
-import com.esotericsoftware.spine.SkeletonData;
-import com.esotericsoftware.spine.SkeletonJson;
 import com.siondream.libgdxjam.Env;
 
 /** {@link AssetLoader} for {@link SkeletonData} instances. 

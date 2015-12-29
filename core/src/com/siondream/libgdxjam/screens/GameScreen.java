@@ -1,9 +1,5 @@
 package com.siondream.libgdxjam.screens;
 
-import overlap.OverlapScene;
-import overlap.OverlapSceneLoader;
-import overlap.plugins.CCTvLoader;
-import overlap.plugins.OverlapLoaderPlugin;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
@@ -32,6 +28,10 @@ import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 import com.siondream.libgdxjam.ecs.systems.SpineAnimationSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
+import com.siondream.libgdxjam.overlap.OverlapScene;
+import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
+import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
+import com.siondream.libgdxjam.overlap.plugins.OverlapLoaderPlugin;
 
 public class GameScreen implements Screen, InputProcessor
 {
