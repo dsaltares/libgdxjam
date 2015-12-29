@@ -29,7 +29,7 @@ import com.siondream.libgdxjam.ecs.systems.NodeSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
-import com.siondream.libgdxjam.ecs.systems.SpineAnimationSystem;
+import com.siondream.libgdxjam.ecs.systems.SpineSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
@@ -44,10 +44,7 @@ public class GameScreen implements Screen, InputProcessor
 	private OrthographicCamera camera;
 	private Viewport viewport;
 
-	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
-	
 	private Engine engine;
-	private RayHandler rayHandler;
 
 	private double accumulator;
 	private double currentTime;
@@ -58,22 +55,11 @@ public class GameScreen implements Screen, InputProcessor
 	private Texture texture;
 	private OverlapScene scene;
 	
-	public GameScreen()
-	{
+	public GameScreen() {
 		stage = Env.getGame().getUIStage();
+		
 		uiCamera = (OrthographicCamera) stage.getCamera();
 		uiViewport = stage.getViewport();
-	}
-	
-	@Override
-	public void show()
-	{
-		engine = new Engine();
-		
-		PhysicsSystem physicsSystem = new PhysicsSystem();
-		engine.addSystem(physicsSystem);
-		
-		World world = physicsSystem.getWorld();
 		
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(
@@ -83,52 +69,22 @@ public class GameScreen implements Screen, InputProcessor
 			Env.MAX_WORLD_HEIGHT,
 			camera
 		);
-
-		rayHandler = new RayHandler(world);
-		rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 0.25f);
 		
-		CameraSystem cameraSystem = new CameraSystem(
-			camera,
-			inputMultiplexer
-		);
-
-		engine.addSystem(cameraSystem);
-
-		LightSystem lightSystem = new LightSystem();
-		engine.addSystem(lightSystem);
-		
-		ParticleSystem particleSystem = new ParticleSystem(Env.UI_TO_WORLD);
-		engine.addSystem(particleSystem);
-
-		LayerSystem layerSystem = new LayerSystem();
-		engine.addSystem(layerSystem);
-		
-		SpineAnimationSystem spineAnimationSystem = new SpineAnimationSystem();
-		engine.addSystem(spineAnimationSystem);
-		
-		RenderingSystem renderingSystem = new RenderingSystem(
-			viewport,
-			uiViewport,
-			stage,
-			world,
-			rayHandler
-		);
-		renderingSystem.setDebug(true);
-		engine.addSystem(renderingSystem);
-		renderingSystem.setProcessing(false);
-
-		NodeSystem nodeSystem = new NodeSystem(engine);
-		engine.addEntityListener(
-			Family.all(NodeComponent.class).get(),
-			nodeSystem
-		);
-
+		setupEngine();
+	}
+	
+	@Override
+	public void show() {
 		texture = new Texture(Gdx.files.internal("badlogic.jpg"));
 		
+		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
+		
 		inputMultiplexer.addProcessor(this);
-		Gdx.input.setInputProcessor(inputMultiplexer);
+		inputMultiplexer.addProcessor(engine.getSystem(CameraSystem.class));
 				
 		AssetManager manager = Env.getAssetManager();
+		World world = engine.getSystem(PhysicsSystem.class).getWorld();
+		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
 		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
@@ -147,14 +103,10 @@ public class GameScreen implements Screen, InputProcessor
 		
 		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
 		scene.addToEngine(engine);
-		
-		CCTvSystem cctvSystem = new CCTvSystem();
-		engine.addSystem(cctvSystem);
 	}
 
 	@Override
-	public void render(float delta)
-	{
+	public void render(float delta) {
 		double newTime = TimeUtils.millis() / 1000.0;
 		double frameTime = Math.min(newTime - currentTime, Env.MAX_STEP);
 		float deltaTime = (float)frameTime;
@@ -173,8 +125,7 @@ public class GameScreen implements Screen, InputProcessor
 	}
 
 	@Override
-	public void resize(int width, int height)
-	{
+	public void resize(int width, int height) {
 		viewport.update(width, height);
 		uiViewport.update(width, height);
 	}
@@ -187,8 +138,10 @@ public class GameScreen implements Screen, InputProcessor
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
-
+		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
+		
+		inputMultiplexer.removeProcessor(this);
+		inputMultiplexer.removeProcessor(engine.getSystem(CameraSystem.class));
 	}
 
 	@Override
@@ -197,15 +150,13 @@ public class GameScreen implements Screen, InputProcessor
 	}
 
 	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		for (EntitySystem system : engine.getSystems()) {
 			if (system instanceof Disposable) {
 				((Disposable)system).dispose();
 			}
 		}
 		texture.dispose();
-		rayHandler.dispose();
 	}
 	
 	@Override
@@ -266,6 +217,51 @@ public class GameScreen implements Screen, InputProcessor
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	private void setupEngine() {
+		engine = new Engine();
+		
+		PhysicsSystem physicsSystem = new PhysicsSystem();
+		CameraSystem cameraSystem = new CameraSystem(camera);
+		LightSystem lightSystem = new LightSystem(physicsSystem.getWorld());
+		ParticleSystem particleSystem = new ParticleSystem(Env.UI_TO_WORLD);
+		LayerSystem layerSystem = new LayerSystem();
+		SpineSystem spineSystem = new SpineSystem();
+		CCTvSystem cctvSystem = new CCTvSystem();
+		RenderingSystem renderingSystem = new RenderingSystem(
+			viewport,
+			uiViewport,
+			stage,
+			physicsSystem.getWorld(),
+			lightSystem.getRayHandler()
+		);
+
+		physicsSystem.priority = 1;
+		cameraSystem.priority = 2;
+		lightSystem.priority = 3;
+		particleSystem.priority = 4;
+		layerSystem.priority = 5;
+		spineSystem.priority = 6;
+		cctvSystem.priority = 7;
+		renderingSystem.priority = 8;
+		
+		engine.addSystem(physicsSystem);
+		engine.addSystem(cameraSystem);
+		engine.addSystem(lightSystem);
+		engine.addSystem(particleSystem);
+		engine.addSystem(layerSystem);
+		engine.addSystem(spineSystem);
+		engine.addSystem(renderingSystem);
+		engine.addSystem(cctvSystem);
+		
+		engine.addEntityListener(
+			Family.all(NodeComponent.class).get(),
+			new NodeSystem(engine)
+		);
+		
+		renderingSystem.setDebug(true);
+		renderingSystem.setProcessing(false);
 	}
 
 }

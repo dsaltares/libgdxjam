@@ -219,8 +219,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		batch.end();
 	}
 	
-	private void renderLights()
-	{
+	private void renderLights() {
 		rayHandler.setCombinedMatrix((OrthographicCamera)viewport.getCamera());
 		rayHandler.updateAndRender();
 	}

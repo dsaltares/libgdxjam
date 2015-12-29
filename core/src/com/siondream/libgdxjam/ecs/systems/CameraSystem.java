@@ -1,9 +1,7 @@
 package com.siondream.libgdxjam.ecs.systems;
 
-import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -18,23 +16,11 @@ public class CameraSystem extends EntitySystem implements InputProcessor {
 	private static final float CAMERA_ZOOM_SPEED = 0.2f;
 	
 	private OrthographicCamera camera;
-	private InputMultiplexer inputMultiplexer;
 	private boolean flyMode = true;
 	private Vector2 velocity = new Vector2();
 	
-	public CameraSystem(OrthographicCamera camera, InputMultiplexer inputMultiplexer) {
-		this.inputMultiplexer = inputMultiplexer;
+	public CameraSystem(OrthographicCamera camera) {
 		this.camera = camera;
-	}
-	
-	@Override
-	public void addedToEngine(Engine engine) {
-		inputMultiplexer.addProcessor(this);
-	}
-	
-	@Override
-	public void removedFromEngine(Engine engine) {
-		inputMultiplexer.removeProcessor(this);
 	}
 	
 	@Override

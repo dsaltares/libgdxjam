@@ -2,6 +2,7 @@ package com.siondream.libgdxjam;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
@@ -26,6 +27,8 @@ public class LibgdxJam extends Game {
 	private Viewport uiViewport;
 	
 	private AssetManager assetManager;
+	
+	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	
 	@Override
 	public void create () {
@@ -55,6 +58,8 @@ public class LibgdxJam extends Game {
 		
 		stage = new Stage();	
 		setScreen( Screens.getLoadingScreen() );
+		
+		Gdx.input.setInputProcessor(inputMultiplexer);
 	}
 	
 	@Override
@@ -100,5 +105,7 @@ public class LibgdxJam extends Game {
 		super.setScreen( screen );
 	}
 	
-
+	public InputMultiplexer getMultiplexer() {
+		return inputMultiplexer;
+	}
 }
