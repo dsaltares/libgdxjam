@@ -44,11 +44,6 @@ public class CCTvSystem extends IteratingSystem {
 			cctv.waitTime = Math.max(cctv.waitTime - deltaTime, 0.0f);
 		}
 		
-		if (cctv.currentAngle >= 270.0f && cctv.currentAngle <= 360.0f) {
-			transform.angle = cctv.currentAngle - 360.0f;
-		}
-		else {
-			transform.angle = cctv.currentAngle;
-		}
+		transform.angle = cctv.currentAngle;
 	}
 }

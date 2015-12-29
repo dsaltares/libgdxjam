@@ -119,16 +119,10 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void resume() {
-		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
-		
-		inputMultiplexer.removeProcessor(this);
-		inputMultiplexer.removeProcessor(engine.getSystem(CameraSystem.class));
 	}
 
 	@Override

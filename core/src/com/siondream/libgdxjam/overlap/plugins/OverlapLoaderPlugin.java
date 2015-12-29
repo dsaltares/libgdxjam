@@ -5,5 +5,5 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 public interface OverlapLoaderPlugin
 {
-	public void load(Entity entity, ObjectMap value);
+	public void load(Entity entity, ObjectMap<String, String> value);
 }
