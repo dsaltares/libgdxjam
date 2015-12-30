@@ -15,9 +15,12 @@ public class CCTvComponent implements Component
 			this.value = value;
 		}
 		
-		public void invert()
+		public Direction invert()
 		{
-			value *= -1;
+			if(value == 1)
+				return COUNTERCLOCKWISE;
+			else
+				return CLOCKWISE;
 		}
 		
 		public int value()

@@ -33,11 +33,11 @@ public class CCTvSystem extends IteratingSystem {
 			
 			if(cctv.currentAngle == cctv.minAngle) {
 				cctv.waitTime = cctv.waitTimeMinAngle;
-				cctv.direction.invert();
+				cctv.direction = cctv.direction.invert();
 			}
 			else if(cctv.currentAngle == cctv.maxAngle) {
 				cctv.waitTime = cctv.waitTimeMaxAngle;
-				cctv.direction.invert();
+				cctv.direction = cctv.direction.invert();
 			}
 		}
 		else {
