@@ -339,6 +339,8 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		if (this.parameters.world == null) { return; }
 		if (this.parameters.categories == null) { return; }
 		
+		logger.info("Loading physic body: " + value.getString("layerName"));
+		
 		// Other possible required properties
 		ObjectMap<String, String> extraInfo = 
 				getExtraInfo(value.has("customVars") ? value.getString("customVars") : null);
@@ -349,47 +351,15 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		// Parse vertices
 		JsonValue shapeInfo = polygonInfo.get("polygons");
-		shapeInfo = shapeInfo.child;
-		
-		float[] vertices = new float[shapeInfo.size * 2];
-		int vertexIndex = 0;
-		for (JsonValue vertex = shapeInfo.child; vertex != null; vertex = vertex.next)
-		{
-			// Set polygon vertices and adapt it to "potato" coords. Zero is default value
-			vertices[vertexIndex++] = vertex.has("x") ? vertex.getFloat("x") * parameters.units : 0f;
-			vertices[vertexIndex++] = vertex.has("y") ? vertex.getFloat("y") * parameters.units : 0f; 
-		}
-		
-		// Create a polygon from the parsed vertices
-		PolygonShape polygon = new PolygonShape();
-		polygon.set(vertices);
-		
-		// Physical properties
 		JsonValue physicsInfo = value.get("physics");
+		
+		Array<Vector2[]> mesh = Array.of(Vector2[].class);
+		
 		Body body;
 		BodyDef bodyDef = new BodyDef();
-		FixtureDef fixtureDef = new FixtureDef();
-		
-		logger.info("Loading physic body: " + value.getString("layerName"));
-		
-		// If it has not physics component, search for material and if not, set to default material
-		Material material;
 		
 		if (physicsInfo == null || physicsInfo.size == 0)
 		{
-			if(extraInfo.containsKey("material"))
-			{
-				material = Material.getMaterial(extraInfo.get("material"));
-			}
-			else
-			{
-				material = Material.DEFAULT;
-			}
-
-			fixtureDef.density = material.getDensity();
-			fixtureDef.friction = material.getFriction();
-			fixtureDef.restitution = material.getRestitution();
-			
 			// Default body properties
 			bodyDef.type = BodyType.StaticBody;
 			bodyDef.allowSleep = true;
@@ -401,34 +371,80 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 			bodyDef.type = bodyTypesCache[physicsInfo.has("bodyType") ? physicsInfo.getInt("bodyType") : 0];
 			bodyDef.allowSleep = physicsInfo.has("allowSleep") ? physicsInfo.getBoolean("allowSleep") : true;
 			bodyDef.awake = physicsInfo.has("awake") ? physicsInfo.getBoolean("awake") : true;
+		}
+		
+		// Create the body
+		body = this.parameters.world.createBody(bodyDef);
+		
+		for (JsonValue vertices = shapeInfo.child; vertices != null; vertices = vertices.next) {
+			Array<Vector2> points = Array.of(Vector2.class);
+			for (JsonValue vertex = vertices.child; vertex != null; vertex = vertex.next) {
+				points.add(new Vector2(
+					vertex.has("x") ? vertex.getFloat("x") * parameters.units : 0.0f,
+					vertex.has("y") ? vertex.getFloat("y") * parameters.units : 0.0f
+				));
+			}
 			
-			// Material properties, if not present, set the physics component properties
-			if(extraInfo.containsKey("material"))
+			FixtureDef fixtureDef = new FixtureDef();
+			
+			// If it has not physics component, search for material and if not, set to default material
+			Material material;
+			
+			if (physicsInfo == null || physicsInfo.size == 0)
 			{
-				material = Material.getMaterial(extraInfo.get("material"));
+				if(extraInfo.containsKey("material"))
+				{
+					material = Material.getMaterial(extraInfo.get("material"));
+				}
+				else
+				{
+					material = Material.DEFAULT;
+				}
+
 				fixtureDef.density = material.getDensity();
 				fixtureDef.friction = material.getFriction();
 				fixtureDef.restitution = material.getRestitution();
 			}
 			else
 			{
-				fixtureDef.density = physicsInfo.has("density") ? physicsInfo.getFloat("density") : 0f;
-				fixtureDef.friction = physicsInfo.has("friction") ? physicsInfo.getFloat("friction") : 0f;
-				fixtureDef.restitution = physicsInfo.has("restitution") ? physicsInfo.getFloat("restitution") : 0f;
+				// Material properties, if not present, set the physics component properties
+				if(extraInfo.containsKey("material"))
+				{
+					material = Material.getMaterial(extraInfo.get("material"));
+					fixtureDef.density = material.getDensity();
+					fixtureDef.friction = material.getFriction();
+					fixtureDef.restitution = material.getRestitution();
+				}
+				else
+				{
+					fixtureDef.density = physicsInfo.has("density") ? physicsInfo.getFloat("density") : 0f;
+					fixtureDef.friction = physicsInfo.has("friction") ? physicsInfo.getFloat("friction") : 0f;
+					fixtureDef.restitution = physicsInfo.has("restitution") ? physicsInfo.getFloat("restitution") : 0f;
+				}
 			}
+			
+			float[] polyVertices = new float[points.size * 2];
+			int vertexIndex = 0;
+			
+			for (Vector2 point : points) {
+				polyVertices[vertexIndex++] = point.x;
+				polyVertices[vertexIndex++] = point.y;
+			}
+			
+			PolygonShape polygon = new PolygonShape();
+			polygon.set(polyVertices);
+			fixtureDef.shape = polygon;
+			
+			Filter filter = new Filter();
+			filter.categoryBits = parameters.categories.getBits("level");
+			
+			Fixture fixture = body.createFixture(fixtureDef);
+			fixture.setFilterData(filter);
+			
+
+			polygon.dispose();
 		}
-		
-		fixtureDef.shape = polygon;
-		
-		// Create the body
-		body = this.parameters.world.createBody(bodyDef);
-		
-		Filter filter = new Filter();
-		filter.categoryBits = parameters.categories.getBits("level");
-		
-		Fixture fixture = body.createFixture(fixtureDef);
-		fixture.setFilterData(filter);
-		
+
 		body.setTransform(transform.position, transform.angle);
 		
 		// Create the physics component
@@ -437,7 +453,6 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		entity.add(physicsComponent);
 		
-		polygon.dispose();
 	}
 	
 	private Entity loadLight(OverlapScene scene, JsonValue value) 
