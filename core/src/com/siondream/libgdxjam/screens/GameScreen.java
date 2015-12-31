@@ -302,7 +302,7 @@ public class GameScreen implements Screen, InputProcessor {
 		center.set(0.0f, 0.0f);
 		shape.setAsBox(0.25f, 0.7f);
 		
-		physics.body.createFixture(mainFDef);
+		player.fixture = physics.body.createFixture(mainFDef);
 		
 		FixtureDef feetFDef = new FixtureDef();
 		feetFDef.shape = shape;

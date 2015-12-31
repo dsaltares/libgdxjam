@@ -49,6 +49,9 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		float maxVelocityX = player.grounded ? player.maxVelocityX :
 											   player.maxVelocityJumpX;
 		
+		//Friction
+		player.fixture.setFriction(player.grounded ? player.groundFriction : 0.0f);
+		
 		// Horizontal movement
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 			if (absVelX < maxVelocityX) {
@@ -117,7 +120,7 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				boolean below = true;
 				
 				for(int j = 0; j < manifold.getNumberOfContactPoints(); j++) {
-					below &= (manifold.getPoints()[j].y < pos.y - 1.5f);
+					below &= (manifold.getPoints()[j].y < pos.y - 0.8f);
 				}
 				
 				if(below) {											
