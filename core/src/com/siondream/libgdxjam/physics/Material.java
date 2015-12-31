@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.reflect.ReflectionException;
 
 public class Material
 {
-	public static final Material GRASS = new Material(0.8f, 0.5f, 0.2f);
+	public static final Material GRASS = new Material(0.8f, 0.9f, 0.1f);
 	public static final Material DEFAULT = GRASS;
 	
 	private float density;

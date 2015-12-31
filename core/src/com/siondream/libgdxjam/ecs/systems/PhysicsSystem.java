@@ -8,11 +8,14 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
+import com.siondream.libgdxjam.physics.CollisionHandler;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 
@@ -26,15 +29,22 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	private ObjectMap<Entity, TransformComponent> transforms = new ObjectMap<Entity, TransformComponent>();
 	
 	private Array<Body> pendingRemoval = new Array<Body>();
-	private World world;
+	private World world = new World(Env.GRAVITY, Env.DO_SLEEP);
+	private CollisionHandler handler = new CollisionHandler();
 	private float alpha;
+	private Logger logger = new Logger("PhysicsSystem", Logger.INFO);
+	private boolean interpolate = false;
 	
 	public PhysicsSystem() {
-		world = new World(Env.GRAVITY, Env.DO_SLEEP);
+		world.setContactListener(handler);
 	}
 	
 	public World getWorld() {
 		return world;
+	}
+	
+	public CollisionHandler getHandler() {
+		return handler;
 	}
 	
 	@Override
@@ -73,6 +83,10 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	public void entityAdded(Entity entity) {
 		bodies.put(entity, Mappers.physics.get(entity));
 		transforms.put(entity, new TransformComponent());
+		
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		TransformComponent transform = Mappers.transform.get(entity);
+		physics.body.setTransform(transform.position, transform.angle);
 	}
 
 	@Override
@@ -101,17 +115,24 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 			
 			if (transform == null) { continue; }
 			
-			TransformComponent old = transforms.get(entity);
-			
-			if (physics.body.isActive()) {
-				transform.position.x = physics.body.getPosition().x * alpha + old.position.x * (1.0f - alpha);
-				transform.position.y = physics.body.getPosition().y * alpha + old.position.y * (1.0f - alpha);
-				transform.angle = physics.body.getAngle() * alpha + old.angle * (1.0f - alpha);
+			TransformComponent old = transforms.get(entity);	
+			if (interpolate) {
+				if (physics.body.isActive()) {
+					transform.position.x = physics.body.getPosition().x * alpha + old.position.x * (1.0f - alpha);
+					transform.position.y = physics.body.getPosition().y * alpha + old.position.y * (1.0f - alpha);
+					transform.angle = physics.body.getAngle() * MathUtils.radiansToDegrees * alpha + old.angle * (1.0f - alpha);
+				}
+				else {
+					physics.body.setTransform(
+						transform.position,
+						MathUtils.degreesToRadians * transform.angle
+					);
+				}
 			}
 			else {
-				physics.body.setTransform(transform.position, transform.angle);
-				old.position.set(transform.position);
-				old.angle = transform.angle;
+				transform.position.x = physics.body.getPosition().x;
+				transform.position.y = physics.body.getPosition().y;
+				transform.angle = physics.body.getAngle() * MathUtils.radiansToDegrees;
 			}
 		}
 	}

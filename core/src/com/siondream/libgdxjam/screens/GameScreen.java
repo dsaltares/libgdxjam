@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.screens;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Input.Keys;
@@ -11,14 +12,24 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
+import com.siondream.libgdxjam.ecs.components.TransformComponent;
+import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.LayerSystem;
 import com.siondream.libgdxjam.ecs.systems.LightSystem;
@@ -28,6 +39,7 @@ import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 import com.siondream.libgdxjam.ecs.systems.SpineSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
+import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
@@ -46,6 +58,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private double currentTime;
 	
 	private OverlapScene scene;
+	private Logger logger = new Logger("GameScreen", Logger.INFO);
 	
 	public GameScreen() {
 		stage = Env.getGame().getUIStage();
@@ -88,7 +101,7 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
 		scene.addToEngine(engine);
-		
+		createPlayer();
 		addInputProcessors();
 	}
 
@@ -102,10 +115,10 @@ public class GameScreen implements Screen, InputProcessor {
 		accumulator += frameTime;
 		
 		while (accumulator >= Env.STEP) {
+			engine.getSystem(PhysicsSystem.class).setAlpha(Env.STEP / (float)accumulator);
 			engine.update(deltaTime);
 			stage.act(Env.STEP);
 			accumulator -= Env.STEP;
-			engine.getSystem(PhysicsSystem.class).setAlpha((float)accumulator / Env.STEP);
 		}
 		
 		engine.getSystem(RenderingSystem.class).update(Env.STEP);
@@ -128,6 +141,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public void hide() {
 		scene.removeFromEngine(engine);
+		engine.removeAllEntities();
 		removeInputProcessors();
 	}
 
@@ -202,6 +216,7 @@ public class GameScreen implements Screen, InputProcessor {
 		LayerSystem layerSystem = new LayerSystem();
 		SpineSystem spineSystem = new SpineSystem();
 		CCTvSystem cctvSystem = new CCTvSystem();
+		PlayerSystem playerSystem = new PlayerSystem(physicsSystem.getWorld());
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			uiViewport,
@@ -217,7 +232,8 @@ public class GameScreen implements Screen, InputProcessor {
 		layerSystem.priority = 5;
 		spineSystem.priority = 6;
 		cctvSystem.priority = 7;
-		renderingSystem.priority = 8;
+		playerSystem.priority = 8;
+		renderingSystem.priority = 9;
 		
 		engine.addSystem(physicsSystem);
 		engine.addSystem(cameraSystem);
@@ -227,6 +243,7 @@ public class GameScreen implements Screen, InputProcessor {
 		engine.addSystem(spineSystem);
 		engine.addSystem(renderingSystem);
 		engine.addSystem(cctvSystem);
+		engine.addSystem(playerSystem);
 		
 		engine.addEntityListener(
 			Family.all(NodeComponent.class).get(),
@@ -259,5 +276,54 @@ public class GameScreen implements Screen, InputProcessor {
 				inputMultiplexer.removeProcessor((InputProcessor)system);
 			}
 		}
+	}
+	
+	private void createPlayer() {
+		Entity entity = new Entity();
+		
+		PhysicsComponent physics = new PhysicsComponent();
+		TransformComponent transform = new TransformComponent();
+		PlayerComponent player = new PlayerComponent();
+		
+		BodyDef bDef = new BodyDef();
+		bDef.fixedRotation = true;
+		bDef.type = BodyType.DynamicBody;
+		
+		World world = engine.getSystem(PhysicsSystem.class).getWorld();
+		physics.body = world.createBody(bDef);
+		
+		PolygonShape shape = new PolygonShape();
+		Vector2 center = new Vector2();
+		
+		FixtureDef mainFDef = new FixtureDef();
+		mainFDef.shape = shape;
+		mainFDef.friction = 50f;
+		mainFDef.restitution = 0.0f;
+		center.set(0.0f, 0.0f);
+		shape.setAsBox(0.25f, 0.7f);
+		
+		physics.body.createFixture(mainFDef);
+		
+		FixtureDef feetFDef = new FixtureDef();
+		feetFDef.shape = shape;
+		feetFDef.isSensor = true;
+		feetFDef.shape = shape;
+		center.set(0.0f, -0.7f);
+		shape.setAsBox(0.25f, 0.05f, center, 0.0f);
+		
+		player.feetSensor = physics.body.createFixture(feetFDef);
+		
+		transform.position.x = 5.0f;
+		transform.position.y = 5.0f;
+		
+		entity.add(physics);
+		entity.add(transform);
+		entity.add(player);
+		
+		engine.addEntity(entity);
+		
+		engine.getSystem(CameraSystem.class).setTarget(entity);
+		
+		shape.dispose();
 	}
 }
