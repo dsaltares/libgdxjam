@@ -14,6 +14,7 @@ import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
+import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.CollisionHandler;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -31,6 +32,7 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	private Array<Body> pendingRemoval = new Array<Body>();
 	private World world = new World(Env.GRAVITY, Env.DO_SLEEP);
 	private CollisionHandler handler = new CollisionHandler();
+	private Categories categories = new Categories();
 	private float alpha;
 	private Logger logger = new Logger("PhysicsSystem", Logger.INFO);
 	private boolean interpolate = false;
@@ -45,6 +47,10 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	
 	public CollisionHandler getHandler() {
 		return handler;
+	}
+	
+	public Categories getCategories() {
+		return categories;
 	}
 	
 	@Override

@@ -8,6 +8,8 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.WorldManifold;
 import com.badlogic.gdx.utils.Array;
@@ -16,13 +18,18 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.physics.Categories;
+import com.siondream.libgdxjam.physics.CollisionHandler;
+import com.siondream.libgdxjam.physics.ContactAdapter;
 
 public class PlayerSystem extends IteratingSystem implements InputProcessor {
 
 	private World world;
 	private Logger logger = new Logger("PlayerSystem", Logger.INFO);
 	
-	public PlayerSystem(World world) {
+	public PlayerSystem(World world,
+						CollisionHandler handler,
+						Categories categories) {
 		super(
 			Family.all(
 				PlayerComponent.class,
@@ -32,6 +39,11 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		);
 		
 		this.world = world;
+		handler.add(
+			categories.getBits("player"),
+			categories.getBits("level"),
+			new PlayerLevelContactListener()
+		);
 	}
 
 	@Override
@@ -44,13 +56,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		float velocitySign = Math.signum(velocity.x);
 		boolean moving = absVelX >= 0.5f;
 		
-		player.grounded = isPlayerGrounded(player, physics);
-		
 		float maxVelocityX = player.grounded ? player.maxVelocityX :
 											   player.maxVelocityJumpX;
-		
-		//Friction
-		player.fixture.setFriction(player.grounded ? player.groundFriction : 0.0f);
 		
 		// Horizontal movement
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
@@ -86,17 +93,17 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 			
 			physics.body.setLinearVelocity(velocity.x, 0.0f);
 			
-			physics.body.applyLinearImpulse(
-				0.0f, player.verticalImpulse,
-				position.x, position.y,
-				true
-			);
-			
 			// Lift the body so it doesn't touch the ground and get stuck
 			physics.body.setTransform(
 				position.x,
 				position.y + 0.1f,
 				physics.body.getAngle()
+			);
+			
+			physics.body.applyLinearImpulse(
+				0.0f, player.verticalImpulse,
+				position.x, position.y,
+				true
 			);
 		}
 		
@@ -107,30 +114,6 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				velocity.y
 			);
 		}
-	}
-	
-	private boolean isPlayerGrounded(PlayerComponent player, PhysicsComponent physics) {
-		Array<Contact> contacts = world.getContactList();
-		for(Contact contact : contacts) {
-			if(contact.isTouching() &&
-			   (contact.getFixtureA() == player.feetSensor || contact.getFixtureB() == player.feetSensor)) {				
-				
-				Vector2 pos = physics.body.getPosition();
-				WorldManifold manifold = contact.getWorldManifold();
-				boolean below = true;
-				
-				for(int j = 0; j < manifold.getNumberOfContactPoints(); j++) {
-					below &= (manifold.getPoints()[j].y < pos.y - 0.8f);
-				}
-				
-				if(below) {											
-					return true;			
-				}
-				
-				return false;
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -189,5 +172,49 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	private class PlayerLevelContactListener extends ContactAdapter {
+		@Override
+		public void beginContact(Contact contact) {
+			for (Entity entity : getEntities()) {
+				PlayerComponent player = Mappers.player.get(entity);
+				
+				if (!matches(contact, player.feetSensor)) { continue; }
+				
+				player.feetContacts++;
+				player.grounded = player.feetContacts > 0;
+				player.fixture.setFriction(player.groundFriction);
+			}
+		}
+
+		@Override
+		public void endContact(Contact contact) {
+			for (Entity entity : getEntities()) {
+				PlayerComponent player = Mappers.player.get(entity);
+				
+				if (!matches(contact, player.feetSensor)) { continue; }
+				
+				player.feetContacts--;
+				player.grounded = player.feetContacts > 0;
+				
+				if (!player.grounded) {
+					player.fixture.setFriction(0.0f);
+				}
+			}
+		}
+		
+		@Override
+		public void preSolve(Contact contact, Manifold oldManifold) {
+			for (Entity entity : getEntities()) {
+				PlayerComponent player = Mappers.player.get(entity);
+				
+				if (!matches(contact, player.fixture)) { continue; }
+				
+				if (player.grounded && contact.isTouching()) {
+					contact.resetFriction();
+				}
+			}
+		}
 	}
 }

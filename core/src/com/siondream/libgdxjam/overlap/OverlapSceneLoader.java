@@ -21,6 +21,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
@@ -48,6 +50,7 @@ import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 import com.siondream.libgdxjam.overlap.plugins.OverlapLoaderPlugin;
+import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.Material;
 
 public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, OverlapSceneLoader.Parameters> {
@@ -83,6 +86,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		public String atlas = "";
 		public String spineFolder = "";
 		public World world;
+		public Categories categories;
 		public RayHandler rayHandler;
 	}
 
@@ -333,6 +337,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private void loadPolygon(Entity entity, TransformComponent transform, JsonValue value)
 	{
 		if (this.parameters.world == null) { return; }
+		if (this.parameters.categories == null) { return; }
 		
 		// Other possible required properties
 		ObjectMap<String, String> extraInfo = 
@@ -417,7 +422,13 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		// Create the body
 		body = this.parameters.world.createBody(bodyDef);
-		body.createFixture(fixtureDef);
+		
+		Filter filter = new Filter();
+		filter.categoryBits = parameters.categories.getBits("level");
+		
+		Fixture fixture = body.createFixture(fixtureDef);
+		fixture.setFilterData(filter);
+		
 		body.setTransform(transform.position, transform.angle);
 		
 		// Create the physics component

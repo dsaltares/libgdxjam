@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -43,6 +44,7 @@ import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
+import com.siondream.libgdxjam.physics.Categories;
 
 public class GameScreen implements Screen, InputProcessor {
 	private Stage stage;
@@ -81,7 +83,9 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public void show() {
 		AssetManager manager = Env.getAssetManager();
-		World world = engine.getSystem(PhysicsSystem.class).getWorld();
+		PhysicsSystem pysicsSystem = engine.getSystem(PhysicsSystem.class);
+		World world = pysicsSystem.getWorld();
+		Categories categories = pysicsSystem.getCategories();
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
 		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
@@ -90,6 +94,7 @@ public class GameScreen implements Screen, InputProcessor {
 		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
 		sceneParameters.spineFolder = "overlap/assets/orig/spine-animations/";
 		sceneParameters.world = world;
+		sceneParameters.categories = categories;
 		sceneParameters.rayHandler = rayHandler;
 		manager.load(
 			"overlap/scenes/MainScene.dt",
@@ -216,7 +221,11 @@ public class GameScreen implements Screen, InputProcessor {
 		LayerSystem layerSystem = new LayerSystem();
 		SpineSystem spineSystem = new SpineSystem();
 		CCTvSystem cctvSystem = new CCTvSystem();
-		PlayerSystem playerSystem = new PlayerSystem(physicsSystem.getWorld());
+		PlayerSystem playerSystem = new PlayerSystem(
+			physicsSystem.getWorld(),
+			physicsSystem.getHandler(),
+			physicsSystem.getCategories()
+		);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			uiViewport,
@@ -287,9 +296,15 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		BodyDef bDef = new BodyDef();
 		bDef.fixedRotation = true;
+		bDef.bullet = true;
 		bDef.type = BodyType.DynamicBody;
 		
-		World world = engine.getSystem(PhysicsSystem.class).getWorld();
+		PhysicsSystem physicsSystem = engine.getSystem(PhysicsSystem.class);
+		World world = physicsSystem.getWorld();
+		Categories categories = physicsSystem.getCategories();
+		
+		short playerCategory = categories.getBits("player");
+		
 		physics.body = world.createBody(bDef);
 		
 		PolygonShape shape = new PolygonShape();
@@ -303,15 +318,21 @@ public class GameScreen implements Screen, InputProcessor {
 		shape.setAsBox(0.25f, 0.7f);
 		
 		player.fixture = physics.body.createFixture(mainFDef);
+		Filter filter = new Filter();
+		filter.categoryBits = playerCategory;
+		player.fixture.setFilterData(filter);
 		
 		FixtureDef feetFDef = new FixtureDef();
 		feetFDef.shape = shape;
 		feetFDef.isSensor = true;
 		feetFDef.shape = shape;
-		center.set(0.0f, -0.7f);
-		shape.setAsBox(0.25f, 0.05f, center, 0.0f);
+		center.set(0.0f, -0.75f);
+		shape.setAsBox(0.23f, 0.05f, center, 0.0f);
 		
 		player.feetSensor = physics.body.createFixture(feetFDef);
+		filter = new Filter();
+		filter.categoryBits = playerCategory;
+		player.feetSensor.setFilterData(filter);
 		
 		transform.position.x = 5.0f;
 		transform.position.y = 5.0f;
