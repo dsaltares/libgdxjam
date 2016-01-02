@@ -220,7 +220,9 @@ public class GameScreen implements Screen, InputProcessor {
 		ParticleSystem particleSystem = new ParticleSystem(Env.UI_TO_WORLD);
 		LayerSystem layerSystem = new LayerSystem();
 		SpineSystem spineSystem = new SpineSystem();
-		CCTvSystem cctvSystem = new CCTvSystem();
+		CCTvSystem cctvSystem = new CCTvSystem(
+			physicsSystem.getWorld()
+		);
 		PlayerSystem playerSystem = new PlayerSystem(
 			physicsSystem.getWorld(),
 			physicsSystem.getHandler(),

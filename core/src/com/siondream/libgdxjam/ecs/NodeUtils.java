@@ -10,6 +10,17 @@ public class NodeUtils {
 	private static Vector3 v3 = new Vector3();
 	private static Vector2 v2 = new Vector2();
 	
+	public static void getPosition(Entity entity, Vector2 position) {
+		if (Mappers.node.has(entity)) {
+			computeWorld(entity);
+			NodeComponent node = Mappers.node.get(entity);
+			position.set(node.position);
+		}
+		else if (Mappers.transform.has(entity)){
+			position.set(Mappers.transform.get(entity).position);
+		}
+	}
+	
 	public static void computeWorld(Entity entity) {
 		NodeComponent node = Mappers.node.get(entity);
 		
