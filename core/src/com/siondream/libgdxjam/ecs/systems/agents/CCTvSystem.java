@@ -52,9 +52,74 @@ public class CCTvSystem extends IteratingSystem {
 	}
 	
 	@Override
+	public void update(float deltaTime) {
+		super.update(deltaTime);
+		
+		updateDetection();
+	}
+	
+	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
 		moveCamera(entity, deltaTime);
-		spotPlayers(entity);
+	}
+	
+	private void updateDetection() {
+		for (Entity target : players) {
+			updateDetection(target);
+		}
+	}
+	
+	private void updateDetection(Entity target) {
+		PlayerComponent player = Mappers.player.get(target);
+		NodeUtils.getPosition(target, position);
+		boolean wasExposed = player.exposed;
+		player.exposed = false;
+		
+		for (Entity entity : getEntities()) {
+			player.exposed = updateDetection(target, entity);
+			
+			if (player.exposed) {
+				break;
+			}
+		}
+		
+		if (wasExposed && !player.exposed){
+			logger.info("no longer exposed");
+		}
+		else if (!wasExposed && player.exposed) {
+			logger.info("exposed");
+		}
+	}
+	
+	private boolean updateDetection(Entity target, Entity entity) {
+		NodeComponent node = Mappers.node.get(entity);
+		LightComponent light = findLight(entity);
+		
+		if (light == null || !(light.light instanceof ConeLight)) { return false; }
+		
+		ConeLight coneLight = (ConeLight)light.light;
+		Vector2 lightPosition = coneLight.getPosition();
+		
+		lightToPlayer.set(position);
+		lightToPlayer.sub(lightPosition);
+		
+		float lightToPlayerDistance = lightToPlayer.len();
+		
+		lightToPlayer.nor();
+		
+		float lightToPlayerAngle = lightToPlayer.angle();
+		float angleDifference = Math.abs(lightToPlayerAngle - node.angle);
+		boolean inCone = lightToPlayerDistance < coneLight.getDistance() &&
+						 angleDifference < (coneLight.getConeDegree() * 2.0f);
+		
+		if (inCone) {
+			callback.prepare(target);	
+			world.rayCast(callback, lightPosition, position);
+			
+			return callback.exposed;
+		}
+		
+		return false;
 	}
 	
 	private void moveCamera(Entity entity, float deltaTime) {
@@ -91,48 +156,7 @@ public class CCTvSystem extends IteratingSystem {
 	}
 	
 	private void spotPlayers(Entity entity) {
-		NodeComponent node = Mappers.node.get(entity);
-		LightComponent light = findLight(entity);
-		
-		if (light == null || !(light.light instanceof ConeLight)) { return; }
-		
-		ConeLight coneLight = (ConeLight)light.light;
-		
-		Vector2 lightPosition = coneLight.getPosition();
-		
-		for (Entity player : players) {
-			NodeUtils.getPosition(player, position);
 
-			lightToPlayer.set(position);
-			lightToPlayer.sub(lightPosition);
-			
-			float lightToPlayerDistance = lightToPlayer.len();
-			
-			lightToPlayer.nor();
-			
-			float lightToPlayerAngle = lightToPlayer.angle();
-			float angleDifference = Math.abs(lightToPlayerAngle - node.angle);
-			boolean inCone = lightToPlayerDistance < coneLight.getDistance() &&
-							 angleDifference < (coneLight.getConeDegree() * 2.0f);
-
-			PlayerComponent p = Mappers.player.get(player);
-			boolean wasExposed = p.exposed;
-			
-			if (inCone) {
-				callback.target = player;	
-				world.rayCast(callback, lightPosition, position);
-			}
-			else {
-				p.exposed = false;
-			}
-			
-			if (!wasExposed && p.exposed) {
-				logger.info("player exposed");
-			}
-			else if (wasExposed && !p.exposed){
-				logger.info("no longer exposed");
-			}
-		}
 	}
 	
 	private LightComponent findLight(Entity entity) {
@@ -152,13 +176,19 @@ public class CCTvSystem extends IteratingSystem {
 	
 	private class CCTVCallback implements RayCastCallback {
 		public Entity target;
+		public boolean exposed;
 
+		public void prepare(Entity target) {
+			this.target = target;
+			exposed = false;
+		}
+		
 		@Override
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 			PlayerComponent player = Mappers.player.get(target);
 			
 			if (fixture == player.fixture) {
-				player.exposed = true;
+				exposed = true;
 			}
 			return 0;
 		}	
