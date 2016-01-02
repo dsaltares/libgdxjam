@@ -23,7 +23,7 @@ public class LightSystem extends IteratingSystem implements Disposable {
 					.get());
 		
 		rayHandler = new RayHandler(world);
-		rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 0.25f);
+		rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 0.5f);
 	}
 
 	@Override

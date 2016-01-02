@@ -11,11 +11,25 @@ barrack
   orig: 250, 150
   offset: 0, 0
   index: -1
+box
+  rotate: false
+  xy: 1657, 286
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
 cabinNight
   rotate: false
   xy: 3679, 325
   size: 225, 164
   orig: 225, 164
+  offset: 0, 0
+  index: -1
+camera
+  rotate: false
+  xy: 2877, 204
+  size: 50, 20
+  orig: 50, 20
   offset: 0, 0
   index: -1
 car
@@ -34,7 +48,7 @@ cloud1Night
   index: -1
 cloud2Night
   rotate: false
-  xy: 1758, 327
+  xy: 1860, 327
   size: 93, 59
   orig: 93, 59
   offset: 0, 0
@@ -55,7 +69,7 @@ glow
   index: -1
 goldenSheep
   rotate: false
-  xy: 1853, 320
+  xy: 1477, 196
   size: 81, 66
   orig: 81, 66
   offset: 0, 0
@@ -118,7 +132,7 @@ hill5Night
   index: -1
 lamp1
   rotate: false
-  xy: 1477, 143
+  xy: 1560, 155
   size: 38, 119
   orig: 38, 119
   offset: 0, 0
@@ -209,7 +223,7 @@ windMain
   index: -1
 windRotor
   rotate: false
-  xy: 1657, 291
+  xy: 1759, 291
   size: 99, 95
   orig: 99, 95
   offset: 0, 0

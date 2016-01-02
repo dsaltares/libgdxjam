@@ -11,8 +11,6 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.WorldManifold;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
@@ -114,6 +112,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				velocity.y
 			);
 		}
+		
+		player.fixture.getShape().setRadius(0.1f);
 	}
 
 	@Override
