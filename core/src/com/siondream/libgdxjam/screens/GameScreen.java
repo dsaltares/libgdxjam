@@ -47,10 +47,6 @@ import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
 import com.siondream.libgdxjam.physics.Categories;
 
 public class GameScreen implements Screen, InputProcessor {
-	private Stage stage;
-	private OrthographicCamera uiCamera;
-	private Viewport uiViewport;
-	
 	private OrthographicCamera camera;
 	private Viewport viewport;
 
@@ -60,13 +56,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private double currentTime;
 	
 	private OverlapScene scene;
-	private Logger logger = new Logger("GameScreen", Logger.INFO);
+	private Logger logger = new Logger(GameScreen.class.getSimpleName(), Env.LOG_LEVEL);
 	
 	public GameScreen() {
-		stage = Env.getGame().getUIStage();
-		
-		uiCamera = (OrthographicCamera) stage.getCamera();
-		uiViewport = stage.getViewport();
+		logger.info("initialize");
 		
 		camera = new OrthographicCamera();
 		viewport = new ExtendViewport(
@@ -82,7 +75,9 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	@Override
 	public void show() {
-		AssetManager manager = Env.getAssetManager();
+		logger.info("show");
+		
+		AssetManager manager = Env.getGame().getAssetManager();
 		PhysicsSystem pysicsSystem = engine.getSystem(PhysicsSystem.class);
 		World world = pysicsSystem.getWorld();
 		Categories categories = pysicsSystem.getCategories();
@@ -122,7 +117,6 @@ public class GameScreen implements Screen, InputProcessor {
 		while (accumulator >= Env.STEP) {
 			engine.getSystem(PhysicsSystem.class).setAlpha(Env.STEP / (float)accumulator);
 			engine.update(deltaTime);
-			stage.act(Env.STEP);
 			accumulator -= Env.STEP;
 		}
 		
@@ -131,8 +125,8 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void resize(int width, int height) {
+		logger.info("resize");
 		viewport.update(width, height);
-		uiViewport.update(width, height);
 	}
 
 	@Override
@@ -145,6 +139,8 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void hide() {
+		logger.info("hide");
+		
 		scene.removeFromEngine(engine);
 		engine.removeAllEntities();
 		removeInputProcessors();
@@ -152,6 +148,8 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void dispose() {
+		logger.info("dispose");
+		
 		for (EntitySystem system : engine.getSystems()) {
 			if (system instanceof Disposable) {
 				((Disposable)system).dispose();
@@ -171,47 +169,41 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public boolean keyUp(int keycode) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean scrolled(int amount) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	private void setupEngine() {
+		logger.info("initializing engine");
 		engine = new Engine();
 		
 		PhysicsSystem physicsSystem = new PhysicsSystem();
@@ -224,14 +216,12 @@ public class GameScreen implements Screen, InputProcessor {
 			physicsSystem.getWorld()
 		);
 		PlayerSystem playerSystem = new PlayerSystem(
-			physicsSystem.getWorld(),
 			physicsSystem.getHandler(),
 			physicsSystem.getCategories()
 		);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
-			uiViewport,
-			stage,
+			Env.getGame().getStage(),
 			physicsSystem.getWorld(),
 			lightSystem.getRayHandler()
 		);
@@ -266,6 +256,7 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 	
 	private void addInputProcessors() {
+		logger.info("enabling engine input processors");
 		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
 		
 		inputMultiplexer.addProcessor(this);
@@ -278,6 +269,7 @@ public class GameScreen implements Screen, InputProcessor {
 	}
 	
 	private void removeInputProcessors() {
+		logger.info("disabling engine input processors");
 		InputMultiplexer inputMultiplexer = Env.getGame().getMultiplexer();
 		
 		inputMultiplexer.removeProcessor(this);

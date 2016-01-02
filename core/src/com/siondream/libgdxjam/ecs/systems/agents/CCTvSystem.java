@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Logger;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
@@ -26,12 +27,16 @@ public class CCTvSystem extends IteratingSystem {
 	private Vector2 position = new Vector2();
 	private Vector2 lightToPlayer = new Vector2();
 	private World world;
-	private Logger logger = new Logger("CCTVSystem", Logger.INFO);
+	private Logger logger = new Logger(
+		CCTvSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	private CCTVCallback callback = new CCTVCallback();
 	
 	public CCTvSystem(World world) {
 		super(Family.all(CCTvComponent.class, TransformComponent.class).get());
 		
+		logger.info("initialize");
 		this.world = world;
 	}
 	
@@ -110,9 +115,22 @@ public class CCTvSystem extends IteratingSystem {
 			boolean inCone = lightToPlayerDistance < coneLight.getDistance() &&
 							 angleDifference < (coneLight.getConeDegree() * 2.0f);
 
+			PlayerComponent p = Mappers.player.get(player);
+			boolean wasExposed = p.exposed;
+			
 			if (inCone) {
-				callback.target = player;
+				callback.target = player;	
 				world.rayCast(callback, lightPosition, position);
+			}
+			else {
+				p.exposed = false;
+			}
+			
+			if (!wasExposed && p.exposed) {
+				logger.info("player exposed");
+			}
+			else if (wasExposed && !p.exposed){
+				logger.info("no longer exposed");
 			}
 		}
 	}
@@ -134,13 +152,13 @@ public class CCTvSystem extends IteratingSystem {
 	
 	private class CCTVCallback implements RayCastCallback {
 		public Entity target;
-		
+
 		@Override
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 			PlayerComponent player = Mappers.player.get(target);
 			
 			if (fixture == player.fixture) {
-				logger.info("PLAYER EXPOSED");
+				player.exposed = true;
 			}
 			return 0;
 		}	

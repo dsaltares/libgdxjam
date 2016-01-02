@@ -7,6 +7,8 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Logger;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
@@ -15,12 +17,18 @@ import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class LightSystem extends IteratingSystem implements Disposable {
 	
+	private Logger logger = new Logger(
+		LightSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	private RayHandler rayHandler;
 	
 	public LightSystem(World world) {
 		super(Family.all(LightComponent.class)
 					.one(NodeComponent.class, TransformComponent.class)
 					.get());
+		
+		logger.info("initialize");
 		
 		rayHandler = new RayHandler(world);
 		rayHandler.setAmbientLight(0.2f, 0.2f, 0.2f, 0.5f);
@@ -47,6 +55,7 @@ public class LightSystem extends IteratingSystem implements Disposable {
 
 	@Override
 	public void dispose() {
+		logger.info("dispose");
 		rayHandler.dispose();
 	}
 	

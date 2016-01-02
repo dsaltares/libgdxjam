@@ -8,10 +8,9 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Logger;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
@@ -22,11 +21,12 @@ import com.siondream.libgdxjam.physics.ContactAdapter;
 
 public class PlayerSystem extends IteratingSystem implements InputProcessor {
 
-	private World world;
-	private Logger logger = new Logger("PlayerSystem", Logger.INFO);
+	private Logger logger = new Logger(
+			PlayerSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	
-	public PlayerSystem(World world,
-						CollisionHandler handler,
+	public PlayerSystem(CollisionHandler handler,
 						Categories categories) {
 		super(
 			Family.all(
@@ -35,8 +35,9 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				TransformComponent.class
 			).get()
 		);
+
+		logger.info("initilize");
 		
-		this.world = world;
 		handler.add(
 			categories.getBits("player"),
 			categories.getBits("level"),
@@ -87,6 +88,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		
 		// Jumping
 		if (player.grounded && player.jump) {
+			logger.info("jumping");
+			
 			player.jump = false;
 			
 			physics.body.setLinearVelocity(velocity.x, 0.0f);
@@ -140,37 +143,31 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 
 	@Override
 	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean scrolled(int amount) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
@@ -185,6 +182,10 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				player.feetContacts++;
 				player.grounded = player.feetContacts > 0;
 				player.fixture.setFriction(player.groundFriction);
+				
+				if (player.feetContacts == 1) {
+					logger.info("landed");
+				}
 			}
 		}
 

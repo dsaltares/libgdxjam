@@ -13,5 +13,6 @@ public class PlayerComponent implements Component {
 	public float verticalImpulse = 5.5f;
 	public boolean jump;
 	public boolean grounded;
+	public boolean exposed;
 	public int feetContacts = 0;
 }

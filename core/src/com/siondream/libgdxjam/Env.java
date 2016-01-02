@@ -1,12 +1,14 @@
 package com.siondream.libgdxjam;
 
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Logger;
 
 public class Env
 {
 	private static LibgdxJam game;
 
+	public final static int LOG_LEVEL = Logger.INFO;
+	
 	public final static String TEXTURES_FOLDER = "./textures";
 	public final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
 	public final static boolean DO_SLEEP = true;
@@ -26,18 +28,11 @@ public class Env
 	
 	public final static float UI_TO_WORLD = (float) MAX_WORLD_WIDTH / (float)MAX_UI_WIDTH;
 	
-	public static void init(LibgdxJam game)
-	{
+	public static void init(LibgdxJam game) {
 		Env.game = game;
 	}
 	
-	public static LibgdxJam getGame()
-	{
+	public static LibgdxJam getGame() {
 		return game;
-	}
-	
-	public static AssetManager getAssetManager()
-	{
-		return game.getAssetManager();
 	}
 }

@@ -62,7 +62,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Parameters parameters;
 	private TextureAtlas atlas;
 	
-	private Logger logger = new Logger(OverlapSceneLoader.class.getSimpleName(), Logger.INFO);
+	private Logger logger = new Logger(
+		OverlapSceneLoader.class.getSimpleName(),
+		Logger.INFO
+	);
 	
 	// Final scene
 	private OverlapScene map;
@@ -79,6 +82,8 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	
 	public OverlapSceneLoader(FileHandleResolver resolver) {
 		super(resolver);
+		
+		logger.info("initialize");
 	}
 
 	public static class Parameters extends AssetLoaderParameters<OverlapScene> {
@@ -131,7 +136,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		this.parameters = parameter;
 		this.atlas = manager.get(parameters.atlas, TextureAtlas.class);
 		
-		logger.info("Parsing scene...");
+		logger.info("parsing scene");
 		
 		JsonValue root = reader.parse(file);
 		
@@ -145,7 +150,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	}
 	
 	private Entity loadRoot(OverlapScene scene, JsonValue value) {
-		logger.info("Loading root");
+		logger.info("loading root");
 		
 		Entity entity = new Entity();
 		
@@ -242,7 +247,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Entity loadComposite(OverlapScene scene, JsonValue value) {
 		Entity entity = new Entity();
 		
-		logger.info("Loading composite: " + value.getString("itemIdentifier", value.getString("uniqueId", "")));
+		logger.info("loading composite: " + value.getString("itemIdentifier", value.getString("uniqueId", "")));
 		
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
@@ -275,7 +280,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Entity loadImage(OverlapScene scene, JsonValue value) {
 		Entity entity = new Entity();
 		
-		logger.info("Loading image: " + value.getString("imageName"));
+		logger.info("loading image: " + value.getString("imageName"));
 		
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
@@ -301,7 +306,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	private Entity loadParticle(OverlapScene scene, JsonValue value) {
 		Entity entity = new Entity();
 		
-		logger.info("Loading particle: " + value.getString("particleName") + " " + value.getString("itemIdentifier", ""));
+		logger.info("loading particle: " + value.getString("particleName") + " " + value.getString("itemIdentifier", ""));
 		
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
@@ -339,7 +344,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		if (this.parameters.world == null) { return; }
 		if (this.parameters.categories == null) { return; }
 		
-		logger.info("Loading physic body: " + value.getString("layerName"));
+		logger.info("loading physic body: " + value.getString("layerName"));
 		
 		// Other possible required properties
 		ObjectMap<String, String> extraInfo = 
@@ -459,7 +464,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	{
 		Entity entity = new Entity();
 		
-		logger.info("Loading light: " + (value.has("itemIdentifier") ? value.getString("itemIdentifier") : "default") );
+		logger.info("loading light: " + (value.has("itemIdentifier") ? value.getString("itemIdentifier") : "default") );
 		
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
@@ -544,7 +549,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 	{
 		Entity entity = new Entity();
 		
-		logger.info("Loading spine anim: " + value.getString("animationName"));
+		logger.info("loading spine anim: " + value.getString("animationName"));
 		
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
@@ -565,7 +570,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 				parameters.spineFolder + animationName + "/" + animationName;
 		
 		// Load spine atlas
-		SkeletonData skeletonData = Env.getAssetManager().get(
+		SkeletonData skeletonData = Env.getGame().getAssetManager().get(
 				animationPathWithoutExtension + ".json", 
 				SkeletonData.class);
 		
@@ -688,37 +693,4 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 			}
 		}
 	}
-	
-//	private void findParticles(JsonValue value,
-//							   Array<AssetDescriptor> dependencies,
-//							   Parameters parameters) {
-//		if (value.has("composite")) {
-//			findParticles(value.get("composite"), dependencies, parameters);
-//		}
-//		if (value.has("sComposites")) {
-//			JsonValue composites = value.get("sComposites");
-//			
-//			for (int i = 0; i < composites.size; ++i) {
-//				findParticles(composites.get(i), dependencies, parameters);
-//			}
-//		}
-//		if (value.has("sParticleEffects")) {
-//			JsonValue particles = value.get("sParticleEffects");
-//			
-//			for (int i = 0; i < particles.size; ++i) {
-//				ParticleEffectParameter particleParameter = new ParticleEffectParameter();
-//				particleParameter.atlasFile = parameters.atlas;
-//				
-//				String particleName = particles.get(i).getString("particleName");
-//				
-//				logger.info("Found particle: " + particleName);
-//				
-//				dependencies.add(new AssetDescriptor(
-//					PARTICLES_DIR + particleName,
-//					ParticleEffect.class,
-//					particleParameter
-//				));
-//			}
-//		}
-//	}
 }

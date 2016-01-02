@@ -34,10 +34,16 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	private CollisionHandler handler = new CollisionHandler();
 	private Categories categories = new Categories();
 	private float alpha;
-	private Logger logger = new Logger("PhysicsSystem", Logger.INFO);
 	private boolean interpolate = false;
 	
+	private Logger logger = new Logger(
+		ParticleSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
+	
 	public PhysicsSystem() {
+		logger.info("initialize");
+		
 		world.setContactListener(handler);
 	}
 	
@@ -55,6 +61,8 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	
 	@Override
 	public void dispose() {
+		logger.info("dispose");
+		
 		world.dispose();
 	}
 	
@@ -145,6 +153,7 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	
 	private void processPendingBodyRemoval() {
 		for (Body body : pendingRemoval) {
+			logger.info("destroying body: " + body);
 			world.destroyBody(body);
 		}
 		

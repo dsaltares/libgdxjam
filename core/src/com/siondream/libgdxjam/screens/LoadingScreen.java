@@ -17,98 +17,82 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	
 	private Logger logger;
 	
-	public LoadingScreen()
-	{
-		logger = new Logger(LoadingScreen.class.getSimpleName(), Logger.INFO);
+	public LoadingScreen() {
+		logger = new Logger(LoadingScreen.class.getSimpleName(), Env.LOG_LEVEL);
 		
-		// Retrieve AssetManager
-		assetMgr = Env.getAssetManager();
+		logger.info("initialize");
 		
-		// Start Loading files
+		assetMgr = Env.getGame().getAssetManager();
+		assetMgr.setErrorListener(this);
 		loadAllAssets();
 	}
 	
-	private void loadAllAssets()
-	{
-		logger.info("-Loading Textures");
+	private void loadAllAssets() {
+		logger.info("loading Textures");
 		loadTextureFolder(Env.TEXTURES_FOLDER);
 	}
 	
-	private void loadTextureFolder(String path)
-	{
-		for(FileHandle file : Gdx.files.internal(path).list())
-		{
-			if(file.isDirectory())
-			{
+	private void loadTextureFolder(String path) {
+		for(FileHandle file : Gdx.files.internal(path).list()) {
+			if(file.isDirectory()) {
 				loadTextureFolder(file.path());
 			}
-			else
-			{
+			else {
 				Class<?> resourceType;
-				if(file.extension().compareTo("atlas") == 0)
-				{
+				if(file.extension().compareTo("atlas") == 0) {
 					resourceType = TextureAtlas.class;
 				}
-				else
-				{
+				else {
 					resourceType = Texture.class;
 				}
 				assetMgr.load(file.path(), resourceType);
-				logger.info(" +" + file.name() + ", loaded as a " + resourceType.toString());
+				logger.info(file.name() + " loaded as a " + resourceType);
 			}
 		}
 	}
 	
 	@Override
 	public void show() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void render(float delta)
 	{
-		if(assetMgr.update())
-		{
-			logger.info("Assets loaded");
+		if(assetMgr.update()) {
+			logger.info("assets loaded");
 			Env.getGame().setScreen(Screens.getGameScreen());
 		}
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void hide() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
 		
 	}
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void error(AssetDescriptor asset, Throwable throwable)
-	{
+	public void error(AssetDescriptor asset, Throwable throwable) {
 		logger.error("error loading " + asset.fileName + " message: " + throwable.getMessage());
 	}
 

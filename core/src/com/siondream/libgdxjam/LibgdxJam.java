@@ -18,7 +18,6 @@ import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.screens.Screens;
 
 public class LibgdxJam extends Game {
-	
 	private Logger logger;
 	
 	private Stage stage;
@@ -32,10 +31,11 @@ public class LibgdxJam extends Game {
 	
 	@Override
 	public void create () {
-		// Init environment
+		logger = new Logger(LibgdxJam.class.getName(), Env.LOG_LEVEL);
+		
+		logger.info("create");
+		
 		Env.init(this);
-				
-		logger = new Logger(LibgdxJam.class.getName(), Logger.INFO);
 				
 		assetManager = new AssetManager();
 		assetManager.setLoader(
@@ -56,19 +56,22 @@ public class LibgdxJam extends Game {
 			uiCamera
 		);
 		
-		stage = new Stage();	
-		setScreen( Screens.getLoadingScreen() );
+		stage = new Stage(uiViewport);
 		
 		Gdx.input.setInputProcessor(inputMultiplexer);
+		
+		setScreen( Screens.getLoadingScreen() );
 	}
 	
 	@Override
 	public void resize(int width, int height) {
+		logger.info("resize");
 		getScreen().resize(width, height);
 	}
 	
 	@Override
 	public void dispose() {
+		logger.info("dispose");
 		getScreen().dispose();
 		stage.dispose();
 		assetManager.dispose();
@@ -78,34 +81,28 @@ public class LibgdxJam extends Game {
 	public void render () {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		
+		stage.act(deltaTime);
 		getScreen().render(deltaTime);
 	}
 	
-	// ============================
-	// Getters
-	// ============================
-	public final AssetManager getAssetManager()
-	{
+	public AssetManager getAssetManager() {
 		return assetManager;
 	}
 	
-	public final Stage getUIStage()
-	{
+	public Stage getStage() {
 		return stage;
-	}
-	
-	// ============================
-	// Setters
-	// ============================
-	@Override
-	public void setScreen (Screen screen)
-	{
-		// We could perform screen transitions here
-		
-		super.setScreen( screen );
 	}
 	
 	public InputMultiplexer getMultiplexer() {
 		return inputMultiplexer;
 	}
+	
+	@Override
+	public void setScreen (Screen screen) {
+		logger.info("setting screen: " + screen);
+		super.setScreen( screen );
+		stage.clear();
+	}
+	
+	
 }

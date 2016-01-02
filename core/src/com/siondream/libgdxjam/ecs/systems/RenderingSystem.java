@@ -19,9 +19,11 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
@@ -36,7 +38,6 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 
 	private SpriteBatch batch;
 	private Viewport viewport;
-	private Viewport uiViewport;
 	private Stage stage;
 	private World world;
 	private RayHandler rayHandler;
@@ -47,23 +48,26 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private SkeletonRendererDebug spineDebugRenderer;
 	private Family renderable;
 	private BoundingBox bounds = new BoundingBox();
+	
+	private Logger logger = new Logger(
+		RenderingSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 
 	public RenderingSystem(Viewport viewport,
-						   Viewport uiViewport,
 						   Stage stage,
 						   World world,
 						   RayHandler rayHandler) {
 		super(Family.all(RootComponent.class, NodeComponent.class).get());
 		
+		logger.info("initialize");
+		
 		this.viewport = viewport;
-		this.uiViewport = uiViewport;
 		this.stage = stage;
 		this.world = world;
 		this.rayHandler = rayHandler;
 		
 		batch = new SpriteBatch();
-		
-		stage.setViewport(uiViewport);
 		
 		shapeRenderer = new ShapeRenderer();
 		
@@ -115,15 +119,18 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	
 	@Override
 	public void dispose() {
+		logger.info("dispose");
 		batch.dispose();
 	}
 
 	public void toggleDebug() {
 		debug = !debug;
+		logger.info("toggled debug: " + debug);
 	}
 	
 	public void setDebug(boolean debug) {
 		this.debug = debug;
+		logger.info("set debug: " + debug);
 	}
 	
 	private void renderChildren(Entity entity) {
@@ -192,10 +199,6 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	{
 		SpineComponent spine = Mappers.spine.get(entity);
 		spineRenderer.draw(batch, spine.skeleton);
-		if(debug)
-		{
-			//spineDebugRenderer.draw(spine.skeleton);
-		}
 	}
 	
 	private boolean inFrustum(NodeComponent node, SizeComponent size, Vector2 origin) {
@@ -225,7 +228,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	}
 	
 	private void renderUI() {
-		uiViewport.getCamera().update();
+		stage.getViewport().getCamera().update();
 		stage.draw();
 	}
 	

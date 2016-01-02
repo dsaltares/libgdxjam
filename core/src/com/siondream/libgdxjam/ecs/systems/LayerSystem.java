@@ -5,6 +5,8 @@ import java.util.Comparator;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.utils.Logger;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
@@ -12,6 +14,10 @@ import com.siondream.libgdxjam.ecs.components.RootComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 
 public class LayerSystem extends IteratingSystem {
+	private Logger logger = new Logger(
+		LayerSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	private EntityComparator comparator = new EntityComparator();
 	
 	public LayerSystem() {
@@ -19,6 +25,8 @@ public class LayerSystem extends IteratingSystem {
 			RootComponent.class,
 			LayerComponent.class
 		).get());
+		
+		logger.info("initialize");
 	}
 
 	@Override

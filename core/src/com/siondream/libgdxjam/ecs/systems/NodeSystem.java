@@ -3,15 +3,22 @@ package com.siondream.libgdxjam.ecs.systems;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
+import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 
 public class NodeSystem implements EntityListener {
+	Logger logger = new Logger(
+		NodeSystem.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	private ObjectMap<Entity, NodeComponent> nodes = new ObjectMap<Entity, NodeComponent>();
 	private Engine engine;
 	
 	public NodeSystem(Engine engine) {
+		logger.info("initialize");
 		this.engine = engine;
 	}
 	
