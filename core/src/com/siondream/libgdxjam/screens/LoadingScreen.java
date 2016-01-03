@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
+import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,13 +12,13 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.spine.SkeletonData;
+import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
 	private final AssetManager assetMgr;
-	private ObjectMap<String, Class<?>> resourceClasses = new ObjectMap<String, Class<?>>();
-	
+
 	private Logger logger = new Logger(
 		LoadingScreen.class.getSimpleName(),
 		Env.LOG_LEVEL
@@ -28,15 +29,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		
 		assetMgr = Env.getGame().getAssetManager();
 		assetMgr.setErrorListener(this);
-		
-		setupExtensions();		
+				
 		loadAllAssets();
-	}
-	
-	private void setupExtensions() {
-		resourceClasses.put("atlas", TextureAtlas.class);
-		resourceClasses.put("png", Texture.class);
-		resourceClasses.put("json", SkeletonData.class);
 	}
 	
 	private void loadAllAssets() {
@@ -51,15 +45,31 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				loadFolder(file.path());
 			}
 			else {
-				Class<?> resourceClass = resourceClasses.get(file.extension());
+				String extension = file.extension();
 				
-				if (resourceClass == null) {
+				if (extension.equals("png")) {
+					assetMgr.load(file.path(), Texture.class);
+				}
+				else if (extension.equals("atlas")) {
+					assetMgr.load(file.path(), TextureAtlas.class);
+				}
+				else if (extension.equals("json") && path.equals(Env.SPINE_FOLDER)) {
+					String atlas = file.parent().path() +
+								   "/" +
+								   file.nameWithoutExtension() +
+								   ".atlas";
+					
+					SkeletonDataLoaderParameter parameter = new SkeletonDataLoaderParameter();					parameter.atlasName = file.parent().path() + file.nameWithoutExtension() + ".atlas";
+					parameter.atlasName = atlas;
+					parameter.scale = Env.UI_TO_WORLD;
+					assetMgr.load(file.path(), SkeletonData.class, parameter);
+				}
+				else {
 					logger.error("unknown resource type: " + file.name());
 					continue;
 				}
 
-				assetMgr.load(file.path(), resourceClass);
-				logger.info(file.name() + " loaded as a " + resourceClass);
+				logger.info(file.name() + " loaded");
 			}
 		}
 	}

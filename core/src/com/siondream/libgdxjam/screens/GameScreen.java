@@ -44,6 +44,7 @@ import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
+import com.siondream.libgdxjam.overlap.plugins.PlayerPlugin;
 import com.siondream.libgdxjam.physics.Categories;
 
 public class GameScreen implements Screen, InputProcessor {
@@ -84,6 +85,10 @@ public class GameScreen implements Screen, InputProcessor {
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
 		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
+		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
+			engine.getSystem(CameraSystem.class),
+			pysicsSystem
+		));
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
 		sceneParameters.units = Env.UI_TO_WORLD;
 		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
@@ -101,7 +106,6 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
 		scene.addToEngine(engine);
-		createPlayer();
 		addInputProcessors();
 	}
 
@@ -279,66 +283,5 @@ public class GameScreen implements Screen, InputProcessor {
 				inputMultiplexer.removeProcessor((InputProcessor)system);
 			}
 		}
-	}
-	
-	private void createPlayer() {
-		Entity entity = new Entity();
-		
-		PhysicsComponent physics = new PhysicsComponent();
-		TransformComponent transform = new TransformComponent();
-		PlayerComponent player = new PlayerComponent();
-		
-		BodyDef bDef = new BodyDef();
-		bDef.fixedRotation = true;
-		bDef.bullet = true;
-		bDef.type = BodyType.DynamicBody;
-		
-		PhysicsSystem physicsSystem = engine.getSystem(PhysicsSystem.class);
-		World world = physicsSystem.getWorld();
-		Categories categories = physicsSystem.getCategories();
-		
-		short playerCategory = categories.getBits("player");
-		
-		physics.body = world.createBody(bDef);
-		
-		PolygonShape shape = new PolygonShape();
-		Vector2 center = new Vector2();
-		
-		FixtureDef mainFDef = new FixtureDef();
-		mainFDef.shape = shape;
-		mainFDef.friction = 50f;
-		mainFDef.restitution = 0.0f;
-		center.set(0.0f, 0.0f);
-		shape.setAsBox(0.25f, 0.7f);
-		
-		player.fixture = physics.body.createFixture(mainFDef);
-		Filter filter = new Filter();
-		filter.categoryBits = playerCategory;
-		player.fixture.setFilterData(filter);
-		
-		FixtureDef feetFDef = new FixtureDef();
-		feetFDef.shape = shape;
-		feetFDef.isSensor = true;
-		feetFDef.shape = shape;
-		center.set(0.0f, -0.75f);
-		shape.setAsBox(0.23f, 0.05f, center, 0.0f);
-		
-		player.feetSensor = physics.body.createFixture(feetFDef);
-		filter = new Filter();
-		filter.categoryBits = playerCategory;
-		player.feetSensor.setFilterData(filter);
-		
-		transform.position.x = 5.0f;
-		transform.position.y = 5.0f;
-		
-		entity.add(physics);
-		entity.add(transform);
-		entity.add(player);
-		
-		engine.addEntity(entity);
-		
-		engine.getSystem(CameraSystem.class).setTarget(entity);
-		
-		shape.dispose();
 	}
 }
