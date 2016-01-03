@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
@@ -35,8 +35,7 @@ import com.siondream.libgdxjam.ecs.components.TextureComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
 public class RenderingSystem extends IteratingSystem implements Disposable {
-
-	private SpriteBatch batch;
+	private PolygonSpriteBatch batch;
 	private Viewport viewport;
 	private Stage stage;
 	private World world;
@@ -67,7 +66,8 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		this.world = world;
 		this.rayHandler = rayHandler;
 		
-		batch = new SpriteBatch();
+		//batch = new SpriteBatch();
+		batch = new PolygonSpriteBatch();
 		
 		shapeRenderer = new ShapeRenderer();
 		
