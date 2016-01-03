@@ -58,7 +58,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		mainFDef.shape = shape;
 		mainFDef.friction = 50f;
 		mainFDef.restitution = 0.0f;
-		center.set(0.0f, 0.7f);
+		center.set(0.0f, 0.8f);
 		shape.setAsBox(0.25f, 0.7f, center, 0.0f);
 		
 		player.fixture = physics.body.createFixture(mainFDef);
@@ -73,8 +73,8 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		feetFDef.shape = shape;
 		feetFDef.isSensor = true;
 		feetFDef.shape = shape;
-		center.set(0.0f, -0.1f);
-		shape.setAsBox(0.23f, 0.05f, center, 0.0f);
+		center.set(0.0f, 0.05f);
+		shape.setAsBox(0.23f, 0.1f, center, 0.0f);
 		
 		player.feetSensor = physics.body.createFixture(feetFDef);
 		filter = new Filter();

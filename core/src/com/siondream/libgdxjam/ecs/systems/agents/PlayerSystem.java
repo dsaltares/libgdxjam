@@ -6,6 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -140,8 +141,6 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		else if (!wantsToMove && !currentAnimation.equals("Idle")) {
 			spine.state.setAnimation(0, "Idle", true);
 		}
-		
-		player.fixture.getShape().setRadius(0.1f);
 	}
 
 	@Override
@@ -221,7 +220,7 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				
 				if (!matches(contact, player.feetSensor)) { continue; }
 				
-				player.feetContacts--;
+				MathUtils.clamp(player.feetContacts, 0, player.feetContacts - 1);
 				player.grounded = player.feetContacts > 0;
 				
 				if (!player.grounded) {
