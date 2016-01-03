@@ -9,44 +9,57 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Logger;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.esotericsoftware.spine.SkeletonData;
 import com.siondream.libgdxjam.Env;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
 	private final AssetManager assetMgr;
+	private ObjectMap<String, Class<?>> resourceClasses = new ObjectMap<String, Class<?>>();
 	
-	private Logger logger;
+	private Logger logger = new Logger(
+		LoadingScreen.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
 	
 	public LoadingScreen() {
-		logger = new Logger(LoadingScreen.class.getSimpleName(), Env.LOG_LEVEL);
-		
 		logger.info("initialize");
 		
 		assetMgr = Env.getGame().getAssetManager();
 		assetMgr.setErrorListener(this);
+		
+		setupExtensions();		
 		loadAllAssets();
+	}
+	
+	private void setupExtensions() {
+		resourceClasses.put("atlas", TextureAtlas.class);
+		resourceClasses.put("png", Texture.class);
+		resourceClasses.put("json", SkeletonData.class);
 	}
 	
 	private void loadAllAssets() {
 		logger.info("loading Textures");
-		loadTextureFolder(Env.TEXTURES_FOLDER);
+		loadFolder(Env.TEXTURES_FOLDER);
+		loadFolder(Env.SPINE_FOLDER);
 	}
 	
-	private void loadTextureFolder(String path) {
+	private void loadFolder(String path) {
 		for(FileHandle file : Gdx.files.internal(path).list()) {
 			if(file.isDirectory()) {
-				loadTextureFolder(file.path());
+				loadFolder(file.path());
 			}
 			else {
-				Class<?> resourceType;
-				if(file.extension().compareTo("atlas") == 0) {
-					resourceType = TextureAtlas.class;
+				Class<?> resourceClass = resourceClasses.get(file.extension());
+				
+				if (resourceClass == null) {
+					logger.error("unknown resource type: " + file.name());
+					continue;
 				}
-				else {
-					resourceType = Texture.class;
-				}
-				assetMgr.load(file.path(), resourceType);
-				logger.info(file.name() + " loaded as a " + resourceType);
+
+				assetMgr.load(file.path(), resourceClass);
+				logger.info(file.name() + " loaded as a " + resourceClass);
 			}
 		}
 	}
