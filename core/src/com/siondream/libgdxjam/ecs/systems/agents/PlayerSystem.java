@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.physics.Categories;
@@ -32,7 +33,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 			Family.all(
 				PlayerComponent.class,
 				PhysicsComponent.class,
-				TransformComponent.class
+				TransformComponent.class,
+				SpineComponent.class
 			).get()
 		);
 
@@ -58,6 +60,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 		float maxVelocityX = player.grounded ? player.maxVelocityX :
 											   player.maxVelocityJumpX;
 		
+		boolean wantsToMove = false;
+		
 		// Horizontal movement
 		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
 			if (absVelX < maxVelocityX) {
@@ -67,6 +71,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 					true
 				);
 			}
+			
+			wantsToMove = true;
 			
 			if (moving && velocitySign > 0.0f) {
 				physics.body.setLinearVelocity(0.0f, velocity.y);
@@ -80,6 +86,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 					true
 				);
 			}
+			
+			wantsToMove = true;
 			
 			if (moving && velocitySign < 0.0f) {
 				physics.body.setLinearVelocity(0.0f, velocity.y);
@@ -114,6 +122,23 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				velocitySign * maxVelocityX,
 				velocity.y
 			);
+		}
+		
+		SpineComponent spine = Mappers.spine.get(entity);
+		
+		// Flip according to speed
+		if (wantsToMove && absVelX > 0.0f) {
+			spine.skeleton.setFlipX(velocity.x < 0.0f);	
+		}
+		
+		// Update animation
+		String currentAnimation = spine.state.getCurrent(0).getAnimation().getName();
+		
+		if (wantsToMove && !currentAnimation.equals("Run")) {
+			spine.state.setAnimation(0, "Run", true);
+		}
+		else if (!wantsToMove && !currentAnimation.equals("Idle")) {
+			spine.state.setAnimation(0, "Idle", true);
 		}
 		
 		player.fixture.getShape().setRadius(0.1f);
