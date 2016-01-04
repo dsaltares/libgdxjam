@@ -206,7 +206,7 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				player.feetContacts++;
 				player.grounded = player.feetContacts > 0;
 				player.fixture.setFriction(player.groundFriction);
-				
+	
 				if (player.feetContacts == 1) {
 					logger.info("landed");
 				}
@@ -220,9 +220,9 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 				
 				if (!matches(contact, player.feetSensor)) { continue; }
 				
-				MathUtils.clamp(player.feetContacts, 0, player.feetContacts - 1);
+				player.feetContacts = Math.max(0, player.feetContacts - 1);
 				player.grounded = player.feetContacts > 0;
-				
+
 				if (!player.grounded) {
 					player.fixture.setFriction(0.0f);
 				}
