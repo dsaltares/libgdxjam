@@ -280,7 +280,7 @@ public class PlayerSystem extends IteratingSystem
 		
 		if (Math.abs(velocity.x) > player.maxVelocityX) {
 			physics.body.setLinearVelocity(
-				velocitySign * player.maxVelocityX,
+				velocitySign * player.currMaxVelX,
 				velocity.y
 			);
 		}

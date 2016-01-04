@@ -9,7 +9,7 @@ public class PlayerComponent implements Component {
 	public float groundFriction = 50.0f;
 	public float maxVelocityX = 5.0f;
 	public float maxVelocityJumpX = 5.0f;
-	public float maxVelocityCrouchX = 2.0f;
+	public float maxVelocityCrouchX = 0.4f;
 	public float horizontalImpulse = 4.0f;
 	public float verticalImpulse = 5.5f;
 	public float currMaxVelX = 0.0f;
