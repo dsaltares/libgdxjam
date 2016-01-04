@@ -198,7 +198,6 @@ public class GameScreen implements Screen, InputProcessor {
 		engine = new Engine();
 		
 		PhysicsSystem physicsSystem = new PhysicsSystem(
-			Env.getGame().getWorld(),
 			Env.getGame().getCategories()
 		);
 		CameraSystem cameraSystem = new CameraSystem(camera);

@@ -11,6 +11,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
@@ -40,8 +41,6 @@ public class LibgdxJam extends Game {
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	private Categories categories;
 	
-	private World world = new World(Env.GRAVITY, Env.DO_SLEEP);
-	
 	@Override
 	public void create () {
 		logger = new Logger(LibgdxJam.class.getName(), Env.LOG_LEVEL);
@@ -49,6 +48,8 @@ public class LibgdxJam extends Game {
 		logger.info("create");
 		
 		Env.init(this);
+		
+		Box2D.init();
 		
 		categories = new Categories();
 				
@@ -123,10 +124,6 @@ public class LibgdxJam extends Game {
 	
 	public Categories getCategories() {
 		return categories;
-	}
-	
-	public World getWorld() {
-		return world;
 	}
 	
 	@Override
