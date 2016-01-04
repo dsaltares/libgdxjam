@@ -12,9 +12,11 @@ public class PlayerComponent implements Component {
 	public float maxVelocityCrouchX = 2.0f;
 	public float horizontalImpulse = 4.0f;
 	public float verticalImpulse = 5.5f;
+	public float currMaxVelX = 0.0f;
 	public boolean jump;
 	public boolean grounded;
 	public boolean crouching;
 	public boolean exposed;
+	public boolean wantsToMove;
 	public int feetContacts = 0;
 }

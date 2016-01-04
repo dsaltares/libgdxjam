@@ -89,127 +89,11 @@ public class PlayerSystem extends IteratingSystem
 
 	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
-		PhysicsComponent physics = Mappers.physics.get(entity);
-		PlayerComponent player = Mappers.player.get(entity);
-		Vector2 position = physics.body.getPosition();
-		Vector2 velocity = physics.body.getLinearVelocity();
-		float absVelX = Math.abs(velocity.x);
-		float velocitySign = Math.signum(velocity.x);
-		boolean moving = absVelX >= 0.5f;
-		boolean wasCrouching = player.crouching;
-		
-		player.crouching = player.grounded &&
-						   Gdx.input.isKeyPressed(Keys.DOWN);
-		
-		if (!wasCrouching && player.crouching) {
-			setStance(entity, crouchStance);
-		}
-		else if (wasCrouching && !player.crouching) {
-			setStance(entity, standStance);
-		}
-		
-		float maxVelocityX = 0.0f;
-		
-		if (player.grounded) {
-			maxVelocityX = player.crouching ? player.maxVelocityCrouchX :
-											  player.maxVelocityX;
-		}
-		else {
-			maxVelocityX = player.maxVelocityJumpX;
-		}
-		
-		boolean wantsToMove = false;
-		
-		// Horizontal movement
-		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-			if (absVelX < maxVelocityX) {
-				physics.body.applyLinearImpulse(
-					-player.horizontalImpulse, 0.0f,
-					position.x, position.y,
-					true
-				);
-			}
-			
-			wantsToMove = true;
-			
-			if (moving && velocitySign > 0.0f) {
-				physics.body.setLinearVelocity(0.0f, velocity.y);
-			}
-		}
-		else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-			if (absVelX < maxVelocityX) {
-				physics.body.applyLinearImpulse(
-					player.horizontalImpulse, 0.0f,
-					position.x, position.y,
-					true
-				);
-			}
-			
-			wantsToMove = true;
-			
-			if (moving && velocitySign < 0.0f) {
-				physics.body.setLinearVelocity(0.0f, velocity.y);
-			}
-		}
-		
-		// Jumping
-		if (player.grounded && player.jump) {
-			logger.info("jumping");
-			
-			player.jump = false;
-			
-			physics.body.setLinearVelocity(velocity.x, 0.0f);
-			
-			// Lift the body so it doesn't touch the ground and get stuck
-			physics.body.setTransform(
-				position.x,
-				position.y + 0.1f,
-				physics.body.getAngle()
-			);
-			
-			physics.body.applyLinearImpulse(
-				0.0f, player.verticalImpulse,
-				position.x, position.y,
-				true
-			);
-		}
-		
-		// Clamp horizontal velocity
-		if (Math.abs(velocity.x) > maxVelocityX) {
-			physics.body.setLinearVelocity(
-				velocitySign * maxVelocityX,
-				velocity.y
-			);
-		}
-		
-		SpineComponent spine = Mappers.spine.get(entity);
-		
-		// Flip according to speed
-		if (wantsToMove && absVelX > 0.0f) {
-			spine.skeleton.setFlipX(velocity.x < 0.0f);	
-		}
-		
-		// Update animation
-		String currentAnimation = spine.state.getCurrent(0).getAnimation().getName();
-		
-		if (player.crouching) {
-			if (wantsToMove &&
-			    !currentAnimation.equals("CrouchWalk")) {
-				spine.state.setAnimation(0, "CrouchWalk", true);
-			}
-			else if (!wantsToMove &&
-					 !currentAnimation.equals("CrouchIdle")) {
-				spine.state.setAnimation(0, "CrouchIdle", true);
-			}
-		}
-		else {
-			if (wantsToMove && !currentAnimation.equals("Run")) {
-				spine.state.setAnimation(0, "Run", true);
-			}
-			else if (!wantsToMove && !currentAnimation.equals("Idle")) {
-				spine.state.setAnimation(0, "Idle", true);
-			}
-		}
+		updateStance(entity);
+		updateHorizontalMovement(entity);
+		updateJumping(entity);
+		limitVelocity(entity);
+		updateAnimation(entity);
 	}
 
 	@Override
@@ -288,6 +172,154 @@ public class PlayerSystem extends IteratingSystem
 		NodeUtils.computeWorld(entity);
 		
 		physics.body.setTransform(node.position, node.angle);
+	}
+	
+	private void updateStance(Entity entity) {
+		PlayerComponent player = Mappers.player.get(entity);
+		
+		boolean wasCrouching = player.crouching;
+		
+		player.crouching = player.grounded &&
+						   Gdx.input.isKeyPressed(Keys.DOWN);
+		
+		if (!wasCrouching && player.crouching) {
+			setStance(entity, crouchStance);
+		}
+		else if (wasCrouching && !player.crouching) {
+			setStance(entity, standStance);
+		}
+		
+		player.currMaxVelX = 0.0f;
+		
+		if (player.grounded) {
+			player.currMaxVelX = player.crouching ? player.maxVelocityCrouchX :
+											  		player.maxVelocityX;
+		}
+		else {
+			player.currMaxVelX = player.maxVelocityJumpX;
+		}
+	}
+	
+	private void updateHorizontalMovement(Entity entity) {
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		PlayerComponent player = Mappers.player.get(entity);
+		Vector2 position = physics.body.getPosition();
+		Vector2 velocity = physics.body.getLinearVelocity();
+		float absVelX = Math.abs(velocity.x);
+		float velocitySign = Math.signum(velocity.x);
+		boolean moving = absVelX >= 0.5f;
+		
+		player.wantsToMove = false;
+		
+		// Horizontal movement
+		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+			if (absVelX < player.maxVelocityX) {
+				physics.body.applyLinearImpulse(
+					-player.horizontalImpulse, 0.0f,
+					position.x, position.y,
+					true
+				);
+			}
+			
+			player.wantsToMove = true;
+			
+			if (moving && velocitySign > 0.0f) {
+				physics.body.setLinearVelocity(0.0f, velocity.y);
+			}
+		}
+		else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+			if (absVelX < player.maxVelocityX) {
+				physics.body.applyLinearImpulse(
+					player.horizontalImpulse, 0.0f,
+					position.x, position.y,
+					true
+				);
+			}
+			
+			player.wantsToMove = true;
+			
+			if (moving && velocitySign < 0.0f) {
+				physics.body.setLinearVelocity(0.0f, velocity.y);
+			}
+		}
+	}
+	
+	private void updateJumping(Entity entity) {
+		PlayerComponent player = Mappers.player.get(entity);
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		Vector2 position = physics.body.getPosition();
+		Vector2 velocity = physics.body.getLinearVelocity();
+		
+		if (player.grounded && player.jump) {
+			logger.info("jumping");
+			
+			player.jump = false;
+			
+			physics.body.setLinearVelocity(velocity.x, 0.0f);
+			
+			// Lift the body so it doesn't touch the ground and get stuck
+			physics.body.setTransform(
+				position.x,
+				position.y + 0.1f,
+				physics.body.getAngle()
+			);
+			
+			physics.body.applyLinearImpulse(
+				0.0f, player.verticalImpulse,
+				position.x, position.y,
+				true
+			);
+		}
+	}
+	
+	private void limitVelocity(Entity entity) {
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		PlayerComponent player = Mappers.player.get(entity);
+		Vector2 velocity = physics.body.getLinearVelocity();
+		float velocitySign = Math.signum(velocity.x);
+		
+		if (Math.abs(velocity.x) > player.maxVelocityX) {
+			physics.body.setLinearVelocity(
+				velocitySign * player.maxVelocityX,
+				velocity.y
+			);
+		}
+	}
+	
+	private void updateAnimation(Entity entity) {
+		SpineComponent spine = Mappers.spine.get(entity);
+		PlayerComponent player = Mappers.player.get(entity);
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		
+		Vector2 velocity = physics.body.getLinearVelocity();
+		float absVelX = Math.abs(velocity.x);
+		
+		// Flip according to speed
+		if (player.wantsToMove && absVelX > 0.0f) {
+			spine.skeleton.setFlipX(velocity.x < 0.0f);	
+		}
+		
+		// Update animation
+		String currAnim = spine.state.getCurrent(0).getAnimation().getName();
+		
+		if (player.crouching) {
+			if (player.wantsToMove &&
+			    !currAnim.equals("CrouchWalk")) {
+				spine.state.setAnimation(0, "CrouchWalk", true);
+			}
+			else if (!player.wantsToMove &&
+					 !currAnim.equals("CrouchIdle")) {
+				spine.state.setAnimation(0, "CrouchIdle", true);
+			}
+		}
+		else {
+			if (player.wantsToMove && !currAnim.equals("Run")) {
+				spine.state.setAnimation(0, "Run", true);
+			}
+			else if (!player.wantsToMove && !currAnim.equals("Idle")) {
+				spine.state.setAnimation(0, "Idle", true);
+			}
+		}
 	}
 	
 	private class PlayerLevelContactListener extends ContactAdapter {
