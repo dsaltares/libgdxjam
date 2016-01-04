@@ -4,7 +4,7 @@
 	<inherits name='com.badlogic.gdx.backends.gdx_backends_gwt' />
 	<inherits name='com.badlogic.gdx.physics.box2d.box2d-gwt' />
 	<inherits name='com.badlogic.ashley_gwt' />
-
+	<inherits name='aurelienribon.tweenengine'/>
     <inherits name='com.siondream.libgdxjam.GdxDefinition' />
     
     <collapse-all-properties />

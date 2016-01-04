@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -37,6 +38,7 @@ import com.siondream.libgdxjam.ecs.components.TransformComponent;
 public class RenderingSystem extends IteratingSystem implements Disposable {
 	private PolygonSpriteBatch batch;
 	private Viewport viewport;
+	private Rectangle cameraFocusRect;
 	private Stage stage;
 	private World world;
 	private RayHandler rayHandler;
@@ -54,6 +56,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	);
 
 	public RenderingSystem(Viewport viewport,
+						   Rectangle cameraFocusRect,
 						   Stage stage,
 						   World world,
 						   RayHandler rayHandler) {
@@ -62,6 +65,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		logger.info("initialize");
 		
 		this.viewport = viewport;
+		this.cameraFocusRect = cameraFocusRect;
 		this.stage = stage;
 		this.world = world;
 		this.rayHandler = rayHandler;
@@ -237,6 +241,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		renderGrid();
 		box2DRenderer.render(world, viewport.getCamera().combined);
+		renderCameraDebug();
 	}
 	
 	private void renderGrid() {
@@ -259,6 +264,19 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 			shapeRenderer.line(i, -height * halfArea, i, height * halfArea);
 		}
 		
+		shapeRenderer.end();
+	}
+	
+	private void renderCameraDebug() 
+	{
+		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+		shapeRenderer.setColor(Color.YELLOW);
+		shapeRenderer.begin(ShapeType.Line);
+		shapeRenderer.rect(
+				viewport.getCamera().position.x + cameraFocusRect.x, 
+				viewport.getCamera().position.y + cameraFocusRect.y, 
+				cameraFocusRect.width, 
+				cameraFocusRect.height);
 		shapeRenderer.end();
 	}
 }

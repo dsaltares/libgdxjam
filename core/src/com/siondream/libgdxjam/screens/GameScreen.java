@@ -212,6 +212,7 @@ public class GameScreen implements Screen, InputProcessor {
 		PlayerSystem playerSystem = new PlayerSystem(physicsSystem);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
+			cameraSystem.getFocusRectangle(),
 			Env.getGame().getStage(),
 			physicsSystem.getWorld(),
 			lightSystem.getRayHandler()

@@ -1,11 +1,15 @@
 package com.siondream.libgdxjam;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenManager;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -20,6 +24,7 @@ import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.PhysicsData;
 import com.siondream.libgdxjam.physics.PhysicsDataLoader;
 import com.siondream.libgdxjam.screens.Screens;
+import com.siondream.libgdxjam.tweens.CameraAccessor;
 
 public class LibgdxJam extends Game {
 	private Logger logger;
@@ -30,6 +35,7 @@ public class LibgdxJam extends Game {
 	private Viewport uiViewport;
 	
 	private AssetManager assetManager;
+	private TweenManager tweenManager;
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	private Categories categories;
@@ -60,6 +66,9 @@ public class LibgdxJam extends Game {
 			new PhysicsDataLoader(new InternalFileHandleResolver(), categories)
 		);
 		
+		tweenManager = new TweenManager();
+		Tween.registerAccessor(Camera.class, new CameraAccessor());
+		
 		uiCamera = new OrthographicCamera();
 		uiViewport = new ExtendViewport(
 			Env.MIN_UI_WIDTH,
@@ -85,6 +94,7 @@ public class LibgdxJam extends Game {
 	@Override
 	public void dispose() {
 		logger.info("dispose");
+		tweenManager.killAll();
 		getScreen().dispose();
 		stage.dispose();
 		assetManager.dispose();
@@ -95,6 +105,7 @@ public class LibgdxJam extends Game {
 		float deltaTime = Gdx.graphics.getDeltaTime();
 		
 		stage.act(deltaTime);
+		tweenManager.update(deltaTime);
 		getScreen().render(deltaTime);
 	}
 	
