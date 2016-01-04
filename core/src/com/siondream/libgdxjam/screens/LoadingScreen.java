@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.physics.PhysicsData;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
@@ -37,6 +38,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		logger.info("loading Textures");
 		loadFolder(Env.TEXTURES_FOLDER);
 		loadFolder(Env.SPINE_FOLDER);
+		loadFolder(Env.PHYSICS_FOLDER);
 	}
 	
 	private void loadFolder(String path) {
@@ -53,7 +55,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				else if (extension.equals("atlas")) {
 					assetMgr.load(file.path(), TextureAtlas.class);
 				}
-				else if (extension.equals("json") && path.equals(Env.SPINE_FOLDER)) {
+				else if (extension.equals("json") &&
+						 path.equals(Env.SPINE_FOLDER)) {
 					String atlas = file.parent().path() +
 								   "/" +
 								   file.nameWithoutExtension() +
@@ -63,6 +66,10 @@ public class LoadingScreen implements Screen, AssetErrorListener
 					parameter.atlasName = atlas;
 					parameter.scale = Env.UI_TO_WORLD;
 					assetMgr.load(file.path(), SkeletonData.class, parameter);
+				}
+				else if (extension.equals("json") &&
+						 path.equals(Env.PHYSICS_FOLDER)) {
+					assetMgr.load(file.path(), PhysicsData.class);
 				}
 				else {
 					logger.error("unknown resource type: " + file.name());

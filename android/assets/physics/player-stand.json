@@ -1,0 +1,47 @@
+{
+	"type": "dynamic",
+	"fixedRotation": "true",
+	"bullet": "true",
+	"linearDamping" : "2.5",
+	"angularDamping" : "0.0",
+	"gravityScale": "1.0",
+	"active": "true",
+	"massData": {
+		"i": "1.0",
+		"mass": "70.0"
+	},
+	"fixtures": [
+		{
+			"id": "main",
+			"density": "1.0",
+			"restitution": "0.0",
+			"friction": "50.0",
+			"shape": {
+				"type": "polygon",
+				"width": "0.25",
+				"height": "0.7",
+				"centerX": "0.0",
+				"centerY": "0.8"
+			},
+			"filter": {
+				"categoryBits": "player",
+				"maskBits":  []
+			}
+		},
+		{
+			"id": "feet",
+			"isSensor": "true",
+			"shape": {
+				"type": "polygon",
+				"width": "0.23",
+				"height": "0.1",
+				"centerX": "0.0",
+				"centerY": "0.05"
+			},
+			"filter": {
+				"categoryBits": "player",
+				"maskBits":  []
+			}
+		}
+	]
+}
