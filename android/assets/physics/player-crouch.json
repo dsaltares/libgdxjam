@@ -18,10 +18,10 @@
 			"friction": "50.0",
 			"shape": {
 				"type": "polygon",
-				"width": "0.25",
+				"width": "0.50",
 				"height": "0.35",
 				"centerX": "0.0",
-				"centerY": "0.4"
+				"centerY": "0.5"
 			},
 			"filter": {
 				"categoryBits": "player",
@@ -33,7 +33,7 @@
 			"isSensor": "true",
 			"shape": {
 				"type": "polygon",
-				"width": "0.23",
+				"width": "0.48",
 				"height": "0.1",
 				"centerX": "0.0",
 				"centerY": "0.05"

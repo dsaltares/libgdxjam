@@ -18,6 +18,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
@@ -77,7 +79,7 @@ public class PlayerSystem extends IteratingSystem
 	
 	@Override
 	public void entityAdded(Entity entity) {
-		loadStance(entity, standStance);
+		setStance(entity, standStance);
 	}
 
 	@Override
@@ -94,9 +96,27 @@ public class PlayerSystem extends IteratingSystem
 		float absVelX = Math.abs(velocity.x);
 		float velocitySign = Math.signum(velocity.x);
 		boolean moving = absVelX >= 0.5f;
+		boolean wasCrouching = player.crouching;
 		
-		float maxVelocityX = player.grounded ? player.maxVelocityX :
-											   player.maxVelocityJumpX;
+		player.crouching = player.grounded &&
+						   Gdx.input.isKeyPressed(Keys.DOWN);
+		
+		if (!wasCrouching && player.crouching) {
+			setStance(entity, crouchStance);
+		}
+		else if (wasCrouching && !player.crouching) {
+			setStance(entity, standStance);
+		}
+		
+		float maxVelocityX = 0.0f;
+		
+		if (player.grounded) {
+			maxVelocityX = player.crouching ? player.maxVelocityCrouchX :
+											  player.maxVelocityX;
+		}
+		else {
+			maxVelocityX = player.maxVelocityJumpX;
+		}
 		
 		boolean wantsToMove = false;
 		
@@ -172,11 +192,23 @@ public class PlayerSystem extends IteratingSystem
 		// Update animation
 		String currentAnimation = spine.state.getCurrent(0).getAnimation().getName();
 		
-		if (wantsToMove && !currentAnimation.equals("Run")) {
-			spine.state.setAnimation(0, "Run", true);
+		if (player.crouching) {
+			if (wantsToMove &&
+			    !currentAnimation.equals("CrouchWalk")) {
+				spine.state.setAnimation(0, "CrouchWalk", true);
+			}
+			else if (!wantsToMove &&
+					 !currentAnimation.equals("CrouchIdle")) {
+				spine.state.setAnimation(0, "CrouchIdle", true);
+			}
 		}
-		else if (!wantsToMove && !currentAnimation.equals("Idle")) {
-			spine.state.setAnimation(0, "Idle", true);
+		else {
+			if (wantsToMove && !currentAnimation.equals("Run")) {
+				spine.state.setAnimation(0, "Run", true);
+			}
+			else if (!wantsToMove && !currentAnimation.equals("Idle")) {
+				spine.state.setAnimation(0, "Idle", true);
+			}
 		}
 	}
 
@@ -232,22 +264,30 @@ public class PlayerSystem extends IteratingSystem
 		return false;
 	}
 	
-	private void loadStance(Entity entity, String stance) {
+	private void setStance(Entity entity, String stance) {
+		logger.info("set stance: " + stance);
+		
 		PhysicsComponent physics = Mappers.physics.get(entity);
 		PlayerComponent player = Mappers.player.get(entity);
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
-		PhysicsData physicsData = assetManager.get(
-			Env.PHYSICS_FOLDER + "/player-stand.json",
-			PhysicsData.class
-		);
-		
 		World world = physicsSystem.getWorld();
+		
+		if (physics.body != null) {
+			world.destroyBody(physics.body);
+		}
+		
+		PhysicsData physicsData = assetManager.get(stance, PhysicsData.class);
 		physics.body = physicsData.createBody(world, entity);
 		
 		Array<Fixture> fixtures = physics.body.getFixtureList();
 		player.fixture = fixtures.get(physicsData.getFixtureIdx("main"));
 		player.feetSensor = fixtures.get(physicsData.getFixtureIdx("feet"));
+		
+		NodeComponent node = Mappers.node.get(entity);
+		NodeUtils.computeWorld(entity);
+		
+		physics.body.setTransform(node.position, node.angle);
 	}
 	
 	private class PlayerLevelContactListener extends ContactAdapter {
