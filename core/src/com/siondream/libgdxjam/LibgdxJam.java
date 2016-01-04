@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -32,6 +33,8 @@ public class LibgdxJam extends Game {
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	private Categories categories;
+	
+	private World world = new World(Env.GRAVITY, Env.DO_SLEEP);
 	
 	@Override
 	public void create () {
@@ -109,6 +112,10 @@ public class LibgdxJam extends Game {
 	
 	public Categories getCategories() {
 		return categories;
+	}
+	
+	public World getWorld() {
+		return world;
 	}
 	
 	@Override

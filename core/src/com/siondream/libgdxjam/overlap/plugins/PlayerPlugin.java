@@ -5,10 +5,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
@@ -21,7 +23,7 @@ import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
-import com.siondream.libgdxjam.physics.Categories;
+import com.siondream.libgdxjam.physics.PhysicsData;
 
 public class PlayerPlugin implements OverlapLoaderPlugin {
 	private CameraSystem cameraSystem;
@@ -39,54 +41,24 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		SpineComponent spine = new SpineComponent();
 		SizeComponent size = new SizeComponent();
 		
-		BodyDef bDef = new BodyDef();
-		bDef.fixedRotation = true;
-		bDef.bullet = true;
-		bDef.type = BodyType.DynamicBody;
+		AssetManager assetManager = Env.getGame().getAssetManager();
+		PhysicsData physicsData = assetManager.get(
+			Env.PHYSICS_FOLDER + "/player-stand.json",
+			PhysicsData.class
+		);
 		
 		World world = physicsSystem.getWorld();
-		Categories categories = physicsSystem.getCategories();
+		physics.body = physicsData.createBody(world, entity);
 		
-		short playerCategory = categories.getBits("player");
-		
-		physics.body = world.createBody(bDef);
-		
-		PolygonShape shape = new PolygonShape();
-		Vector2 center = new Vector2();
-		
-		FixtureDef mainFDef = new FixtureDef();
-		mainFDef.shape = shape;
-		mainFDef.friction = 50f;
-		mainFDef.restitution = 0.0f;
-		center.set(0.0f, 0.8f);
-		shape.setAsBox(0.25f, 0.7f, center, 0.0f);
-		
-		player.fixture = physics.body.createFixture(mainFDef);
-		Filter filter = new Filter();
-		filter.categoryBits = playerCategory;
-		player.fixture.setFilterData(filter);
-		shape.dispose();
-		
-		shape = new PolygonShape();
-		center = new Vector2();
-		FixtureDef feetFDef = new FixtureDef();
-		feetFDef.shape = shape;
-		feetFDef.isSensor = true;
-		feetFDef.shape = shape;
-		center.set(0.0f, 0.05f);
-		shape.setAsBox(0.23f, 0.1f, center, 0.0f);
-		
-		player.feetSensor = physics.body.createFixture(feetFDef);
-		filter = new Filter();
-		filter.categoryBits = playerCategory;
-		player.feetSensor.setFilterData(filter);
-		
-		AssetManager assetManager = Env.getGame().getAssetManager();
 		SkeletonData skeletonData = assetManager.get("./spine/Player.json", SkeletonData.class);
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
 		spine.state.setAnimation(0, "Idle", true);
+		
+		Array<Fixture> fixtures = physics.body.getFixtureList();
+		player.fixture = fixtures.get(physicsData.getFixtureIdx("main"));
+		player.feetSensor = fixtures.get(physicsData.getFixtureIdx("feet"));
 		
 		size.width = 0.5f;
 		size.height = 1.4f;
