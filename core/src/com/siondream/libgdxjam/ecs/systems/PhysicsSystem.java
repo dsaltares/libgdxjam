@@ -32,7 +32,7 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	private Array<Body> pendingRemoval = new Array<Body>();
 	private World world = new World(Env.GRAVITY, Env.DO_SLEEP);
 	private CollisionHandler handler = new CollisionHandler();
-	private Categories categories = new Categories();
+	private Categories categories ;
 	private float alpha;
 	private boolean interpolate = false;
 	
@@ -41,9 +41,10 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 		Env.LOG_LEVEL
 	);
 	
-	public PhysicsSystem() {
+	public PhysicsSystem(Categories categories) {
 		logger.info("initialize");
 		
+		this.categories = categories;
 		world.setContactListener(handler);
 	}
 	

@@ -2,20 +2,19 @@ package com.siondream.libgdxjam.physics;
 
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.siondream.libgdxjam.Env;
 
 public class Categories {
-	private Logger logger;
-	private ObjectMap<String, Short> categoryBits;
-	private ObjectMap<Short, String> categoryNames;
-	private int nextCategoryBit;
+	private Logger logger = new Logger(
+		Categories.class.getSimpleName(),
+		Env.LOG_LEVEL
+	);
+	private ObjectMap<String, Short> categoryBits = new ObjectMap<String, Short>();
+	private ObjectMap<Short, String> categoryNames = new ObjectMap<Short, String>();
+	private int nextCategoryBit = 0;
 	
 	public Categories() {
-		logger = new Logger("CategoryBitsManager", Logger.INFO);
 		logger.info("initialising");
-		
-		categoryBits = new ObjectMap<String, Short>();
-		categoryNames = new ObjectMap<Short, String>();
-		nextCategoryBit = 0;
 	}
 	
 	public short getBits(String name) {

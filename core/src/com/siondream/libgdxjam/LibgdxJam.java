@@ -15,6 +15,9 @@ import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
+import com.siondream.libgdxjam.physics.Categories;
+import com.siondream.libgdxjam.physics.PhysicsData;
+import com.siondream.libgdxjam.physics.PhysicsDataLoader;
 import com.siondream.libgdxjam.screens.Screens;
 
 public class LibgdxJam extends Game {
@@ -28,6 +31,7 @@ public class LibgdxJam extends Game {
 	private AssetManager assetManager;
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
+	private Categories categories;
 	
 	@Override
 	public void create () {
@@ -36,6 +40,8 @@ public class LibgdxJam extends Game {
 		logger.info("create");
 		
 		Env.init(this);
+		
+		categories = new Categories();
 				
 		assetManager = new AssetManager();
 		assetManager.setLoader(
@@ -45,6 +51,10 @@ public class LibgdxJam extends Game {
 		assetManager.setLoader(
 			OverlapScene.class,
 			new OverlapSceneLoader(new InternalFileHandleResolver())
+		);
+		assetManager.setLoader(
+			PhysicsData.class,
+			new PhysicsDataLoader(new InternalFileHandleResolver(), categories)
 		);
 		
 		uiCamera = new OrthographicCamera();
@@ -95,6 +105,10 @@ public class LibgdxJam extends Game {
 	
 	public InputMultiplexer getMultiplexer() {
 		return inputMultiplexer;
+	}
+	
+	public Categories getCategories() {
+		return categories;
 	}
 	
 	@Override
