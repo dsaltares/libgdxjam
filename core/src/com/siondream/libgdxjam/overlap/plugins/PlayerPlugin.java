@@ -22,16 +22,12 @@ import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
-import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
-import com.siondream.libgdxjam.physics.PhysicsData;
 
 public class PlayerPlugin implements OverlapLoaderPlugin {
 	private CameraSystem cameraSystem;
-	private PhysicsSystem physicsSystem;
 	
-	public PlayerPlugin(CameraSystem cameraSystem, PhysicsSystem physicsSystem) {
+	public PlayerPlugin(CameraSystem cameraSystem) {
 		this.cameraSystem = cameraSystem;
-		this.physicsSystem = physicsSystem;
 	}
 	
 	@Override
@@ -42,23 +38,12 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		SizeComponent size = new SizeComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
-		PhysicsData physicsData = assetManager.get(
-			Env.PHYSICS_FOLDER + "/player-stand.json",
-			PhysicsData.class
-		);
-		
-		World world = physicsSystem.getWorld();
-		physics.body = physicsData.createBody(world, entity);
 		
 		SkeletonData skeletonData = assetManager.get("./spine/Player.json", SkeletonData.class);
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
 		spine.state.setAnimation(0, "Idle", true);
-		
-		Array<Fixture> fixtures = physics.body.getFixtureList();
-		player.fixture = fixtures.get(physicsData.getFixtureIdx("main"));
-		player.feetSensor = fixtures.get(physicsData.getFixtureIdx("feet"));
 		
 		size.width = 0.5f;
 		size.height = 1.4f;

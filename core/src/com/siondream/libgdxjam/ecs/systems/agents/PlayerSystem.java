@@ -1,15 +1,20 @@
 package com.siondream.libgdxjam.ecs.systems.agents;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
@@ -17,19 +22,25 @@ import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.physics.Categories;
-import com.siondream.libgdxjam.physics.CollisionHandler;
 import com.siondream.libgdxjam.physics.ContactAdapter;
+import com.siondream.libgdxjam.physics.PhysicsData;
 
-public class PlayerSystem extends IteratingSystem implements InputProcessor {
+public class PlayerSystem extends IteratingSystem
+						  implements InputProcessor,
+						  			 EntityListener {
 
+	private String standStance = Env.PHYSICS_FOLDER + "/player-stand.json";
+	private String crouchStance = Env.PHYSICS_FOLDER + "/player-crouch.json";
+	PhysicsSystem physicsSystem;
+	
 	private Logger logger = new Logger(
 			PlayerSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	
-	public PlayerSystem(CollisionHandler handler,
-						Categories categories) {
+	public PlayerSystem(PhysicsSystem physicsSystem) {
 		super(
 			Family.all(
 				PlayerComponent.class,
@@ -41,11 +52,37 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 
 		logger.info("initilize");
 		
-		handler.add(
+		this.physicsSystem = physicsSystem;
+		
+		Categories categories = physicsSystem.getCategories();
+		
+		physicsSystem.getHandler().add(
 			categories.getBits("player"),
 			categories.getBits("level"),
 			new PlayerLevelContactListener()
 		);
+	}
+	
+	@Override
+	public void addedToEngine(Engine engine) {
+		super.addedToEngine(engine);
+		engine.addEntityListener(getFamily(), 0, this);
+	}
+	
+	@Override
+	public void removedFromEngine(Engine engine) {
+		super.removedFromEngine(engine);
+		engine.removeEntityListener(this);
+	}
+	
+	@Override
+	public void entityAdded(Entity entity) {
+		loadStance(entity, standStance);
+	}
+
+	@Override
+	public void entityRemoved(Entity entity) {
+		
 	}
 
 	@Override
@@ -193,6 +230,24 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
 	@Override
 	public boolean scrolled(int amount) {
 		return false;
+	}
+	
+	private void loadStance(Entity entity, String stance) {
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		PlayerComponent player = Mappers.player.get(entity);
+		AssetManager assetManager = Env.getGame().getAssetManager();
+		
+		PhysicsData physicsData = assetManager.get(
+			Env.PHYSICS_FOLDER + "/player-stand.json",
+			PhysicsData.class
+		);
+		
+		World world = physicsSystem.getWorld();
+		physics.body = physicsData.createBody(world, entity);
+		
+		Array<Fixture> fixtures = physics.body.getFixtureList();
+		player.fixture = fixtures.get(physicsData.getFixtureIdx("main"));
+		player.feetSensor = fixtures.get(physicsData.getFixtureIdx("feet"));
 	}
 	
 	private class PlayerLevelContactListener extends ContactAdapter {

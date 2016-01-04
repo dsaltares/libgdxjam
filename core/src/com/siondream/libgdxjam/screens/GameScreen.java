@@ -74,8 +74,7 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
 		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
-			engine.getSystem(CameraSystem.class),
-			pysicsSystem
+			engine.getSystem(CameraSystem.class)
 		));
 		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
 		sceneParameters.units = Env.UI_TO_WORLD;
@@ -210,10 +209,7 @@ public class GameScreen implements Screen, InputProcessor {
 		CCTvSystem cctvSystem = new CCTvSystem(
 			physicsSystem.getWorld()
 		);
-		PlayerSystem playerSystem = new PlayerSystem(
-			physicsSystem.getHandler(),
-			physicsSystem.getCategories()
-		);
+		PlayerSystem playerSystem = new PlayerSystem(physicsSystem);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			Env.getGame().getStage(),

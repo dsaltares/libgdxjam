@@ -85,7 +85,7 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 	@Override
 	public void addedToEngine(Engine engine) {
 		super.addedToEngine(engine);
-		engine.addEntityListener(family, this);
+		engine.addEntityListener(family, Integer.MAX_VALUE, this);
 		entities = engine.getEntitiesFor(family);
 	}
 	
