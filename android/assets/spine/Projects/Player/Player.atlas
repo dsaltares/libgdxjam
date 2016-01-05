@@ -1,0 +1,97 @@
+
+Player.png
+size: 512,64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Antenna
+  rotate: true
+  xy: 165, 29
+  size: 28, 47
+  orig: 28, 47
+  offset: 0, 0
+  index: -1
+ArmL
+  rotate: true
+  xy: 302, 33
+  size: 24, 40
+  orig: 24, 40
+  offset: 0, 0
+  index: -1
+ArmR
+  rotate: true
+  xy: 344, 33
+  size: 24, 40
+  orig: 24, 40
+  offset: 0, 0
+  index: -1
+Body
+  rotate: false
+  xy: 2, 2
+  size: 52, 55
+  orig: 52, 55
+  offset: 0, 0
+  index: -1
+EarPlug
+  rotate: false
+  xy: 494, 35
+  size: 13, 22
+  orig: 13, 22
+  offset: 0, 0
+  index: -1
+FootL
+  rotate: false
+  xy: 386, 38
+  size: 39, 19
+  orig: 39, 19
+  offset: 0, 0
+  index: -1
+FootR
+  rotate: false
+  xy: 427, 38
+  size: 39, 19
+  orig: 39, 19
+  offset: 0, 0
+  index: -1
+HandL
+  rotate: false
+  xy: 468, 36
+  size: 24, 21
+  orig: 24, 21
+  offset: 0, 0
+  index: -1
+HandR
+  rotate: false
+  xy: 165, 6
+  size: 24, 21
+  orig: 24, 21
+  offset: 0, 0
+  index: -1
+Helmet
+  rotate: false
+  xy: 56, 13
+  size: 52, 44
+  orig: 52, 44
+  offset: 0, 0
+  index: -1
+LegL
+  rotate: true
+  xy: 214, 30
+  size: 27, 42
+  orig: 27, 42
+  offset: 0, 0
+  index: -1
+LegR
+  rotate: true
+  xy: 258, 30
+  size: 27, 42
+  orig: 27, 42
+  offset: 0, 0
+  index: -1
+Visor
+  rotate: false
+  xy: 110, 15
+  size: 53, 42
+  orig: 53, 42
+  offset: 0, 0
+  index: -1
