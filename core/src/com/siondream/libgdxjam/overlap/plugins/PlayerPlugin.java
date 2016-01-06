@@ -44,7 +44,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
 		spine.state.setAnimation(0, "Idle", true);
-		
+		spine.state.getData().setDefaultMix(0.1f);
 		size.width = 0.5f;
 		size.height = 1.4f;
 		

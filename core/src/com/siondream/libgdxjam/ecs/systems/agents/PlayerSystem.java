@@ -301,9 +301,7 @@ public class PlayerSystem extends IteratingSystem
 		
 		// Update animation
 		String currAnim = spine.state.getCurrent(0).getAnimation().getName();
-		
-		logger.info("grounded: " + player.grounded);
-		
+
 		if (player.crouching) {
 			if (player.wantsToMove &&
 			    !currAnim.equals("CrouchWalk")) {
