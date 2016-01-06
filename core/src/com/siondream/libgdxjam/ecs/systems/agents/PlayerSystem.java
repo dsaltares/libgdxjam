@@ -302,6 +302,8 @@ public class PlayerSystem extends IteratingSystem
 		// Update animation
 		String currAnim = spine.state.getCurrent(0).getAnimation().getName();
 		
+		logger.info("grounded: " + player.grounded);
+		
 		if (player.crouching) {
 			if (player.wantsToMove &&
 			    !currAnim.equals("CrouchWalk")) {
@@ -312,13 +314,16 @@ public class PlayerSystem extends IteratingSystem
 				spine.state.setAnimation(0, "CrouchIdle", true);
 			}
 		}
-		else {
-			if (player.wantsToMove && !currAnim.equals("Run")) {
-				spine.state.setAnimation(0, "Run", true);
+		else if (!player.grounded){
+			if (!currAnim.equals("Jump")) {
+				spine.state.setAnimation(0, "Jump", true);
 			}
-			else if (!player.wantsToMove && !currAnim.equals("Idle")) {
-				spine.state.setAnimation(0, "Idle", true);
-			}
+		}
+		else if (player.wantsToMove && !currAnim.equals("Run")) {
+			spine.state.setAnimation(0, "Run", true);
+		}
+		else if (!player.wantsToMove && !currAnim.equals("Idle")) {
+			spine.state.setAnimation(0, "Idle", true);
 		}
 	}
 	
