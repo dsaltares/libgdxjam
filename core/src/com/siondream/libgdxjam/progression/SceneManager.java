@@ -7,9 +7,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.World;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
+import com.siondream.libgdxjam.overlap.plugins.EndOfLevelPlugin;
 import com.siondream.libgdxjam.overlap.plugins.SceneConfigPlugin;
 import com.siondream.libgdxjam.overlap.plugins.PlayerPlugin;
 import com.siondream.libgdxjam.physics.Categories;
@@ -29,6 +31,8 @@ public class SceneManager
 		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
 			engine.getSystem(CameraSystem.class)
 		));
+		OverlapSceneLoader.registerPlugin("endOfLevel", new EndOfLevelPlugin(
+			engine.getSystem(PhysicsSystem.class)));
 	}
 	
 	public static OverlapScene loadScene(String sceneName, World world, Categories categories, RayHandler rayHandler)

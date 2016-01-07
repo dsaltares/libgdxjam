@@ -26,6 +26,7 @@ import com.siondream.libgdxjam.ecs.systems.NodeSystem;
 import com.siondream.libgdxjam.ecs.systems.ParticleSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
+import com.siondream.libgdxjam.ecs.systems.SensorSystem;
 import com.siondream.libgdxjam.ecs.systems.SpineSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
@@ -192,6 +193,7 @@ public class GameScreen implements Screen, InputProcessor {
 			physicsSystem.getWorld()
 		);
 		PlayerSystem playerSystem = new PlayerSystem(physicsSystem);
+		SensorSystem sensorSystem = new SensorSystem(physicsSystem);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			cameraSystem.getFocusRectangle(),
@@ -201,6 +203,7 @@ public class GameScreen implements Screen, InputProcessor {
 		);
 
 		physicsSystem.priority = 1;
+		sensorSystem.priority = 1;
 		cameraSystem.priority = 2;
 		lightSystem.priority = 3;
 		particleSystem.priority = 4;
@@ -211,6 +214,7 @@ public class GameScreen implements Screen, InputProcessor {
 		renderingSystem.priority = 9;
 		
 		engine.addSystem(physicsSystem);
+		engine.addSystem(sensorSystem);
 		engine.addSystem(cameraSystem);
 		engine.addSystem(lightSystem);
 		engine.addSystem(particleSystem);

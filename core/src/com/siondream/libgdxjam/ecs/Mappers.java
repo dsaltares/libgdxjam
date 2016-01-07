@@ -13,6 +13,7 @@ import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 
@@ -31,6 +32,7 @@ public class Mappers {
 	// Agents
 	public static ComponentMapper<CCTvComponent> cctv = ComponentMapper.getFor(CCTvComponent.class);
 	public static ComponentMapper<PlayerComponent> player = ComponentMapper.getFor(PlayerComponent.class);
+	public static ComponentMapper<SensorComponent> sensor = ComponentMapper.getFor(SensorComponent.class);
 	
 	// AI states
 	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);

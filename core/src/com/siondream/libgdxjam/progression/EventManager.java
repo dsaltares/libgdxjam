@@ -36,6 +36,7 @@ public class EventManager
 				break;
 			case YOU_HAVE_BEEN_KILLED:
 				// BLOCK INPUT
+				
 				// SHOW DEFEAT
 				System.out.println("DEFEAT");
 				// Callback -> scene.reset();
