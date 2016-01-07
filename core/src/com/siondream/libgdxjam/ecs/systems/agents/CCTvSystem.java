@@ -21,6 +21,10 @@ import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.progression.Event;
+import com.siondream.libgdxjam.progression.EventManager;
+import com.siondream.libgdxjam.progression.EventType;
+import com.siondream.libgdxjam.progression.SceneManager;
 
 public class CCTvSystem extends IteratingSystem {
 	private ImmutableArray<Entity> players;
@@ -88,6 +92,7 @@ public class CCTvSystem extends IteratingSystem {
 		}
 		else if (!wasExposed && player.exposed) {
 			logger.info("exposed");
+			EventManager.fireEvent(SceneManager.getCurrentScene(), new Event(EventType.YOU_HAVE_BEEN_KILLED, false, false));
 		}
 	}
 	

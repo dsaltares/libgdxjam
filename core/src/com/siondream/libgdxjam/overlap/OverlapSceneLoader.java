@@ -271,7 +271,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		loadSpineAnimations(scene, entity, value.get("sSpineAnimations"));
 		if(value.has("customVars"))
 		{
-			loadTypeProperties(entity, getExtraInfo(value.getString("customVars")));
+			loadTypeProperties(scene, entity, getExtraInfo(value.getString("customVars")));
 		}
 		
 		return entity;
@@ -645,14 +645,14 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(layer);
 	}
 	
-	private void loadTypeProperties(Entity entity, ObjectMap<String, String> value)
+	private void loadTypeProperties(OverlapScene scene, Entity entity, ObjectMap<String, String> value)
 	{
 		if (value == null || value.size == 0) { return; }
 		
 		if (!value.containsKey("type")) { return; }
 		
 		OverlapLoaderPlugin loader = pluginMapper.get(value.get("type"));
-		loader.load(entity, value);
+		loader.load(scene, entity, value);
 	}
 	
 	private void findSpineAnims(JsonValue value, Array<AssetDescriptor> dependencies)

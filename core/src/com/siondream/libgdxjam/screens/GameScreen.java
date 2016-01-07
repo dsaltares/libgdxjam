@@ -34,6 +34,7 @@ import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
 import com.siondream.libgdxjam.overlap.plugins.PlayerPlugin;
 import com.siondream.libgdxjam.physics.Categories;
+import com.siondream.libgdxjam.progression.SceneManager;
 
 public class GameScreen implements Screen, InputProcessor {
 	private OrthographicCamera camera;
@@ -60,39 +61,21 @@ public class GameScreen implements Screen, InputProcessor {
 		);
 		
 		setupEngine();
+		
+		SceneManager.init(engine);
 	}
 	
 	@Override
 	public void show() {
 		logger.info("show");
 		
-		AssetManager manager = Env.getGame().getAssetManager();
 		PhysicsSystem pysicsSystem = engine.getSystem(PhysicsSystem.class);
 		World world = pysicsSystem.getWorld();
 		Categories categories = pysicsSystem.getCategories();
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
-		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
-		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
-			engine.getSystem(CameraSystem.class)
-		));
-		OverlapSceneLoader.Parameters sceneParameters = new OverlapSceneLoader.Parameters();
-		sceneParameters.units = Env.UI_TO_WORLD;
-		sceneParameters.atlas = "overlap/assets/orig/pack/pack.atlas";
-		sceneParameters.spineFolder = "overlap/assets/orig/spine-animations/";
-		sceneParameters.world = world;
-		sceneParameters.categories = categories;
-		sceneParameters.rayHandler = rayHandler;
-		manager.load(
-			"overlap/scenes/MainScene.dt",
-			OverlapScene.class,
-			sceneParameters
-		);
+		SceneManager.loadScene("MainScene", world, categories, rayHandler);
 		
-		manager.finishLoading();
-		
-		scene = manager.get("overlap/scenes/MainScene.dt", OverlapScene.class);
-		scene.addToEngine(engine);
 		addInputProcessors();
 	}
 

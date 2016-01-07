@@ -3,12 +3,13 @@ package com.siondream.libgdxjam.overlap.plugins;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
+import com.siondream.libgdxjam.overlap.OverlapScene;
 
 public class CCTvLoader implements OverlapLoaderPlugin
 {
 
 	@Override
-	public void load(Entity entity, ObjectMap<String, String> map)
+	public void load(OverlapScene scene, Entity entity, ObjectMap<String, String> map)
 	{
 		CCTvComponent cctv = new CCTvComponent();
 		
