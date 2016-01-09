@@ -46,6 +46,7 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	private Entity target;
 	private final Rectangle focusRectangle;
 	private Tween tween;
+	private boolean cameraMoving;
 	
 	private Family targetFamily = Family.all(
 		PhysicsComponent.class,
@@ -119,8 +120,12 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		updateFocusRectangle();
 		calculateTargetPosition();
 		
-		if (!focusRectangle.contains(targetPosition) || isTargetMoving()) {
+		if (shouldUpdateTween()) {
 			updateTween();
+			cameraMoving = true;
+		}
+		else {
+			cameraMoving = false;
 		}
 		
 		if (tween != null) {
@@ -149,9 +154,31 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		}
 	}
 	
+	private boolean shouldUpdateTween() {
+		if (!focusRectangle.contains(targetPosition)) {
+			return true;
+		}
+		
+		if (isTargetMoving()) {
+			if (isTargetBeyondHalf() || cameraMoving) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	private boolean isTargetMoving() {
 		Vector2 targetVelocity = getTargetVelocity();
 		return Math.abs(targetVelocity.x) > TARGET_SPEED_MOVING_THRESHOLD;
+	}
+	
+	private boolean isTargetBeyondHalf() {
+		NodeUtils.getPosition(target, position);
+		int direction = Mappers.player.get(target).direction;
+		
+		return (direction > 0 && position.x > camera.position.x) ||
+			   (direction < 0 && position.x < camera.position.x);
 	}
 	
 	private int getTargetDirection() {
