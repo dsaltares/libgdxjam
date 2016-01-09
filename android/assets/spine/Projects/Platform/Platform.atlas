@@ -1,0 +1,55 @@
+
+Platform.png
+size: 512,32
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+PlatformBaseSide
+  rotate: false
+  xy: 2, 2
+  size: 177, 26
+  orig: 177, 26
+  offset: 0, 0
+  index: -1
+PlatformBottom
+  rotate: false
+  xy: 344, 16
+  size: 47, 12
+  orig: 47, 12
+  offset: 0, 0
+  index: -1
+PlatformFire
+  rotate: true
+  xy: 393, 12
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: -1
+PlatformFireR
+  rotate: true
+  xy: 412, 12
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: -1
+PlatformLower
+  rotate: false
+  xy: 181, 7
+  size: 161, 21
+  orig: 161, 21
+  offset: 0, 0
+  index: -1
+PlatformPropeller
+  rotate: true
+  xy: 431, 12
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: -1
+PlatformPropellerR
+  rotate: true
+  xy: 450, 12
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: -1
