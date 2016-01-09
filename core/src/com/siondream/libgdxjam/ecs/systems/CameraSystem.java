@@ -43,14 +43,15 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	public CameraSystem(OrthographicCamera camera) {
 		logger.info("initialize");
 		this.camera = camera;
-		focusRectangle = new Rectangle(-Env.MAX_WORLD_WIDTH * .5f + Env.MAX_WORLD_WIDTH * .25f,
-									   -Env.MAX_WORLD_HEIGHT * .5f + Env.MAX_WORLD_HEIGHT / 3,
-									   Env.MAX_WORLD_WIDTH * .5f,
-									   Env.MAX_WORLD_HEIGHT / 3);
+		focusRectangle = new Rectangle(
+			-Env.MAX_WORLD_WIDTH * .5f + Env.MAX_WORLD_WIDTH * .25f,
+			-Env.MAX_WORLD_HEIGHT * .5f + Env.MAX_WORLD_HEIGHT / 3.0f,
+			Env.MAX_WORLD_WIDTH * .5f,
+			Env.MAX_WORLD_HEIGHT / 3.0f
+		);
 	}
 	
-	public Rectangle getFocusRectangle()
-	{
+	public Rectangle getFocusRectangle() {
 		return focusRectangle;
 	}
 	
@@ -62,54 +63,60 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	@Override
 	public void update(float deltaTime) {
 		if (flyMode) {
-			velocity.set(0.0f, 0.0f);
-			
-			if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-				velocity.x = 1.0f;
-			}
-			else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-				velocity.x = -1.0f;
-			}
-			
-			if (Gdx.input.isKeyPressed(Keys.UP)) {
-				velocity.y = 1.0f;
-			}
-			else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-				velocity.y = -1.0f;
-			}
-			
-			velocity.nor();
-			velocity.scl(deltaTime);
-			velocity.scl(CAMERA_SPEED);
-			camera.position.add(velocity.x, velocity.y, 0.0f);
+			updateFlyMode(deltaTime);
 		}
-		else if (target != null){
-			NodeUtils.getPosition(target, position);
-			
-			positionWithoutOffset.set(position);
-			positionWithoutOffset.sub(camera.position.x, camera.position.y);
-			
-			if(!tweenInProgress())
-			{
-				if(!focusRectangle.contains(positionWithoutOffset))
-				{
-					float distance = position.dst(focusRectangle.x, focusRectangle.y);
-					float time = Math.max(distance / CAMERA_SPEED, CAMERA_MIN_TRANSITION_TIME);
-					activeTween = Tween.to(camera, CameraAccessor.POSITION, time)
-							.ease(TweenEquations.easeNone)
-							.target(position.x - CAMERA_FOCUS_OFFSET.x, position.y - CAMERA_FOCUS_OFFSET.y)
-							.start();
-				}
-			}
-			else
-			{
-				activeTween.update(deltaTime);
-			}
+		else {
+			updateTrackTarget(deltaTime);
 		}
 	}
 	
-	private boolean tweenInProgress()
-	{
+	private void updateFlyMode(float deltaTime) {
+		velocity.set(0.0f, 0.0f);
+		
+		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+			velocity.x = 1.0f;
+		}
+		else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+			velocity.x = -1.0f;
+		}
+		
+		if (Gdx.input.isKeyPressed(Keys.UP)) {
+			velocity.y = 1.0f;
+		}
+		else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
+			velocity.y = -1.0f;
+		}
+		
+		velocity.nor();
+		velocity.scl(deltaTime);
+		velocity.scl(CAMERA_SPEED);
+		camera.position.add(velocity.x, velocity.y, 0.0f);
+	}
+	
+	private void updateTrackTarget(float deltaTime) {
+		if (target == null) { return; }
+		
+		NodeUtils.getPosition(target, position);
+		
+		positionWithoutOffset.set(position);
+		positionWithoutOffset.sub(camera.position.x, camera.position.y);
+		
+		if(!tweenInProgress()) {
+			if(!focusRectangle.contains(positionWithoutOffset)) {
+				float distance = position.dst(focusRectangle.x, focusRectangle.y);
+				float time = Math.max(distance / CAMERA_SPEED, CAMERA_MIN_TRANSITION_TIME);
+				activeTween = Tween.to(camera, CameraAccessor.POSITION, time)
+						.ease(TweenEquations.easeNone)
+						.target(position.x - CAMERA_FOCUS_OFFSET.x, position.y - CAMERA_FOCUS_OFFSET.y)
+						.start();
+			}
+		}
+		else {
+			activeTween.update(deltaTime);
+		}
+	}
+	
+	private boolean tweenInProgress() {
 		return activeTween != null && !activeTween.isFinished();
 	}
 	
@@ -159,9 +166,9 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		
 		camera.zoom += amount * CAMERA_ZOOM_SPEED;
 		camera.zoom = MathUtils.clamp(
-						camera.zoom,
-						CAMERA_MIN_ZOOM,
-						CAMERA_MAX_ZOOM
+			camera.zoom,
+			CAMERA_MIN_ZOOM,
+			CAMERA_MAX_ZOOM
 		);
 		return true;
 	}
