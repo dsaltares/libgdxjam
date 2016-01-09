@@ -26,7 +26,8 @@ import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 
 public class CameraSystem extends EntitySystem implements InputProcessor, Disposable {
 
-	private static final float CAMERA_SPEED = 15.0f;
+	private static final float CAMERA_FLY_SPEED = 15.0f;
+	private static final float CAMERA_TRACK_SPEED = 6.0f;
 	private static final float CAMERA_MAX_ZOOM = 5.0f;
 	private static final float CAMERA_MIN_ZOOM = 0.2f;
 	private static final float CAMERA_ZOOM_SPEED = 0.2f;
@@ -110,7 +111,7 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		
 		velocity.nor();
 		velocity.scl(deltaTime);
-		velocity.scl(CAMERA_SPEED);
+		velocity.scl(CAMERA_FLY_SPEED);
 		camera.position.add(velocity.x, velocity.y, 0.0f);
 	}
 	
@@ -200,7 +201,7 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		
 		position.set(camera.position.x, camera.position.y);
 		float distance = position.dst(targetPosition);
-		float time = Math.min(0.6f, distance / CAMERA_SPEED * 1.5f);
+		float time = Math.min(0.6f, distance / CAMERA_TRACK_SPEED);
 		tween = Tween.to(camera, CameraAccessor.POSITION, time)
 					 .ease(TweenEquations.easeNone)
 					 .target(targetPosition.x, targetPosition.y)
