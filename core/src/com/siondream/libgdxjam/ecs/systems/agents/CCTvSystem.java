@@ -18,6 +18,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
@@ -130,6 +131,7 @@ public class CCTvSystem extends IteratingSystem {
 	private void moveCamera(Entity entity, float deltaTime) {
 		CCTvComponent cctv = Mappers.cctv.get(entity);
 		TransformComponent transform = Mappers.transform.get(entity);
+		PhysicsComponent physics = Mappers.physics.get(entity);
 		
 		if (!cctv.started) {
 			cctv.currentAngle = transform.angle;
@@ -158,6 +160,8 @@ public class CCTvSystem extends IteratingSystem {
 		}
 		
 		transform.angle = cctv.currentAngle;
+		
+		physics.body.setTransform(transform.position, transform.angle * MathUtils.degreesToRadians);
 	}
 	
 	private void spotPlayers(Entity entity) {

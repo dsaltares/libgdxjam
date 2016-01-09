@@ -1,0 +1,62 @@
+
+Beholder.png
+size: 256,64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Body
+  rotate: false
+  xy: 2, 2
+  size: 45, 60
+  orig: 45, 60
+  offset: 0, 0
+  index: -1
+Eye
+  rotate: false
+  xy: 49, 12
+  size: 28, 50
+  orig: 28, 50
+  offset: 0, 0
+  index: -1
+Pupil
+  rotate: true
+  xy: 164, 51
+  size: 11, 26
+  orig: 11, 26
+  offset: 0, 0
+  index: -1
+Tentacle1
+  rotate: false
+  xy: 79, 31
+  size: 24, 31
+  orig: 24, 31
+  offset: 0, 0
+  index: -1
+Tentacle2
+  rotate: false
+  xy: 105, 38
+  size: 29, 24
+  orig: 29, 24
+  offset: 0, 0
+  index: -1
+Tentacle3
+  rotate: false
+  xy: 79, 2
+  size: 24, 27
+  orig: 24, 27
+  offset: 0, 0
+  index: -1
+Tentacle4
+  rotate: true
+  xy: 105, 3
+  size: 33, 20
+  orig: 33, 20
+  offset: 0, 0
+  index: -1
+Tentacle5
+  rotate: true
+  xy: 136, 37
+  size: 25, 26
+  orig: 25, 26
+  offset: 0, 0
+  index: -1

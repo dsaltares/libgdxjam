@@ -27,7 +27,8 @@ public class SceneManager
 		ecsEngine = engine;
 		
 		OverlapSceneLoader.registerPlugin("levelConfig", new SceneConfigPlugin());
-		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader());
+		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader(
+				engine.getSystem(PhysicsSystem.class)));
 		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
 			engine.getSystem(CameraSystem.class)
 		));
