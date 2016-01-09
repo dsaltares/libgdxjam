@@ -197,21 +197,22 @@ public class GameScreen implements Screen, InputProcessor {
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			cameraSystem.getFocusRectangle(),
+			cameraSystem.getTargetPosition(),
 			Env.getGame().getStage(),
 			physicsSystem.getWorld(),
 			lightSystem.getRayHandler()
 		);
 
 		physicsSystem.priority = 1;
-		sensorSystem.priority = 1;
-		cameraSystem.priority = 2;
+		sensorSystem.priority = 2;
 		lightSystem.priority = 3;
 		particleSystem.priority = 4;
 		layerSystem.priority = 5;
 		spineSystem.priority = 6;
 		cctvSystem.priority = 7;
 		playerSystem.priority = 8;
-		renderingSystem.priority = 9;
+		cameraSystem.priority = 9;
+		renderingSystem.priority = 10;
 		
 		engine.addSystem(physicsSystem);
 		engine.addSystem(sensorSystem);

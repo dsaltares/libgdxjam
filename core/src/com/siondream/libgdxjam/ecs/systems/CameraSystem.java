@@ -5,6 +5,7 @@ import aurelienribon.tweenengine.TweenEquations;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
@@ -17,6 +18,11 @@ import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.tweens.CameraAccessor;
+import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
+import com.siondream.libgdxjam.ecs.components.TransformComponent;
+import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 
 public class CameraSystem extends EntitySystem implements InputProcessor, Disposable {
 
@@ -24,8 +30,9 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	private static final float CAMERA_MAX_ZOOM = 5.0f;
 	private static final float CAMERA_MIN_ZOOM = 0.2f;
 	private static final float CAMERA_ZOOM_SPEED = 0.2f;
-	private static final float CAMERA_MIN_TRANSITION_TIME = 0.3f;
-	private static final Vector2 CAMERA_FOCUS_OFFSET = new Vector2(1f, 0f);
+	private static final float CAMERA_LOOK_AHEAD_DISTANCE = 2.0f;
+	private static final float CAMERA_LOOK_UP_DISTANCE = 2.0f;
+	private static final float TARGET_SPEED_MOVING_THRESHOLD = 0.2f;
 	
 	private Logger logger = new Logger(
 		CameraSystem.class.getSimpleName(),
@@ -35,27 +42,40 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	private boolean flyMode;
 	private Vector2 velocity = new Vector2();
 	private Vector2 position = new Vector2();
-	private Vector2 positionWithoutOffset = new Vector2();
+	private Vector2 targetPosition = new Vector2();
 	private Entity target;
 	private final Rectangle focusRectangle;
-	private Tween activeTween;
+	private Tween tween;
+	
+	private Family targetFamily = Family.all(
+		PhysicsComponent.class,
+		PlayerComponent.class
+	).one(
+		NodeComponent.class,
+		TransformComponent.class
+	).get();
 	
 	public CameraSystem(OrthographicCamera camera) {
 		logger.info("initialize");
 		this.camera = camera;
-		focusRectangle = new Rectangle(
-			-Env.MAX_WORLD_WIDTH * .5f + Env.MAX_WORLD_WIDTH * .25f,
-			-Env.MAX_WORLD_HEIGHT * .5f + Env.MAX_WORLD_HEIGHT / 3.0f,
-			Env.MAX_WORLD_WIDTH * .5f,
-			Env.MAX_WORLD_HEIGHT / 3.0f
-		);
+		
+		focusRectangle = new Rectangle();
+		focusRectangle.width = Env.MAX_WORLD_WIDTH * 0.5f;
+		focusRectangle.height = Env.MAX_WORLD_HEIGHT * 0.4f;
 	}
 	
 	public Rectangle getFocusRectangle() {
 		return focusRectangle;
 	}
 	
+	public Vector2 getTargetPosition() {
+		return targetPosition;
+	}
+	
 	public void setTarget(Entity entity) {
+		if (!targetFamily.matches(entity)) {
+			throw new IllegalArgumentException("invalid target");
+		}
 		logger.info("setting target: " + entity);
 		target = entity;
 	}
@@ -96,28 +116,68 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 	private void updateTrackTarget(float deltaTime) {
 		if (target == null) { return; }
 		
-		NodeUtils.getPosition(target, position);
+		updateFocusRectangle();
+		calculateTargetPosition();
 		
-		positionWithoutOffset.set(position);
-		positionWithoutOffset.sub(camera.position.x, camera.position.y);
-		
-		if(!tweenInProgress()) {
-			if(!focusRectangle.contains(positionWithoutOffset)) {
-				float distance = position.dst(focusRectangle.x, focusRectangle.y);
-				float time = Math.max(distance / CAMERA_SPEED, CAMERA_MIN_TRANSITION_TIME);
-				activeTween = Tween.to(camera, CameraAccessor.POSITION, time)
-						.ease(TweenEquations.easeNone)
-						.target(position.x - CAMERA_FOCUS_OFFSET.x, position.y - CAMERA_FOCUS_OFFSET.y)
-						.start();
-			}
+		if (!focusRectangle.contains(targetPosition) || isTargetMoving()) {
+			updateTween();
 		}
-		else {
-			activeTween.update(deltaTime);
+		
+		if (tween != null) {
+			tween.update(deltaTime);
 		}
 	}
 	
-	private boolean tweenInProgress() {
-		return activeTween != null && !activeTween.isFinished();
+	private void updateFocusRectangle() {
+		focusRectangle.x = camera.position.x - focusRectangle.width * 0.5f;
+		focusRectangle.y = camera.position.y - focusRectangle.height * 0.5f;
+	}
+	
+	private void calculateTargetPosition() {
+		NodeUtils.getPosition(target, position);
+
+		if (targetPosition.isZero()) {
+			targetPosition.set(position);
+		}
+		else {
+			NodeUtils.getPosition(target, position);
+			targetPosition.set(position);
+			
+			int direction = getTargetDirection();
+			targetPosition.x += CAMERA_LOOK_AHEAD_DISTANCE * direction;
+			targetPosition.y += CAMERA_LOOK_UP_DISTANCE;
+		}
+	}
+	
+	private boolean isTargetMoving() {
+		Vector2 targetVelocity = getTargetVelocity();
+		return Math.abs(targetVelocity.x) > TARGET_SPEED_MOVING_THRESHOLD;
+	}
+	
+	private int getTargetDirection() {
+		return Mappers.player.has(target) ?
+			   Mappers.player.get(target).direction :
+			   1;
+	}
+	
+	private Vector2 getTargetVelocity() {
+		return Mappers.physics.has(target) ?
+			   Mappers.physics.get(target).body.getLinearVelocity() :
+			   Vector2.Zero;
+	}
+	
+	private void updateTween() {
+		if (tween != null) {
+			tween.free();
+		}
+		
+		position.set(camera.position.x, camera.position.y);
+		float distance = position.dst(targetPosition);
+		float time = Math.min(0.6f, distance / CAMERA_SPEED * 1.5f);
+		tween = Tween.to(camera, CameraAccessor.POSITION, time)
+					 .ease(TweenEquations.easeNone)
+					 .target(targetPosition.x, targetPosition.y)
+					 .start();
 	}
 	
 	@Override
@@ -173,9 +233,8 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		return true;
 	}
 	
-	public void dispose ()
-	{
-		if(activeTween != null)
-			activeTween.free();
+	public void dispose () {
+		if(tween != null)
+			tween.free();
 	}
 }

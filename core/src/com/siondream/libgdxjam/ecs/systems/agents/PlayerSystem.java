@@ -93,6 +93,7 @@ public class PlayerSystem extends IteratingSystem
 		updateHorizontalMovement(entity);
 		updateJumping(entity);
 		limitVelocity(entity);
+		updateDirection(entity);
 		updateAnimation(entity);
 	}
 
@@ -286,18 +287,24 @@ public class PlayerSystem extends IteratingSystem
 		}
 	}
 	
-	private void updateAnimation(Entity entity) {
-		SpineComponent spine = Mappers.spine.get(entity);
+	private void updateDirection(Entity entity) {
 		PlayerComponent player = Mappers.player.get(entity);
 		PhysicsComponent physics = Mappers.physics.get(entity);
 		
 		Vector2 velocity = physics.body.getLinearVelocity();
 		float absVelX = Math.abs(velocity.x);
 		
-		// Flip according to speed
 		if (player.wantsToMove && absVelX > 0.0f) {
-			spine.skeleton.setFlipX(velocity.x < 0.0f);	
+			player.direction = (int)Math.signum(velocity.x);
 		}
+	}
+	
+	private void updateAnimation(Entity entity) {
+		SpineComponent spine = Mappers.spine.get(entity);
+		PlayerComponent player = Mappers.player.get(entity);
+
+		// Flip according to speed
+		spine.skeleton.setFlipX(player.direction < 0);	
 		
 		// Update animation
 		String currAnim = spine.state.getCurrent(0).getAnimation().getName();

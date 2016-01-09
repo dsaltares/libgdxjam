@@ -39,6 +39,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private PolygonSpriteBatch batch;
 	private Viewport viewport;
 	private Rectangle cameraFocusRect;
+	private Vector2 cameraTarget;
 	private Stage stage;
 	private World world;
 	private RayHandler rayHandler;
@@ -57,6 +58,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 
 	public RenderingSystem(Viewport viewport,
 						   Rectangle cameraFocusRect,
+						   Vector2 cameraTarget,
 						   Stage stage,
 						   World world,
 						   RayHandler rayHandler) {
@@ -66,6 +68,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		
 		this.viewport = viewport;
 		this.cameraFocusRect = cameraFocusRect;
+		this.cameraTarget = cameraTarget;
 		this.stage = stage;
 		this.world = world;
 		this.rayHandler = rayHandler;
@@ -267,16 +270,23 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 		shapeRenderer.end();
 	}
 	
-	private void renderCameraDebug() 
-	{
+	private void renderCameraDebug()  {
 		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.setColor(Color.YELLOW);
 		shapeRenderer.begin(ShapeType.Line);
 		shapeRenderer.rect(
-				viewport.getCamera().position.x + cameraFocusRect.x, 
-				viewport.getCamera().position.y + cameraFocusRect.y, 
-				cameraFocusRect.width, 
-				cameraFocusRect.height);
+			cameraFocusRect.x,
+			cameraFocusRect.y,
+			cameraFocusRect.width, 
+			cameraFocusRect.height
+		);
+		shapeRenderer.setColor(Color.RED);
+		shapeRenderer.rect(
+			cameraTarget.x - 0.05f,
+			cameraTarget.y - 0.05f,
+			0.1f,
+			0.1f
+		);
 		shapeRenderer.end();
 	}
 }

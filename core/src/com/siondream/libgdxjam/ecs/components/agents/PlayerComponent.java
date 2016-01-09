@@ -19,4 +19,5 @@ public class PlayerComponent implements Component {
 	public boolean exposed;
 	public boolean wantsToMove;
 	public int feetContacts = 0;
+	public int direction = 1;
 }
