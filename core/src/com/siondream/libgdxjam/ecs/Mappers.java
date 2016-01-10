@@ -16,7 +16,7 @@ import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
-import com.siondream.libgdxjam.ecs.components.AnimationSelectionComponent;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 
 
 public class Mappers {
@@ -30,7 +30,7 @@ public class Mappers {
 	public static ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
 	public static ComponentMapper<LightComponent> light = ComponentMapper.getFor(LightComponent.class);
 	public static ComponentMapper<SpineComponent> spine = ComponentMapper.getFor(SpineComponent.class);
-	public static ComponentMapper<AnimationSelectionComponent> selection = ComponentMapper.getFor(AnimationSelectionComponent.class);
+	public static ComponentMapper<AnimationControlComponent> animControl = ComponentMapper.getFor(AnimationControlComponent.class);
 	
 	// Agents
 	public static ComponentMapper<CCTvComponent> cctv = ComponentMapper.getFor(CCTvComponent.class);

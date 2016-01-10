@@ -4,7 +4,7 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
-public class AnimationSelectionData {
+public class AnimationControl {
 	public final ImmutableArray<TagGroup> groups;
 	public final ImmutableArray<Layer> layers;
 	
@@ -12,7 +12,7 @@ public class AnimationSelectionData {
 	final Array<TagGroup> mutableGroups = new Array<TagGroup>();
 	final Array<Layer> mutableLayers = new Array<Layer>();
 	
-	public AnimationSelectionData() {
+	public AnimationControl() {
 		groups = new ImmutableArray<TagGroup>(mutableGroups);
 		layers = new ImmutableArray<Layer>(mutableLayers);
 	}

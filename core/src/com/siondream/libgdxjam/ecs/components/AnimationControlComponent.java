@@ -2,11 +2,11 @@ package com.siondream.libgdxjam.ecs.components;
 
 import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Bits;
-import com.siondream.libgdxjam.animation.AnimationSelectionData;
+import com.siondream.libgdxjam.animation.AnimationControl;
 import com.siondream.libgdxjam.animation.TagGroup;
 
-public class AnimationSelectionComponent implements Component {
-	public AnimationSelectionData data;
+public class AnimationControlComponent implements Component {
+	public AnimationControl data;
 	public Bits state = new Bits();
 	
 	public void set(int tag) {

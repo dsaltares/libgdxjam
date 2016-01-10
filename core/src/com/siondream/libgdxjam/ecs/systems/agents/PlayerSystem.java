@@ -20,7 +20,7 @@ import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
-import com.siondream.libgdxjam.ecs.components.AnimationSelectionComponent;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
@@ -53,7 +53,7 @@ public class PlayerSystem extends IteratingSystem
 				PlayerComponent.class,
 				PhysicsComponent.class,
 				TransformComponent.class,
-				AnimationSelectionComponent.class,
+				AnimationControlComponent.class,
 				SpineComponent.class
 			).get()
 		);
@@ -309,28 +309,28 @@ public class PlayerSystem extends IteratingSystem
 	
 	private void updateAnimation(Entity entity) {
 		SpineComponent spine = Mappers.spine.get(entity);
-		AnimationSelectionComponent selection = Mappers.selection.get(entity);
+		AnimationControlComponent animControl = Mappers.animControl.get(entity);
 		PlayerComponent player = Mappers.player.get(entity);
 
 		if (player.crouching) {
-			selection.set(playerTags.crouch);
+			animControl.set(playerTags.crouch);
 		}
 		else {
-			selection.set(playerTags.stand);
+			animControl.set(playerTags.stand);
 		}
 		
 		if (player.grounded) {
-			selection.set(playerTags.ground);
+			animControl.set(playerTags.ground);
 		}
 		else {
-			selection.set(playerTags.jump);
+			animControl.set(playerTags.jump);
 		}
 		
 		if (player.wantsToMove) {
-			selection.set(playerTags.run);
+			animControl.set(playerTags.run);
 		}
 		else {
-			selection.set(playerTags.idle);
+			animControl.set(playerTags.idle);
 		}
 		
 		// Flip according to speed

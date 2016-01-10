@@ -12,7 +12,7 @@ public class Env
 	public final static String TEXTURES_FOLDER = "./textures";
 	public final static String SPINE_FOLDER = "./spine";
 	public final static String PHYSICS_FOLDER = "./physics";
-	public final static String ANIMATION_SELECTION_FOLDER = "./anims";
+	public final static String ANIMATION_CONTROL_FOLDER = "./anims";
 	public final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
 	public final static boolean DO_SLEEP = true;
 

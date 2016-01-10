@@ -8,14 +8,14 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
 import com.siondream.libgdxjam.Env;
-import com.siondream.libgdxjam.ecs.components.AnimationSelectionComponent;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
-import com.siondream.libgdxjam.animation.AnimationSelectionData;
+import com.siondream.libgdxjam.animation.AnimationControl;
 
 public class PlayerPlugin implements OverlapLoaderPlugin {
 	private CameraSystem cameraSystem;
@@ -30,7 +30,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		PlayerComponent player = new PlayerComponent();
 		SpineComponent spine = new SpineComponent();
 		SizeComponent size = new SizeComponent();
-		AnimationSelectionComponent selection = new AnimationSelectionComponent();
+		AnimationControlComponent animControl = new AnimationControlComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
@@ -38,10 +38,9 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
-		spine.state.setAnimation(0, "Idle", true);
 		spine.state.getData().setDefaultMix(0.1f);
 		
-		selection.data = assetManager.get("./anims/player.json", AnimationSelectionData.class);
+		animControl.data = assetManager.get("./anims/player.json", AnimationControl.class);
 		
 		size.width = 0.5f;
 		size.height = 1.4f;
@@ -50,7 +49,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		entity.add(player);
 		entity.add(spine);
 		entity.add(size);
-		entity.add(selection);
+		entity.add(animControl);
 		
 		cameraSystem.setTarget(entity);
 	}

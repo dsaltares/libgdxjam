@@ -26,8 +26,8 @@ import com.siondream.libgdxjam.physics.PhysicsDataLoader;
 import com.siondream.libgdxjam.screens.Screens;
 import com.siondream.libgdxjam.tweens.CameraAccessor;
 import com.siondream.libgdxjam.animation.Tags;
-import com.siondream.libgdxjam.animation.AnimationSelectionData;
-import com.siondream.libgdxjam.animation.AnimationSelectionLoader;
+import com.siondream.libgdxjam.animation.AnimationControl;
+import com.siondream.libgdxjam.animation.AnimationControlLoader;
 
 public class LibgdxJam extends Game {
 	private Logger logger;
@@ -78,8 +78,8 @@ public class LibgdxJam extends Game {
 			)
 		);
 		assetManager.setLoader(
-			AnimationSelectionData.class,
-			new AnimationSelectionLoader(
+			AnimationControl.class,
+			new AnimationControlLoader(
 				new InternalFileHandleResolver(),
 				tags
 			)

@@ -7,45 +7,44 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Logger;
 import com.esotericsoftware.spine.Animation;
+import com.esotericsoftware.spine.AnimationState.TrackEntry;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.animation.Entry;
 import com.siondream.libgdxjam.animation.Layer;
-import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
-import com.siondream.libgdxjam.ecs.components.AnimationSelectionComponent;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 
-public class AnimationSelectionSystem extends IteratingSystem {
+public class AnimationControlSystem extends IteratingSystem {
 
 	private Bits tmp = new Bits();
-	private Tags tags;
 	Logger logger = new Logger(
-		AnimationSelectionSystem.class.getSimpleName(),
+		AnimationControlSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	
-	public AnimationSelectionSystem(Tags tags) {
+	public AnimationControlSystem() {
 		super(Family.all(
 			SpineComponent.class,
-			AnimationSelectionComponent.class).get()
+			AnimationControlComponent.class).get()
 		);
 		
 		logger.info("initialize");
-		this.tags = tags;
 	}
 
 	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
-		AnimationSelectionComponent selection = Mappers.selection.get(entity);
+		AnimationControlComponent animControl = Mappers.animControl.get(entity);
 		SpineComponent spine = Mappers.spine.get(entity);
 		
-		for (Layer layer : selection.data.layers) {
-			updateLayer(spine, selection.state, layer);
+		for (Layer layer : animControl.data.layers) {
+			updateLayer(spine, animControl.state, layer);
 		}
 	}
 	
 	private void updateLayer(SpineComponent spine, Bits state, Layer layer) {
-		Animation current = spine.state.getCurrent(layer.track).getAnimation();
+		TrackEntry track = spine.state.getCurrent(layer.track);
+		Animation current = track != null ? track.getAnimation() : null;
 		Entry entry = getBestMatch(layer.entries, state);
 		
 		if (entry != null && entry.animation != current) {

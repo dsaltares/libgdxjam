@@ -16,19 +16,19 @@ import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 
-public class AnimationSelectionLoader extends AsynchronousAssetLoader<AnimationSelectionData, AnimationSelectionLoader.Parameter>{
+public class AnimationControlLoader extends AsynchronousAssetLoader<AnimationControl, AnimationControlLoader.Parameter>{
 	private Logger logger = new Logger(
-			AnimationSelectionLoader.class.getSimpleName(),
+			AnimationControlLoader.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	
 	FileHandleResolver resolver;
 	private JsonReader reader = new JsonReader();
 	private Tags tags;
-	private AnimationSelectionData data;
+	private AnimationControl data;
 	private SkeletonData skeleton;
 	
-	public AnimationSelectionLoader(FileHandleResolver resolver, Tags tags) {
+	public AnimationControlLoader(FileHandleResolver resolver, Tags tags) {
 		super(resolver);
 		
 		logger.info("initialize");
@@ -36,19 +36,19 @@ public class AnimationSelectionLoader extends AsynchronousAssetLoader<AnimationS
 		this.tags = tags;
 	}
 
-	static public class Parameter extends AssetLoaderParameters<AnimationSelectionData> {
+	static public class Parameter extends AssetLoaderParameters<AnimationControl> {
 		
 	}
 
 	@Override
 	public void loadAsync(AssetManager manager, String fileName,
 			FileHandle file, Parameter parameter) {
-		data = new AnimationSelectionData();
+		data = new AnimationControl();
 		loadData(manager, fileName, file, parameter);
 	}
 
 	@Override
-	public AnimationSelectionData loadSync(AssetManager manager,
+	public AnimationControl loadSync(AssetManager manager,
 			String fileName, FileHandle file, Parameter parameter) {
 		return data;
 	}

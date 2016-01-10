@@ -13,7 +13,7 @@ import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.physics.PhysicsData;
-import com.siondream.libgdxjam.animation.AnimationSelectionData;
+import com.siondream.libgdxjam.animation.AnimationControl;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
@@ -38,7 +38,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		loadFolder(Env.TEXTURES_FOLDER);
 		loadFolder(Env.SPINE_FOLDER);
 		loadFolder(Env.PHYSICS_FOLDER);
-		loadFolder(Env.ANIMATION_SELECTION_FOLDER);
+		loadFolder(Env.ANIMATION_CONTROL_FOLDER);
 	}
 	
 	private void loadFolder(String path) {
@@ -72,8 +72,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 					assetMgr.load(file.path(), PhysicsData.class);
 				}
 				else if (extension.equals("json") &&
-						 path.equals(Env.ANIMATION_SELECTION_FOLDER)) {
-					assetMgr.load(file.path(), AnimationSelectionData.class);
+						 path.equals(Env.ANIMATION_CONTROL_FOLDER)) {
+					assetMgr.load(file.path(), AnimationControl.class);
 				}
 				else {
 					logger.error("unknown resource type: " + file.name());
