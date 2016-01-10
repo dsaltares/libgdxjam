@@ -60,11 +60,11 @@ public class AnimationControlSystem extends IteratingSystem implements EntityLis
 
 	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
-		AnimationControlComponent animControl = Mappers.animControl.get(entity);
+		AnimationControlComponent control = Mappers.animControl.get(entity);
 		SpineComponent spine = Mappers.spine.get(entity);
 		
-		for (Layer layer : animControl.data.layers) {
-			updateLayer(spine, animControl.state, layer);
+		for (Layer layer : control.data.layers) {
+			updateLayer(spine, control, layer);
 		}
 	}
 	
@@ -89,15 +89,7 @@ public class AnimationControlSystem extends IteratingSystem implements EntityLis
 		int maxScore = Integer.MIN_VALUE;
 		
 		for (Entry entry : entries) {
-			if (!state.containsAll(entry.tags)) {
-				continue;
-			}
-			
-			tmp.clear();
-			tmp.or(state);
-			tmp.and(entry.tags);
-			
-			int score = getScore(tmp);
+			int score = getScore(state, entry.tags);
 			if (score > maxScore) {
 				maxScore = score;
 				best = entry;
@@ -107,11 +99,19 @@ public class AnimationControlSystem extends IteratingSystem implements EntityLis
 		return best;
 	}
 	
-	private int getScore(Bits bits) {
+	private int getScore(Bits state, Bits tags) {
+		if (!state.containsAll(tags)) {
+			return Integer.MIN_VALUE;
+		}
+		
+		tmp.clear();
+		tmp.or(state);
+		tmp.and(tags);
+		
 		int score = 0;
 		int index = 0;
 		
-		while ((index = bits.nextSetBit(index)) > -1) {
+		while ((index = tmp.nextSetBit(index)) > -1) {
 			score++;
 			index++;
 		}
