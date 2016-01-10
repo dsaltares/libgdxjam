@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonValue.JsonIterator;
 import com.badlogic.gdx.utils.Logger;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.Env;
 import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.SkeletonData;
@@ -88,6 +89,7 @@ public class AnimationControlLoader extends AsynchronousAssetLoader<AnimationCon
 		
 		loadTagGroups(root.get("tags"));
 		loadLayers(root.get("layers"));
+		loadTransitions(root.get("transitions"));
 	}
 	
 	private void loadTagGroups(JsonValue value) {
@@ -156,5 +158,42 @@ public class AnimationControlLoader extends AsynchronousAssetLoader<AnimationCon
 			loadTags(value.get("tags")),
 			value.getBoolean("loop")
 		);
+	}
+	
+	private void loadTransitions(JsonValue value) {
+		data.defaultDuration = value.getFloat("defaultDuration");
+		
+		if (!value.has("list")) { return; }
+		
+		JsonIterator iterator = value.get("list").iterator();
+		
+		while (iterator.hasNext()) {
+			loadTransition(iterator.next());
+		}
+	}
+	
+	private void loadTransition(JsonValue value) {
+		String fromName = value.getString("from");
+		String toName = value.getString("to");
+		Animation from = skeleton.findAnimation(fromName);
+		Animation to = skeleton.findAnimation(toName);
+		
+		if (from == null) {
+			logger.error("from animation not found: " + fromName);
+			return;
+		}
+		
+		if (to == null) {
+			logger.error("to animation not found: " + to);
+			return;
+		}
+		
+		float duration = value.getFloat("duration");
+		
+		if (!data.transitions.containsKey(from)) {
+			data.transitions.put(from, new ObjectMap<Animation, Float>());
+		}
+		
+		data.transitions.get(from).put(to, duration);
 	}
 }

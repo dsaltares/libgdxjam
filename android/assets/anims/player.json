@@ -33,5 +33,30 @@
                 "loop": true,
             },
         ]
+    },
+    "transitions": {
+        "defaultDuration": 0.1,
+        "list": [
+            {
+                "from": "Idle",
+                "to": "CrouchIdle",
+                "duration": 0.18
+            },
+            {
+                "from": "Run",
+                "to": "CrouchWalk",
+                "duration": 0.12
+            },
+            {
+                "from": "CrouchIdle",
+                "to": "Idle",
+                "duration": 0.2
+            },
+            {
+                "from": "CrouchWalk",
+                "to": "Run",
+                "duration": 0.18
+            }
+        ]
     }
 }
