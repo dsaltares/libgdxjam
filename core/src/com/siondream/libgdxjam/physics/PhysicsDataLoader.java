@@ -45,6 +45,8 @@ public class PhysicsDataLoader extends AsynchronousAssetLoader<PhysicsData, Phys
 	
 	public PhysicsDataLoader(FileHandleResolver resolver, Categories categories) {
 		super(resolver);
+		
+		logger.info("initialize");
 		this.categories = categories;
 	}
 
@@ -77,7 +79,7 @@ public class PhysicsDataLoader extends AsynchronousAssetLoader<PhysicsData, Phys
 			loadFixtureDefs(root);
 			
 		} catch (Exception e) {
-			logger.error("error loading " + fileName + " " + e.getMessage());
+			logger.error("error loading " + fileName + "\n" + e.getStackTrace());
 		}
 	}
 	

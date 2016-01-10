@@ -4,17 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
-import com.badlogic.gdx.assets.AssetLoaderParameters;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Logger;
-import com.badlogic.gdx.utils.ObjectMap;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.physics.PhysicsData;
+import com.siondream.libgdxjam.animation.AnimationSelectionData;
 
 public class LoadingScreen implements Screen, AssetErrorListener
 {
@@ -29,7 +28,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		logger.info("initialize");
 		
 		assetMgr = Env.getGame().getAssetManager();
-		assetMgr.setErrorListener(this);
+		//assetMgr.setErrorListener(this);
 				
 		loadAllAssets();
 	}
@@ -39,6 +38,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		loadFolder(Env.TEXTURES_FOLDER);
 		loadFolder(Env.SPINE_FOLDER);
 		loadFolder(Env.PHYSICS_FOLDER);
+		loadFolder(Env.ANIMATION_SELECTION_FOLDER);
 	}
 	
 	private void loadFolder(String path) {
@@ -70,6 +70,10 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				else if (extension.equals("json") &&
 						 path.equals(Env.PHYSICS_FOLDER)) {
 					assetMgr.load(file.path(), PhysicsData.class);
+				}
+				else if (extension.equals("json") &&
+						 path.equals(Env.ANIMATION_SELECTION_FOLDER)) {
+					assetMgr.load(file.path(), AnimationSelectionData.class);
 				}
 				else {
 					logger.error("unknown resource type: " + file.name());

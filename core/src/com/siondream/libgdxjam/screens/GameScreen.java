@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.systems.AnimationSelectionSystem;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
 import com.siondream.libgdxjam.ecs.systems.LayerSystem;
 import com.siondream.libgdxjam.ecs.systems.LightSystem;
@@ -192,8 +193,14 @@ public class GameScreen implements Screen, InputProcessor {
 		CCTvSystem cctvSystem = new CCTvSystem(
 			physicsSystem.getWorld()
 		);
-		PlayerSystem playerSystem = new PlayerSystem(physicsSystem);
+		PlayerSystem playerSystem = new PlayerSystem(
+			physicsSystem,
+			Env.getGame().getTags()
+		);
 		SensorSystem sensorSystem = new SensorSystem(physicsSystem);
+		AnimationSelectionSystem animationSelectionSystem = new AnimationSelectionSystem(
+			Env.getGame().getTags()
+		);
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
 			cameraSystem.getFocusRectangle(),
@@ -212,7 +219,8 @@ public class GameScreen implements Screen, InputProcessor {
 		cctvSystem.priority = 7;
 		playerSystem.priority = 8;
 		cameraSystem.priority = 9;
-		renderingSystem.priority = 10;
+		animationSelectionSystem.priority = 10;
+		renderingSystem.priority = 11;
 		
 		engine.addSystem(physicsSystem);
 		engine.addSystem(sensorSystem);
@@ -223,6 +231,7 @@ public class GameScreen implements Screen, InputProcessor {
 		engine.addSystem(spineSystem);
 		engine.addSystem(renderingSystem);
 		engine.addSystem(cctvSystem);
+		engine.addSystem(animationSelectionSystem);
 		engine.addSystem(playerSystem);
 		
 		engine.addEntityListener(

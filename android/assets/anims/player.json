@@ -1,0 +1,37 @@
+{
+    "spine": "./spine/Player.json",
+    "tags": {
+        "vertical": [ "ground", "jump" ],
+        "stance": [ "stand", "crouch" ],
+        "movement": [ "idle", "run" ]
+    },
+    "layers": {
+        "fullBody": [
+            {
+                "tags": [ "ground", "stand", "idle" ],
+                "name": "Idle",
+                "loop": true,
+            },
+            {
+                "tags": [ "ground", "stand", "run" ],
+                "name": "Run",
+                "loop": true,
+            },
+            {
+                "tags": [ "ground", "crouch", "idle" ],
+                "name": "CrouchIdle",
+                "loop": true,
+            },
+            {
+                "tags": [ "ground", "crouch", "run" ],
+                "name": "CrouchWalk",
+                "loop": true,
+            },
+            {
+                "tags": [ "jump" ],
+                "name": "Jump",
+                "loop": true,
+            },
+        ]
+    }
+}

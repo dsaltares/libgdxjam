@@ -15,19 +15,22 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.AnimationSelectionComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
-import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.ContactAdapter;
 import com.siondream.libgdxjam.physics.PhysicsData;
+import com.siondream.libgdxjam.animation.Tags;
 
 public class PlayerSystem extends IteratingSystem
 						  implements InputProcessor,
@@ -36,18 +39,21 @@ public class PlayerSystem extends IteratingSystem
 	private String standStance = Env.PHYSICS_FOLDER + "/player-stand.json";
 	private String crouchStance = Env.PHYSICS_FOLDER + "/player-crouch.json";
 	PhysicsSystem physicsSystem;
+	Tags tags;
+	PlayerTags playerTags;
 	
 	private Logger logger = new Logger(
 			PlayerSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	
-	public PlayerSystem(PhysicsSystem physicsSystem) {
+	public PlayerSystem(PhysicsSystem physicsSystem, Tags tags) {
 		super(
 			Family.all(
 				PlayerComponent.class,
 				PhysicsComponent.class,
 				TransformComponent.class,
+				AnimationSelectionComponent.class,
 				SpineComponent.class
 			).get()
 		);
@@ -55,8 +61,10 @@ public class PlayerSystem extends IteratingSystem
 		logger.info("initilize");
 		
 		this.physicsSystem = physicsSystem;
+		this.tags = tags;
 		
 		Categories categories = physicsSystem.getCategories();
+		playerTags = new PlayerTags();
 		
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
@@ -301,35 +309,32 @@ public class PlayerSystem extends IteratingSystem
 	
 	private void updateAnimation(Entity entity) {
 		SpineComponent spine = Mappers.spine.get(entity);
+		AnimationSelectionComponent selection = Mappers.selection.get(entity);
 		PlayerComponent player = Mappers.player.get(entity);
 
+		if (player.crouching) {
+			selection.set(playerTags.crouch);
+		}
+		else {
+			selection.set(playerTags.stand);
+		}
+		
+		if (player.grounded) {
+			selection.set(playerTags.ground);
+		}
+		else {
+			selection.set(playerTags.jump);
+		}
+		
+		if (player.wantsToMove) {
+			selection.set(playerTags.run);
+		}
+		else {
+			selection.set(playerTags.idle);
+		}
+		
 		// Flip according to speed
 		spine.skeleton.setFlipX(player.direction < 0);	
-		
-		// Update animation
-		String currAnim = spine.state.getCurrent(0).getAnimation().getName();
-
-		if (player.crouching) {
-			if (player.wantsToMove &&
-			    !currAnim.equals("CrouchWalk")) {
-				spine.state.setAnimation(0, "CrouchWalk", true);
-			}
-			else if (!player.wantsToMove &&
-					 !currAnim.equals("CrouchIdle")) {
-				spine.state.setAnimation(0, "CrouchIdle", true);
-			}
-		}
-		else if (!player.grounded){
-			if (!currAnim.equals("Jump")) {
-				spine.state.setAnimation(0, "Jump", true);
-			}
-		}
-		else if (player.wantsToMove && !currAnim.equals("Run")) {
-			spine.state.setAnimation(0, "Run", true);
-		}
-		else if (!player.wantsToMove && !currAnim.equals("Idle")) {
-			spine.state.setAnimation(0, "Idle", true);
-		}
 	}
 	
 	private class PlayerLevelContactListener extends ContactAdapter {
@@ -378,5 +383,14 @@ public class PlayerSystem extends IteratingSystem
 				}
 			}
 		}
+	}
+	
+	private class PlayerTags {
+		int ground = tags.get("ground");
+		int jump = tags.get("jump");
+		int stand = tags.get("stand");
+		int crouch = tags.get("crouch");
+		int idle = tags.get("idle");
+		int run = tags.get("run");
 	}
 }

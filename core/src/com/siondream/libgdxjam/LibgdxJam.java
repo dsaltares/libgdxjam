@@ -25,6 +25,9 @@ import com.siondream.libgdxjam.physics.PhysicsData;
 import com.siondream.libgdxjam.physics.PhysicsDataLoader;
 import com.siondream.libgdxjam.screens.Screens;
 import com.siondream.libgdxjam.tweens.CameraAccessor;
+import com.siondream.libgdxjam.animation.Tags;
+import com.siondream.libgdxjam.animation.AnimationSelectionData;
+import com.siondream.libgdxjam.animation.AnimationSelectionLoader;
 
 public class LibgdxJam extends Game {
 	private Logger logger;
@@ -39,6 +42,7 @@ public class LibgdxJam extends Game {
 	
 	private InputMultiplexer inputMultiplexer = new InputMultiplexer();
 	private Categories categories;
+	private Tags tags;
 	
 	@Override
 	public void create () {
@@ -51,19 +55,34 @@ public class LibgdxJam extends Game {
 		Box2D.init();
 		
 		categories = new Categories();
+		tags = new Tags();
 				
 		assetManager = new AssetManager();
 		assetManager.setLoader(
 				SkeletonData.class,
-				new SkeletonDataLoader(new InternalFileHandleResolver())
+				new SkeletonDataLoader(
+					new InternalFileHandleResolver()
+				)
 			);
 		assetManager.setLoader(
 			OverlapScene.class,
-			new OverlapSceneLoader(new InternalFileHandleResolver())
+			new OverlapSceneLoader(
+				new InternalFileHandleResolver()
+			)
 		);
 		assetManager.setLoader(
 			PhysicsData.class,
-			new PhysicsDataLoader(new InternalFileHandleResolver(), categories)
+			new PhysicsDataLoader(
+				new InternalFileHandleResolver(),
+				categories
+			)
+		);
+		assetManager.setLoader(
+			AnimationSelectionData.class,
+			new AnimationSelectionLoader(
+				new InternalFileHandleResolver(),
+				tags
+			)
 		);
 		
 		tweenManager = new TweenManager();
@@ -125,12 +144,14 @@ public class LibgdxJam extends Game {
 		return categories;
 	}
 	
+	public Tags getTags() {
+		return tags;
+	}
+	
 	@Override
 	public void setScreen (Screen screen) {
 		logger.info("setting screen: " + screen);
 		super.setScreen( screen );
 		stage.clear();
 	}
-	
-	
 }
