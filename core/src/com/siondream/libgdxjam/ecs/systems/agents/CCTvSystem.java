@@ -14,8 +14,10 @@ import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
@@ -28,21 +30,31 @@ import com.siondream.libgdxjam.progression.EventType;
 import com.siondream.libgdxjam.progression.SceneManager;
 
 public class CCTvSystem extends IteratingSystem {
+	private static final float DETECTION_TIME = 1.0f;
+	
 	private ImmutableArray<Entity> players;
 	private Vector2 position = new Vector2();
 	private Vector2 lightToPlayer = new Vector2();
 	private World world;
+	private Tags tags;
+	private CCTVTags cctvTags;
 	private Logger logger = new Logger(
 		CCTvSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	private CCTVCallback callback = new CCTVCallback();
 	
-	public CCTvSystem(World world) {
-		super(Family.all(CCTvComponent.class, TransformComponent.class).get());
+	public CCTvSystem(World world, Tags tags) {
+		super(Family.all(
+			CCTvComponent.class,
+			TransformComponent.class,
+			AnimationControlComponent.class
+		).get());
 		
 		logger.info("initialize");
 		this.world = world;
+		this.tags = tags;
+		this.cctvTags = new CCTVTags();
 	}
 	
 	@Override
@@ -52,61 +64,51 @@ public class CCTvSystem extends IteratingSystem {
 	}
 	
 	@Override
-	public void removedFromEngine(Engine engine) {
-		super.removedFromEngine(engine);
-	}
-	
-	@Override
-	public void update(float deltaTime) {
-		super.update(deltaTime);
-		
-		updateDetection();
-	}
-	
-	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
+		updateDetection(entity, deltaTime);
 		moveCamera(entity, deltaTime);
+		updateAnimation(entity);
 	}
 	
-	private void updateDetection() {
-		for (Entity target : players) {
-			updateDetection(target);
-		}
-	}
-	
-	private void updateDetection(Entity target) {
-		PlayerComponent player = Mappers.player.get(target);
-		NodeUtils.getPosition(target, position);
-		boolean wasExposed = player.exposed;
-		player.exposed = false;
+	private void updateDetection(Entity entity, float deltaTime) {
+		CCTvComponent cctv = Mappers.cctv.get(entity);
 		
-		for (Entity entity : getEntities()) {
-			player.exposed = updateDetection(target, entity);
+		cctv.alerted = false;
+		
+		for (Entity target : players) {
+			updateDetection(entity, target);
 			
-			if (player.exposed) {
+			if (cctv.alerted) {
 				break;
 			}
 		}
 		
-		if (wasExposed && !player.exposed){
-			logger.info("no longer exposed");
-		}
-		else if (!wasExposed && player.exposed) {
+		cctv.detectionTime = cctv.alerted ? cctv.detectionTime + deltaTime : 0.0f;
+		
+		if (cctv.detectionTime > DETECTION_TIME) {
 			logger.info("exposed");
-			EventManager.fireEvent(SceneManager.getCurrentScene(), new Event(EventType.YOU_HAVE_BEEN_KILLED, false, false));
+			EventManager.fireEvent(
+				SceneManager.getCurrentScene(),
+				new Event(EventType.YOU_HAVE_BEEN_KILLED, false, false)
+			);
 		}
 	}
 	
-	private boolean updateDetection(Entity target, Entity entity) {
+	private void updateDetection(Entity entity, Entity target) {
+		Vector2 targetPos = Mappers.physics.get(target).body.getPosition();
 		NodeComponent node = Mappers.node.get(entity);
 		LightComponent light = findLight(entity);
+		CCTvComponent cctv = Mappers.cctv.get(entity);
 		
-		if (light == null || !(light.light instanceof ConeLight)) { return false; }
+		cctv.alerted = false;
+		cctv.targetPosition.set(0.0f, 0.0f);
+		
+		if (light == null || !(light.light instanceof ConeLight)) { return; }
 		
 		ConeLight coneLight = (ConeLight)light.light;
 		Vector2 lightPosition = coneLight.getPosition();
 		
-		lightToPlayer.set(position);
+		lightToPlayer.set(targetPos);
 		lightToPlayer.sub(lightPosition);
 		
 		float lightToPlayerDistance = lightToPlayer.len();
@@ -120,37 +122,56 @@ public class CCTvSystem extends IteratingSystem {
 		
 		if (inCone) {
 			callback.prepare(target);	
-			world.rayCast(callback, lightPosition, position);
+			logger.error("raycast");
+			world.rayCast(callback, lightPosition, targetPos);
 			
-			return callback.exposed;
+			if (callback.exposed) {
+				cctv.alerted = true;
+				cctv.targetPosition.set(targetPos);
+			}
 		}
-		
-		return false;
 	}
 	
 	private void moveCamera(Entity entity, float deltaTime) {
 		CCTvComponent cctv = Mappers.cctv.get(entity);
 		TransformComponent transform = Mappers.transform.get(entity);
-		PhysicsComponent physics = Mappers.physics.get(entity);
 		
-		if (!cctv.started) {
+		if (cctv.alerted) {
+			trackTarget(cctv, transform);
+		}
+		else {
+			movePatrol(cctv, transform, deltaTime);
+		}
+		
+		limitAngle(cctv);
+	}
+	
+	private void trackTarget(CCTvComponent cctv, TransformComponent transform) {
+		position.set(cctv.targetPosition);
+		position.sub(transform.position);
+		position.nor();
+		float angle = position.angle();
+		cctv.currentAngle = angle;
+		cctv.patrolStarted = false;
+		transform.angle = angle;
+	}
+	
+	private void movePatrol(CCTvComponent cctv,
+							TransformComponent transform,
+							float deltaTime) {
+		if (!cctv.patrolStarted) {
 			cctv.currentAngle = transform.angle;
-			cctv.started = true;
+			cctv.patrolStarted = true;
 		}
 		
 		if(cctv.waitTime == 0) {
 			cctv.currentAngle += cctv.angularVelocity * cctv.direction.value() * deltaTime;
-			cctv.currentAngle = MathUtils.clamp(
-				cctv.currentAngle, 
-				cctv.minAngle, 
-				cctv.maxAngle
-			);
 			
-			if(cctv.currentAngle == cctv.minAngle) {
+			if(cctv.currentAngle <= cctv.minAngle) {
 				cctv.waitTime = cctv.waitTimeMinAngle;
 				cctv.direction = cctv.direction.invert();
 			}
-			else if(cctv.currentAngle == cctv.maxAngle) {
+			else if(cctv.currentAngle >= cctv.maxAngle) {
 				cctv.waitTime = cctv.waitTimeMaxAngle;
 				cctv.direction = cctv.direction.invert();
 			}
@@ -158,14 +179,16 @@ public class CCTvSystem extends IteratingSystem {
 		else {
 			cctv.waitTime = Math.max(cctv.waitTime - deltaTime, 0.0f);
 		}
-		
+
 		transform.angle = cctv.currentAngle;
-		
-		physics.body.setTransform(transform.position, transform.angle * MathUtils.degreesToRadians);
 	}
 	
-	private void spotPlayers(Entity entity) {
-
+	private void limitAngle(CCTvComponent cctv) {
+		cctv.currentAngle = MathUtils.clamp(
+			cctv.currentAngle, 
+			cctv.minAngle, 
+			cctv.maxAngle
+		);
 	}
 	
 	private LightComponent findLight(Entity entity) {
@@ -183,6 +206,18 @@ public class CCTvSystem extends IteratingSystem {
 		}
 	}
 	
+	private void updateAnimation(Entity entity) {
+		AnimationControlComponent control = Mappers.animControl.get(entity);
+		CCTvComponent cctv = Mappers.cctv.get(entity);
+		
+		if (cctv.alerted) {
+			control.set(cctvTags.alert);
+		}
+		else {
+			control.set(cctvTags.patrol);
+		}
+	}
+	
 	private class CCTVCallback implements RayCastCallback {
 		public Entity target;
 		public boolean exposed;
@@ -194,6 +229,7 @@ public class CCTvSystem extends IteratingSystem {
 		
 		@Override
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+			logger.error("done");
 			PlayerComponent player = Mappers.player.get(target);
 			
 			if (fixture == player.fixture) {
@@ -201,5 +237,10 @@ public class CCTvSystem extends IteratingSystem {
 			}
 			return 0;
 		}	
+	}
+	
+	private class CCTVTags {
+		final int patrol = tags.get("patrol");
+		final int alert = tags.get("alert");
 	}
 }

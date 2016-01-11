@@ -191,7 +191,8 @@ public class GameScreen implements Screen, InputProcessor {
 		PatrolSystem patrolSystem = new PatrolSystem();
 		GruntSystem gruntSystem = new GruntSystem( physicsSystem.getWorld() );
 		CCTvSystem cctvSystem = new CCTvSystem(
-			physicsSystem.getWorld()
+			physicsSystem.getWorld(),
+			Env.getGame().getTags()
 		);
 		PlayerSystem playerSystem = new PlayerSystem(
 			physicsSystem,
