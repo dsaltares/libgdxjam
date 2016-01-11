@@ -1,0 +1,104 @@
+
+Grunt.png
+size: 512,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+GruntAntenna
+  rotate: true
+  xy: 138, 2
+  size: 15, 27
+  orig: 15, 27
+  offset: 0, 0
+  index: -1
+GruntAntenna2
+  rotate: false
+  xy: 167, 2
+  size: 27, 15
+  orig: 27, 15
+  offset: 0, 0
+  index: -1
+GruntArm
+  rotate: true
+  xy: 311, 37
+  size: 88, 123
+  orig: 88, 123
+  offset: 0, 0
+  index: -1
+GruntArm2
+  rotate: false
+  xy: 210, 43
+  size: 45, 25
+  orig: 45, 25
+  offset: 0, 0
+  index: -1
+GruntBody
+  rotate: true
+  xy: 2, 7
+  size: 118, 134
+  orig: 118, 134
+  offset: 0, 0
+  index: -1
+GruntEyeBack
+  rotate: true
+  xy: 303, 6
+  size: 29, 30
+  orig: 29, 30
+  offset: 0, 0
+  index: -1
+GruntFace
+  rotate: true
+  xy: 436, 45
+  size: 80, 73
+  orig: 80, 73
+  offset: 0, 0
+  index: -1
+GruntFoot
+  rotate: false
+  xy: 257, 49
+  size: 47, 19
+  orig: 47, 19
+  offset: 0, 0
+  index: -1
+GruntFoot2
+  rotate: false
+  xy: 210, 21
+  size: 45, 20
+  orig: 45, 20
+  offset: 0, 0
+  index: -1
+GruntGun2
+  rotate: false
+  xy: 138, 70
+  size: 171, 55
+  orig: 171, 55
+  offset: 0, 0
+  index: -1
+GruntJaw
+  rotate: false
+  xy: 138, 19
+  size: 70, 49
+  orig: 70, 49
+  offset: 0, 0
+  index: -1
+GruntLeg
+  rotate: false
+  xy: 436, 15
+  size: 38, 28
+  orig: 38, 28
+  offset: 0, 0
+  index: -1
+GruntLeg2
+  rotate: false
+  xy: 476, 11
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+GruntTeeth
+  rotate: false
+  xy: 257, 26
+  size: 44, 21
+  orig: 44, 21
+  offset: 0, 0
+  index: -1

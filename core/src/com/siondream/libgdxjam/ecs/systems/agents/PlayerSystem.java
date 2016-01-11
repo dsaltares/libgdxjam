@@ -15,22 +15,21 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Bits;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
+import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
-import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.ContactAdapter;
 import com.siondream.libgdxjam.physics.PhysicsData;
-import com.siondream.libgdxjam.animation.Tags;
 
 public class PlayerSystem extends IteratingSystem
 						  implements InputProcessor,

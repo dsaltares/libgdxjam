@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.siondream.libgdxjam.ecs.components.ai.StateComponent;
 
 public abstract class StateSystem extends IteratingSystem implements EntityListener
 {
@@ -29,7 +30,10 @@ public abstract class StateSystem extends IteratingSystem implements EntityListe
 	}
 	
 	@Override
-	public abstract void entityAdded(Entity entity); // On enter action
+	public void entityAdded(Entity entity) // On enter action
+	{
+		entity.remove(StateComponent.class);
+	}
 	
 	@Override
 	protected abstract void processEntity(Entity entity, float deltaTime); // State logic

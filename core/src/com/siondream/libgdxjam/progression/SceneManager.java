@@ -12,8 +12,9 @@ import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
 import com.siondream.libgdxjam.overlap.plugins.EndOfLevelPlugin;
-import com.siondream.libgdxjam.overlap.plugins.SceneConfigPlugin;
+import com.siondream.libgdxjam.overlap.plugins.GruntPlugin;
 import com.siondream.libgdxjam.overlap.plugins.PlayerPlugin;
+import com.siondream.libgdxjam.overlap.plugins.SceneConfigPlugin;
 import com.siondream.libgdxjam.physics.Categories;
 
 
@@ -26,9 +27,11 @@ public class SceneManager
 	{
 		ecsEngine = engine;
 		
+		PhysicsSystem physicsSystem = engine.getSystem(PhysicsSystem.class);
+		
 		OverlapSceneLoader.registerPlugin("levelConfig", new SceneConfigPlugin());
-		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader(
-				engine.getSystem(PhysicsSystem.class)));
+		OverlapSceneLoader.registerPlugin("cctv", new CCTvLoader(physicsSystem));
+		OverlapSceneLoader.registerPlugin("grunt", new GruntPlugin(physicsSystem));
 		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
 			engine.getSystem(CameraSystem.class)
 		));
