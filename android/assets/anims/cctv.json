@@ -1,0 +1,23 @@
+{
+    "spine": "./spine/Beholder.json",
+    "tags": {
+        "agent": [ "patrol", "alert" ]
+    },
+    "layers": {
+        "main": [
+            {
+                "tags": [ "patrol" ],
+                "name": "Idle",
+                "loop": true,
+            },
+            {
+                "tags": [ "alert" ],
+                "name": "Stare",
+                "loop": true,
+            }
+        ]
+    },
+    "transitions": {
+        "defaultDuration": 0.1
+    }
+}

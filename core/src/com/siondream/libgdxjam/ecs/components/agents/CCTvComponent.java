@@ -1,6 +1,7 @@
 package com.siondream.libgdxjam.ecs.components.agents;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.gdx.math.Vector2;
 import com.siondream.libgdxjam.utils.Direction;
 
 public class CCTvComponent implements Component
@@ -14,5 +15,8 @@ public class CCTvComponent implements Component
 	public float waitTimeMinAngle = 0.5f;
 	public float waitTime = 0.0f;
 	public Direction direction = Direction.COUNTERCLOCKWISE;
-	public boolean started = false;
+	public boolean patrolStarted = false;
+	public boolean alerted = false;
+	public float detectionTime = 0.0f;
+	public Vector2 targetPosition = new Vector2();
 }
