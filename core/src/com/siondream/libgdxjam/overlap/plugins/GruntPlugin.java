@@ -84,7 +84,6 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		entity.add(spine);
 		entity.add(grunt);
 		entity.add(patrol);
-		//entity.add(animControl);
-
+		entity.add(animControl);
 	}
 }

@@ -1,7 +1,7 @@
 {
     "spine": "./spine/Grunt.json",
     "tags": {
-        "movement": [ "idle", "run" ]
+        "movement": [ "idle", "move" ]
     },
     "layers": {
         "fullBody": [
@@ -11,30 +11,13 @@
                 "loop": true,
             },
             {
-                "tags": [ "walk" ],
+                "tags": [ "move" ],
                 "name": "Walk",
                 "loop": true,
             },
-            {
-                "tags": [ "idle", "walk" ],
-                "name": "IdleWalk",
-                "loop": true,
-            }
         ]
     },
     "transitions": {
-        "defaultDuration": 0.1,
-        "list": [
-            {
-                "from": "Idle",
-                "to": "Walk",
-                "duration": 0.18
-            },
-            {
-                "from": "Walk",
-                "to": "Idle",
-                "duration": 0.12
-            }
-        ]
+        "defaultDuration": 0.15
     }
 }
