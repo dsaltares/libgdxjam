@@ -7,6 +7,9 @@ public class PatrolComponent extends StateComponent
 	public float maxX;
 	public float minX;
 	
+	public float maxXwaitSeconds;
+	public float minXwaitSeconds;
+	
 	public float speed;
 	
 	public Direction direction;

@@ -17,6 +17,7 @@ import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
+import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 
 
@@ -40,6 +41,7 @@ public class Mappers {
 	public static ComponentMapper<GruntComponent> grunt = ComponentMapper.getFor(GruntComponent.class);
 	
 	// AI states
+	public static ComponentMapper<IdleComponent> idle = ComponentMapper.getFor(IdleComponent.class);
 	public static ComponentMapper<PatrolComponent> patrol = ComponentMapper.getFor(PatrolComponent.class);
 	public static ComponentMapper<AttackComponent> attack = ComponentMapper.getFor(AttackComponent.class);
 }
