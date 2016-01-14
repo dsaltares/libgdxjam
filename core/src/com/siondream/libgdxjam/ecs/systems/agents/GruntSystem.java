@@ -91,37 +91,6 @@ public class GruntSystem extends IteratingSystem {
 		}
 		else if(Mappers.attack.has(entity)) {
 			control.set(gruntTags.shoot);
-			
-//			SpineComponent spine = Mappers.spine.get(entity);
-//			spine.state.addListener( new AnimationStateListener() {
-//
-//				@Override
-//				public void event(int trackIndex, Event event) {
-//					// TODO Auto-generated method stub
-//					
-//				}
-//
-//				@Override
-//				public void complete(int trackIndex, int loopCount) {
-//					// TODO Auto-generated method stub
-//					
-//				}
-//
-//				@Override
-//				public void start(int trackIndex) {
-//					// TODO Auto-generated method stub
-//					
-//				}
-//
-//				@Override
-//				public void end(int trackIndex) {
-//					// When attack finishes
-//					StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
-//					stateMachine.nextState = stateMachine.previousState;
-//				}
-//				
-//			});
-			
 		}
 		// TODO: Sleep
 	}
