@@ -59,8 +59,8 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		spine.state = new AnimationState(stateData);
 		spine.state.setAnimation(0, "Idle", true);
 		spine.state.getData().setDefaultMix(0.1f);
-		size.width = 1f;
-		size.height = 0.9f;
+		size.width = 2.0f;
+		size.height = 2.0f;
 		
 		animControl.data = assetManager.get("./anims/grunt.json", AnimationControl.class);
 		
