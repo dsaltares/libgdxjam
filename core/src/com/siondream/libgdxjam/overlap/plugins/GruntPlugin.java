@@ -8,14 +8,17 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.animation.AnimationControl;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
+import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.physics.PhysicsData;
@@ -36,6 +39,8 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		PhysicsComponent physics = new PhysicsComponent();
 		SizeComponent size = new SizeComponent();
 		SpineComponent spine = new SpineComponent();
+		AnimationControlComponent animControl = new AnimationControlComponent();
+		StateMachineComponent stateMachine = new StateMachineComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
@@ -56,6 +61,8 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		size.width = 1f;
 		size.height = 0.9f;
 		
+		animControl.data = assetManager.get("./anims/grunt.json", AnimationControl.class);
+		
 		PhysicsData physicsData = assetManager.get(Env.PHYSICS_FOLDER + "/grunt-idle.json", PhysicsData.class);
 		physics.body = physicsData.createBody(physicsSystem.getWorld(), entity);
 		
@@ -71,12 +78,17 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		patrol.minX = grunt.center - grunt.leftWalkableArea;
 		patrol.speed = grunt.walkSpeed;
 		patrol.direction = grunt.direction;
+		patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
+		patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
+		
+		stateMachine.currentState = patrol;
 		
 		entity.add(physics);
 		entity.add(size);
 		entity.add(spine);
 		entity.add(grunt);
+		entity.add(stateMachine);
 		entity.add(patrol);
-
+		entity.add(animControl);
 	}
 }

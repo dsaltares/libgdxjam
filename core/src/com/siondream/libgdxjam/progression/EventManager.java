@@ -1,8 +1,10 @@
 package com.siondream.libgdxjam.progression;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
+import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 
 public class EventManager 
@@ -13,7 +15,12 @@ public class EventManager
 		);
 	
 	private static Array<Event> eventsQueue = new Array<Event>();
+	private static Engine engine;
 	
+	public static void init(Engine ecsEngine)
+	{
+		engine = ecsEngine;
+	}
 	
 	public static void fireEvent(OverlapScene scene, Event event)
 	{
@@ -28,17 +35,14 @@ public class EventManager
 				eventsQueue.add(event);
 				if( satisfiesWinCondition(scene.getWinCondition()) )
 				{
-					// BLOCK INPUT
-					// SHOW VICTORY
-					System.out.println("VICTORY");
+					engine.getSystem(PlayerSystem.class).setBlockInput(true);
+					logger.info("VICTORY"); // SHOW VICTORY
 					// Callback -> show level screen
 				}
 				break;
 			case YOU_HAVE_BEEN_KILLED:
-				// BLOCK INPUT
-				
-				// SHOW DEFEAT
-				System.out.println("DEFEAT");
+				engine.getSystem(PlayerSystem.class).setBlockInput(true);
+				logger.info("DEFEAT"); // SHOW DEFEAT
 				// Callback -> scene.reset();
 				eventsQueue.clear();
 				break;

@@ -16,11 +16,9 @@ import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
-import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
-import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
@@ -122,7 +120,6 @@ public class CCTvSystem extends IteratingSystem {
 		
 		if (inCone) {
 			callback.prepare(target);	
-			logger.error("raycast");
 			world.rayCast(callback, lightPosition, targetPos);
 			
 			if (callback.exposed) {
@@ -228,8 +225,10 @@ public class CCTvSystem extends IteratingSystem {
 		}
 		
 		@Override
-		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-			logger.error("done");
+		public float reportRayFixture(Fixture fixture,
+									  Vector2 point,
+									  Vector2 normal,
+									  float fraction) {
 			PlayerComponent player = Mappers.player.get(target);
 			
 			if (fixture == player.fixture) {

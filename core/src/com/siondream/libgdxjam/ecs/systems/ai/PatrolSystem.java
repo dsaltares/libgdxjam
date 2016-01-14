@@ -5,57 +5,66 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.math.Vector2;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
+import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
+import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
+import com.siondream.libgdxjam.utils.Direction;
 
 public class PatrolSystem extends StateSystem
 {
-	
-	public PatrolSystem()
-	{
+	public PatrolSystem() {
 		super(Family.all(PatrolComponent.class).get());
 	}
 
 	@Override
-	public void entityAdded(Entity entity)
-	{
-		// On enter action
-		super.entityAdded(entity); // Remove previous state
-	}
-
-	@Override
-	protected void processEntity(Entity entity, float deltaTime)
-	{
+	protected void processEntity(Entity entity, float deltaTime) {
+		super.processEntity(entity, deltaTime); // Process potential runnable executions 
+		
 		PatrolComponent patrol = Mappers.patrol.get(entity);
 		PhysicsComponent physics = Mappers.physics.get(entity);
 		
-		updateDirection(entity, physics, patrol);
-		
 		physics.body.setLinearVelocity( patrol.speed * patrol.direction.value(), 0f );
 		
+		updateDirection(entity, physics, patrol);
 	}
 
-	private void updateDirection(Entity entity, PhysicsComponent physics, PatrolComponent patrol)
-	{
+	private void updateDirection(Entity entity, PhysicsComponent physics, final PatrolComponent patrol) {
 		Vector2 entityPosition = physics.body.getPosition();
-
 		
-		if(entityPosition.x >= patrol.maxX)
-		{
-			// Change to Idle -> rightWaitTime
-			patrol.direction = patrol.direction.invert();
+		if(patrol.direction == Direction.CLOCKWISE &&
+		   entityPosition.x >= patrol.maxX) {
+			changeToIdle(patrol, entity, patrol.maxXwaitSeconds);
 		}
-		else if(entityPosition.x <= patrol.minX)
-		{
-			// Change to Idle -> leftWaitTime
-			patrol.direction = patrol.direction.invert();
+		else if(patrol.direction == Direction.COUNTERCLOCKWISE &&
+			    entityPosition.x <= patrol.minX) {
+			changeToIdle(patrol, entity, patrol.minXwaitSeconds);
 		}
+	}
+	
+	private void changeToIdle(final PatrolComponent patrol, final Entity entity, float secondsToChange) {
+		final StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
+		IdleComponent idle = new IdleComponent();
+		idle.secondsToRunRunnable = secondsToChange;
+		idle.runnable = new Runnable() {
+
+			@Override
+			public void run() {
+				patrol.direction = patrol.direction.invert();
+				stateMachine.nextState = stateMachine.previousState;
+			}
+			
+		};
+		
+		stateMachine.nextState = idle;
 	}
 	
 	@Override
-	public void entityRemoved(Entity entity)
-	{
-		// On Exit
-		
-	}
+	public void entityRemoved(Entity entity) {		
 	
+	}
+
+	@Override
+	public void entityAdded(Entity entity) {
+
+	}
 }

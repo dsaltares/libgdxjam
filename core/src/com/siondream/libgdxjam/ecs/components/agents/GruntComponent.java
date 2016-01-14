@@ -14,4 +14,7 @@ public class GruntComponent implements Component
 	
 	public float leftAreaWaitSeconds;
 	public float rightAreaWaitSeconds;
+	
+	public boolean isAwake;
+	public boolean isAlerted;
 }

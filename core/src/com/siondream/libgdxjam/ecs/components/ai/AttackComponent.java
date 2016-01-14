@@ -1,8 +1,7 @@
 package com.siondream.libgdxjam.ecs.components.ai;
 
-import com.badlogic.ashley.core.Component;
 
-public class AttackComponent implements Component
+public class AttackComponent extends StateComponent
 {
 	//public Actor m_actor;
 }

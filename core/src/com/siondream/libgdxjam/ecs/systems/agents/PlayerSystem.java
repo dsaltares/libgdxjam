@@ -41,6 +41,8 @@ public class PlayerSystem extends IteratingSystem
 	Tags tags;
 	PlayerTags playerTags;
 	
+	private boolean isInputBlocked;
+	
 	private Logger logger = new Logger(
 			PlayerSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
@@ -61,6 +63,7 @@ public class PlayerSystem extends IteratingSystem
 		
 		this.physicsSystem = physicsSystem;
 		this.tags = tags;
+		this.isInputBlocked = false;
 		
 		Categories categories = physicsSystem.getCategories();
 		playerTags = new PlayerTags();
@@ -68,6 +71,12 @@ public class PlayerSystem extends IteratingSystem
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
 			categories.getBits("level"),
+			new PlayerLevelContactListener()
+		);
+		
+		physicsSystem.getHandler().add(
+			categories.getBits("player"),
+			categories.getBits("enemy"),
 			new PlayerLevelContactListener()
 		);
 	}
@@ -106,7 +115,7 @@ public class PlayerSystem extends IteratingSystem
 
 	@Override
 	public boolean keyDown(int keycode) {
-		if (keycode == Keys.UP) {
+		if (!isInputBlocked && keycode == Keys.UP) {
 			for (Entity entity : getEntities()) {
 				PlayerComponent player = Mappers.player.get(entity);
 				player.jump = true;
@@ -117,7 +126,7 @@ public class PlayerSystem extends IteratingSystem
 
 	@Override
 	public boolean keyUp(int keycode) {
-		if (keycode == Keys.UP) {
+		if (!isInputBlocked && keycode == Keys.UP) {
 			for (Entity entity : getEntities()) {
 				PlayerComponent player = Mappers.player.get(entity);
 				player.jump = false;
@@ -188,6 +197,7 @@ public class PlayerSystem extends IteratingSystem
 		boolean wasCrouching = player.crouching;
 		
 		player.crouching = player.grounded &&
+						   !isInputBlocked && 
 						   Gdx.input.isKeyPressed(Keys.DOWN);
 		
 		if (!wasCrouching && player.crouching) {
@@ -220,7 +230,7 @@ public class PlayerSystem extends IteratingSystem
 		player.wantsToMove = false;
 		
 		// Horizontal movement
-		if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+		if (!isInputBlocked && Gdx.input.isKeyPressed(Keys.LEFT)) {
 			if (absVelX < player.maxVelocityX) {
 				physics.body.applyLinearImpulse(
 					-player.horizontalImpulse, 0.0f,
@@ -235,7 +245,7 @@ public class PlayerSystem extends IteratingSystem
 				physics.body.setLinearVelocity(0.0f, velocity.y);
 			}
 		}
-		else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+		else if (!isInputBlocked && Gdx.input.isKeyPressed(Keys.RIGHT)) {
 			if (absVelX < player.maxVelocityX) {
 				physics.body.applyLinearImpulse(
 					player.horizontalImpulse, 0.0f,
@@ -334,6 +344,16 @@ public class PlayerSystem extends IteratingSystem
 		
 		// Flip according to speed
 		spine.skeleton.setFlipX(player.direction < 0);	
+	}
+	
+	public boolean isInputBlocked()
+	{
+		return this.isInputBlocked;
+	}
+	
+	public void setBlockInput(boolean blockInput)
+	{
+		this.isInputBlocked = blockInput;
 	}
 	
 	private class PlayerLevelContactListener extends ContactAdapter {

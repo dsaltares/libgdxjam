@@ -1,0 +1,28 @@
+{
+    "spine": "./spine/Grunt.json",
+    "tags": {
+        "movement": [ "idle", "move", "shoot" ]
+    },
+    "layers": {
+        "fullBody": [
+            {
+                "tags": [ "idle" ],
+                "name": "Idle",
+                "loop": true,
+            },
+            {
+                "tags": [ "move" ],
+                "name": "Walk",
+                "loop": true,
+            },
+            {
+                "tags": [ "shoot" ],
+                "name": "Shoot",
+                "loop": false,
+            },
+        ]
+    },
+    "transitions": {
+        "defaultDuration": 0.15
+    }
+}

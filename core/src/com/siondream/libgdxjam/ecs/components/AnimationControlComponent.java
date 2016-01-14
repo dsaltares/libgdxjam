@@ -52,7 +52,7 @@ public class AnimationControlComponent extends Bits implements Component {
 	private void ensureExclusions(int tag) {
 		TagGroup group = data.group(tag);
 		
-		if (!group.name.equals("default")) {
+		if (group != null && !group.name.equals("default")) {
 			for (int groupTag : group.tags) {
 				this.clear(groupTag);
 			}

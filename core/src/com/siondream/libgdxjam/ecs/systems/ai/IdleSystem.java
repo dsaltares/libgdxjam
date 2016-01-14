@@ -2,27 +2,29 @@ package com.siondream.libgdxjam.ecs.systems.ai;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
+import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
 
-public class AttackSystem extends StateSystem
+public class IdleSystem extends StateSystem
 {
 	
-	public AttackSystem()
+	public IdleSystem()
 	{
-		super(Family.all(AttackComponent.class).get());
+		super(Family.all(IdleComponent.class).get());
 	}
 	
 	@Override
 	public void entityAdded(Entity entity)
 	{
 		// On enter action
+
+		// Set idle animation
 		
 	}
 	
 	@Override
 	protected void processEntity(Entity entity, float deltaTime)
 	{
-		super.processEntity(entity, deltaTime); // Process potential runnable executions 
+		super.processEntity(entity, deltaTime);
 		
 	}
 
