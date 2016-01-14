@@ -40,7 +40,7 @@ public class CameraSystem extends EntitySystem implements InputProcessor, Dispos
 		Env.LOG_LEVEL
 	);
 	private OrthographicCamera camera;
-	private boolean flyMode;
+	private boolean flyMode = false;
 	private Vector2 velocity = new Vector2();
 	private Vector2 position = new Vector2();
 	private Vector2 targetPosition = new Vector2();

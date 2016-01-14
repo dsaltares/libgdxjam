@@ -45,6 +45,7 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
 		// Load grunt properties
+		grunt.sightDistance = Float.parseFloat(map.get("sightDistance", "5.0"));
 		grunt.walkSpeed = Float.parseFloat(map.get("walkSpeed", "2.0"));
 		grunt.leftWalkableArea = Float.parseFloat(map.get("leftWalkableArea", "0.0"));
 		grunt.rightWalkableArea = Float.parseFloat(map.get("rightWalkableArea", "0.0"));

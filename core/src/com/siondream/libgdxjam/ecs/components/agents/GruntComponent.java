@@ -5,6 +5,8 @@ import com.siondream.libgdxjam.utils.Direction;
 
 public class GruntComponent implements Component 
 {
+	public float sightDistance;
+	
 	public float walkSpeed;
 	public Direction direction = Direction.CLOCKWISE;
 	

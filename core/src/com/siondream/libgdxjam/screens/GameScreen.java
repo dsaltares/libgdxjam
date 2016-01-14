@@ -79,7 +79,7 @@ public class GameScreen implements Screen, InputProcessor {
 		Categories categories = pysicsSystem.getCategories();
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
-		SceneManager.loadScene("MainScene", world, categories, rayHandler);
+		SceneManager.loadScene("Level1", world, categories, rayHandler);
 		
 		addInputProcessors();
 	}

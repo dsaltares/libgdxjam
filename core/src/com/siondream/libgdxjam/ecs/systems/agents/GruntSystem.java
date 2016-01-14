@@ -159,7 +159,8 @@ public class GruntSystem extends IteratingSystem {
 		PhysicsComponent targetPhysics = Mappers.physics.get(target);
 		GruntComponent grunt = Mappers.grunt.get(entity);
 		
-		if( isLookingAtTarget(entity, target) )
+		if( isLookingAtTarget(entity, target) &&
+				isWithinVisionRange(entity, target))
 		{
 			callback.prepare(target);
 			world.rayCast(callback, gruntPhysics.body.getPosition(), targetPhysics.body.getPosition());
@@ -175,13 +176,25 @@ public class GruntSystem extends IteratingSystem {
 		}
 	}
 	
+	private boolean isWithinVisionRange(Entity entity, Entity target)
+	{
+		PhysicsComponent gruntPhysics = Mappers.physics.get(entity);
+		PhysicsComponent targetPhysics = Mappers.physics.get(target);
+		GruntComponent grunt = Mappers.grunt.get(entity);
+		
+		direction.set(gruntPhysics.body.getPosition());
+		direction.sub(targetPhysics.body.getPosition());
+		
+		return direction.len() < grunt.sightDistance;
+	}
+	
 	private boolean isLookingAtTarget(Entity entity, Entity target)
 	{
 		TransformComponent gruntTransform = Mappers.transform.get(entity);
 		TransformComponent targetTransform = Mappers.transform.get(target);
 		GruntComponent grunt = Mappers.grunt.get(entity);
 		
-		// TODO: This should be done with dot product
+		// TODO: Maybe this should be done with dot product if we include direction in matrix
 		if( 	(gruntTransform.position.x > targetTransform.position.x &&
 					grunt.direction == Direction.COUNTERCLOCKWISE) ||
 				(gruntTransform.position.x < targetTransform.position.x &&
@@ -211,8 +224,8 @@ public class GruntSystem extends IteratingSystem {
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 			PlayerComponent player = Mappers.player.get(target);
 
-			// I dunno why this doesn't work:
 			/*
+			// I dunno why this doesn't work:
 			if (fixture == player.fixture) {
 				exposed = true;
 			}*/
