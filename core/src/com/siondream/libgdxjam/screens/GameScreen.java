@@ -9,8 +9,18 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -52,6 +62,8 @@ public class GameScreen implements Screen, InputProcessor {
 	private OverlapScene scene;
 	private Logger logger = new Logger(GameScreen.class.getSimpleName(), Env.LOG_LEVEL);
 	
+	private Button resetButton;
+	
 	public GameScreen() {
 		logger.info("initialize");
 		
@@ -68,22 +80,66 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		SceneManager.init(engine);
 		EventManager.init(engine);
+
 	}
 	
 	@Override
 	public void show() {
 		logger.info("show");
 		
-		PhysicsSystem pysicsSystem = engine.getSystem(PhysicsSystem.class);
-		World world = pysicsSystem.getWorld();
-		Categories categories = pysicsSystem.getCategories();
+		PhysicsSystem physics = engine.getSystem(PhysicsSystem.class);
+		World world = physics.getWorld();
+		Categories categories = physics.getCategories();
 		RayHandler rayHandler = engine.getSystem(LightSystem.class).getRayHandler();
 		
-		SceneManager.loadScene("Level1", world, categories, rayHandler);
+		scene = SceneManager.loadScene("Level1", world, categories, rayHandler);
+		
+		loadUI();
 		
 		addInputProcessors();
+		
+		camera.position.set(0f,0f,0f);
+		engine.getSystem(PlayerSystem.class).setBlockInput(false);
+	}
+	
+	private void loadUI()
+	{
+		AssetManager assetMgr = Env.getGame().getAssetManager();
+		Stage stage = Env.getGame().getStage();
+		
+		Table table = new Table();
+		table.setFillParent(true);
+		
+		TextureAtlas uiAtlas = assetMgr.get(Env.TEXTURES_FOLDER + "/ui/ui.atlas", TextureAtlas.class);
+		
+		generateResetButton(uiAtlas);
+
+		
+		table.row().padTop(30f).colspan(2).expand();
+		table.add(resetButton).top().right();
+		table.row().colspan(1);
+				
+		table.debug();
+		
+		stage.addActor(table);
 	}
 
+	private void generateResetButton(TextureAtlas uiAtlas)
+	{
+		Texture resetButtonTexture = uiAtlas.findRegion("btn_reset").getTexture(); 
+		Button.ButtonStyle resetButtonStyle = new Button.ButtonStyle();
+		resetButtonStyle.up = new TextureRegionDrawable(new TextureRegion(resetButtonTexture));
+		resetButton = new Button(resetButtonStyle);
+		
+		resetButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				SceneManager.resetCurrentScene();
+			};
+		});
+	}
+	
 	@Override
 	public void render(float delta) {
 		double newTime = TimeUtils.millis() / 1000.0;

@@ -1,90 +1,13 @@
 
 ui.png
-size: 1024,128
+size: 128,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-awningRed
+btn_reset
   rotate: false
   xy: 2, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-chimney
-  rotate: false
-  xy: 74, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-houseDarkBottomLeft
-  rotate: false
-  xy: 146, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-houseDarkBottomMid
-  rotate: false
-  xy: 218, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-houseGrayTopMid
-  rotate: false
-  xy: 290, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-houseGrayTopRight
-  rotate: false
-  xy: 362, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-roofYellowTopMid
-  rotate: false
-  xy: 434, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-roofYellowTopRight
-  rotate: false
-  xy: 506, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-signBed
-  rotate: false
-  xy: 578, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-signCoin
-  rotate: false
-  xy: 650, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-signCup
-  rotate: false
-  xy: 722, 2
-  size: 70, 70
-  orig: 70, 70
-  offset: 0, 0
-  index: -1
-signHangingBed
-  rotate: false
-  xy: 794, 2
-  size: 70, 70
-  orig: 70, 70
+  size: 100, 78
+  orig: 100, 78
   offset: 0, 0
   index: -1

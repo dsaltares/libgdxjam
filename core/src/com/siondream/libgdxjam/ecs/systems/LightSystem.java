@@ -2,7 +2,9 @@ package com.siondream.libgdxjam.ecs.systems;
 
 import box2dLight.RayHandler;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.World;
@@ -15,7 +17,11 @@ import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 
-public class LightSystem extends IteratingSystem implements Disposable {
+public class LightSystem extends IteratingSystem implements EntityListener, Disposable {
+	
+	private static final Family family = Family.all(LightComponent.class)
+			.one(NodeComponent.class, TransformComponent.class)
+			.get();
 	
 	private Logger logger = new Logger(
 		LightSystem.class.getSimpleName(),
@@ -24,9 +30,7 @@ public class LightSystem extends IteratingSystem implements Disposable {
 	private RayHandler rayHandler;
 	
 	public LightSystem(World world) {
-		super(Family.all(LightComponent.class)
-					.one(NodeComponent.class, TransformComponent.class)
-					.get());
+		super(family);
 		
 		logger.info("initialize");
 		
@@ -53,6 +57,31 @@ public class LightSystem extends IteratingSystem implements Disposable {
 		}
 	}
 
+	@Override
+	public void entityAdded(Entity entity) 
+	{
+		
+	}
+	
+	@Override
+	public void addedToEngine(Engine engine) {
+		super.addedToEngine(engine);
+		engine.addEntityListener(family, Integer.MAX_VALUE, this);
+	}
+	
+	@Override
+	public void removedFromEngine(Engine engine) {
+		super.removedFromEngine(engine);
+		engine.removeEntityListener(this);
+	}
+	
+	@Override
+	public void entityRemoved(Entity entity)
+	{
+		LightComponent light = Mappers.light.get(entity);
+		light.light.remove();
+	}
+	
 	@Override
 	public void dispose() {
 		logger.info("dispose");

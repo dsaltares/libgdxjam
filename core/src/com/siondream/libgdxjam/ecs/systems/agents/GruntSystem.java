@@ -154,7 +154,7 @@ public class GruntSystem extends IteratingSystem {
 		direction.set(gruntPhysics.body.getPosition());
 		direction.sub(targetPhysics.body.getPosition());
 		
-		return direction.len() < grunt.sightDistance;
+		return Math.abs(direction.len2()) < (grunt.sightDistance * grunt.sightDistance);
 	}
 	
 	private boolean isLookingAtTarget(Entity entity, Entity target)
@@ -184,25 +184,35 @@ public class GruntSystem extends IteratingSystem {
 	private class GruntCallback implements RayCastCallback {
 		public Entity target;
 		public boolean exposed;
+		private float minFraction;
+		
 		public void prepare(Entity target) {
+			logger.info("Direccionado y viendole... comprobando si hay obstáculos");
 			this.target = target;
 			exposed = false;
+			minFraction = Float.MAX_VALUE;
 		}
 		
 		@Override
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
 			PlayerComponent player = Mappers.player.get(target);
 
+			minFraction = Math.min(minFraction, fraction);
+			
 			/*
 			// I dunno why this doesn't work:
-			if (fixture == player.fixture) {
-				exposed = true;
+			if (minFraction == fraction) 
+			{
+				exposed = fixture == player.fixture ? true : false;
 			}*/
-			// Quick hack:
-			if(fixture.getBody().getPosition() == player.fixture.getBody().getPosition())
-				exposed = true;
 			
-			return 0;
+			// Quick hack:
+			if (minFraction == fraction) 
+			{
+				exposed = fixture.getBody().getPosition() == player.fixture.getBody().getPosition() ? true : false;
+			}
+			
+			return fraction;
 		}
 	}
 }

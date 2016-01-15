@@ -218,10 +218,12 @@ public class CCTvSystem extends IteratingSystem {
 	private class CCTVCallback implements RayCastCallback {
 		public Entity target;
 		public boolean exposed;
+		private float minFraction;
 
 		public void prepare(Entity target) {
 			this.target = target;
 			exposed = false;
+			minFraction = Float.MAX_VALUE;
 		}
 		
 		@Override
@@ -229,12 +231,17 @@ public class CCTvSystem extends IteratingSystem {
 									  Vector2 point,
 									  Vector2 normal,
 									  float fraction) {
+			
+			minFraction = Math.min(minFraction, fraction);
+			
 			PlayerComponent player = Mappers.player.get(target);
 			
-			if (fixture == player.fixture) {
-				exposed = true;
+			if (minFraction == fraction) 
+			{
+				exposed = fixture == player.fixture ? true : false;
 			}
-			return 0;
+			
+			return fraction;
 		}	
 	}
 	

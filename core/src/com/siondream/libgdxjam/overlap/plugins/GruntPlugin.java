@@ -18,6 +18,7 @@ import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
+import com.siondream.libgdxjam.ecs.components.ai.StateComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
@@ -45,7 +46,7 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
 		// Load grunt properties
-		grunt.sightDistance = Float.parseFloat(map.get("sightDistance", "5.0"));
+		grunt.sightDistance = Float.parseFloat(map.get("sightDistance", "7.0"));
 		grunt.walkSpeed = Float.parseFloat(map.get("walkSpeed", "2.0"));
 		grunt.leftWalkableArea = Float.parseFloat(map.get("leftWalkableArea", "0.0"));
 		grunt.rightWalkableArea = Float.parseFloat(map.get("rightWalkableArea", "0.0"));
@@ -74,22 +75,31 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		grunt.center = Mappers.transform.get(entity).position.x;
 		
 		// Set grunt initial state
-		PatrolComponent patrol = new PatrolComponent();
-		patrol.maxX = grunt.center + grunt.rightWalkableArea;
-		patrol.minX = grunt.center - grunt.leftWalkableArea;
-		patrol.speed = grunt.walkSpeed;
-		patrol.direction = grunt.direction;
-		patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
-		patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
+		String initialState = map.get("initialState", "patrol");
+		StateComponent state = null;
 		
-		stateMachine.currentState = patrol;
+		switch(initialState)
+		{
+			case "patrol":
+				PatrolComponent patrol = new PatrolComponent();
+				patrol.maxX = grunt.center + grunt.rightWalkableArea;
+				patrol.minX = grunt.center - grunt.leftWalkableArea;
+				patrol.speed = grunt.walkSpeed;
+				patrol.direction = grunt.direction;
+				patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
+				patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
+				state = patrol;
+				break;
+		}
+		
+		stateMachine.currentState = state;
 		
 		entity.add(physics);
 		entity.add(size);
 		entity.add(spine);
 		entity.add(grunt);
 		entity.add(stateMachine);
-		entity.add(patrol);
+		entity.add(state);
 		entity.add(animControl);
 	}
 }

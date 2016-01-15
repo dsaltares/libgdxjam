@@ -259,11 +259,6 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		index.layer = value.getString("layerName");
 		
-		if(index.layer.compareTo("platforms") == 0)
-		{
-			System.out.println("hola");
-		}		
-		
 		loadTransform(transform, value);
 		loadLayers(entity, value.get("layers"));
 		loadPolygon(entity, transform, value);
@@ -597,9 +592,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		spine.skeleton.getBounds(v2Utils1, v2Utils2);
 		size.width = v2Utils2.x;
 		size.height = v2Utils2.y;
-		//transform.origin.set(v2Utils1);
+		transform.origin.set(v2Utils1);
 		// Fix to position spine anim in the right coords... TODO: Is there a good solution?
-		transform.position.add(size.width * 0.5f, size.height * .5f);
+		transform.position.add(size.width * .5f, size.height * .8f);
 
 		entity.add(node);
 		entity.add(size);

@@ -37,6 +37,9 @@ public class NodeSystem implements EntityListener {
 	public void entityRemoved(Entity entity) {
 		NodeComponent node = nodes.remove(entity);
 		
+		if(node == null)
+			return;
+		
 		if (node.parent != null) {
 			NodeComponent parentNode = Mappers.node.get(node.parent);
 			parentNode.children.removeValue(entity, true);

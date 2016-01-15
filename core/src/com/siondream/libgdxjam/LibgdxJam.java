@@ -100,6 +100,7 @@ public class LibgdxJam extends Game {
 		stage = new Stage(uiViewport);
 		
 		Gdx.input.setInputProcessor(inputMultiplexer);
+		inputMultiplexer.addProcessor(stage);
 		
 		setScreen( Screens.getLoadingScreen() );
 	}
@@ -151,7 +152,7 @@ public class LibgdxJam extends Game {
 	@Override
 	public void setScreen (Screen screen) {
 		logger.info("setting screen: " + screen);
-		super.setScreen( screen );
 		stage.clear();
+		super.setScreen( screen );
 	}
 }

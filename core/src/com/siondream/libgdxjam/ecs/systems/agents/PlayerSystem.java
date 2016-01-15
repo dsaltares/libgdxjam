@@ -174,7 +174,8 @@ public class PlayerSystem extends IteratingSystem
 		
 		World world = physicsSystem.getWorld();
 		
-		if (physics.body != null) {
+		if (world.getBodyCount() > 0 && 
+				physics.body != null) {
 			world.destroyBody(physics.body);
 		}
 		

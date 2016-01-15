@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.progression;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Engine;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.World;
 import com.siondream.libgdxjam.Env;
@@ -70,11 +71,29 @@ public class SceneManager
 		return currentScene;
 	}
 	
+	public static void resetCurrentScene()
+	{
+		if(currentScene != null && 
+				ecsEngine.getEntities().size() != 0)
+		{
+			Screen gameScreen = Env.getGame().getScreen();
+
+			unloadCurrentScene();
+			
+			Env.getGame().getStage().clear();
+			
+			gameScreen.show();
+		}
+	}
+	
 	public static void unloadCurrentScene()
 	{
 		if(currentScene != null)
 		{
-			currentScene.removeFromEngine(ecsEngine);
+			String scenePath = "overlap/scenes/" + currentScene.getName() + ".dt";
+
+			Env.getGame().getAssetManager().unload(scenePath);
+			Env.getGame().getScreen().hide();
 			currentScene = null;
 		}
 	}

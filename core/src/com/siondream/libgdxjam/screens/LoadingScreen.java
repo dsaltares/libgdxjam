@@ -62,7 +62,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 								   file.nameWithoutExtension() +
 								   ".atlas";
 					
-					SkeletonDataLoaderParameter parameter = new SkeletonDataLoaderParameter();					parameter.atlasName = file.parent().path() + file.nameWithoutExtension() + ".atlas";
+					SkeletonDataLoaderParameter parameter = new SkeletonDataLoaderParameter();
 					parameter.atlasName = atlas;
 					parameter.scale = Env.UI_TO_WORLD;
 					assetMgr.load(file.path(), SkeletonData.class, parameter);
