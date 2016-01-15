@@ -27,12 +27,57 @@ public class SensorSystem extends IteratingSystem
 			categories.getBits("player"),
 			new SensorPlayerContactListener()
 		);
+		
+		physicsSystem.getHandler().add(
+				categories.getBits("sensor"),
+				categories.getBits("box"),
+				new SensorBoxContactListener()
+			);
 	}
 
 	@Override
 	protected void processEntity(Entity entity, float deltaTime)
 	{
 		
+	}
+	
+	private class SensorBoxContactListener extends ContactAdapter
+	{
+		@Override
+		public void beginContact(Contact contact) // TODO: NOT SURE BUT... I THINK SAME ENTITY IS PROCESSED AT LEAST TWICE
+		{
+			for (Entity entity : getEntities())
+			{
+				SensorComponent sensor = Mappers.sensor.get(entity);
+
+				if(contact.getFixtureA() == sensor.sensorFixture)
+				{
+					if(sensor.isBoxSensible && 
+							sensor.sensorReactionEnter != null)
+					{
+						sensor.sensorReactionEnter.run();
+					}
+				}
+			}
+		}
+		
+		@Override
+		public void endContact(Contact contact) 
+		{
+			for (Entity entity : getEntities())
+			{
+				SensorComponent sensor = Mappers.sensor.get(entity);
+
+				if(contact.getFixtureA() == sensor.sensorFixture)
+				{
+					if(sensor.isBoxSensible && 
+							sensor.sensorReactionEnter != null)
+					{
+						sensor.sensorReactionExit.run();
+					}
+				}
+			}
+		}
 	}
 	
 	private class SensorPlayerContactListener extends ContactAdapter
@@ -43,12 +88,33 @@ public class SensorSystem extends IteratingSystem
 			for (Entity entity : getEntities())
 			{
 				SensorComponent sensor = Mappers.sensor.get(entity);
-				
-				if(sensor.sensorReaction != null)
+
+				if(contact.getFixtureA() == sensor.sensorFixture)
 				{
-					sensor.sensorReaction.run();
+					if(sensor.isPlayerSensible && 
+							sensor.sensorReactionEnter != null)
+					{
+						sensor.sensorReactionEnter.run();
+					}
 				}
-				
+			}
+		}
+		
+		@Override
+		public void endContact(Contact contact) // TODO: NOT SURE BUT... I THINK SAME ENTITY IS PROCESSED AT LEAST TWICE
+		{
+			for (Entity entity : getEntities())
+			{
+				SensorComponent sensor = Mappers.sensor.get(entity);
+
+				if(contact.getFixtureA() == sensor.sensorFixture)
+				{
+					if(sensor.isPlayerSensible && 
+							sensor.sensorReactionEnter != null)
+					{
+						sensor.sensorReactionExit.run();
+					}
+				}
 			}
 		}
 	}

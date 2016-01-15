@@ -30,6 +30,7 @@ import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.systems.AnimationControlSystem;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.DoorSystem;
 import com.siondream.libgdxjam.ecs.systems.LayerSystem;
 import com.siondream.libgdxjam.ecs.systems.LightSystem;
 import com.siondream.libgdxjam.ecs.systems.NodeSystem;
@@ -263,6 +264,7 @@ public class GameScreen implements Screen, InputProcessor {
 			Env.getGame().getTags()
 		);
 		SensorSystem sensorSystem = new SensorSystem(physicsSystem);
+		DoorSystem doorSystem = new DoorSystem();
 		AnimationControlSystem animationControlSystem = new AnimationControlSystem();
 		RenderingSystem renderingSystem = new RenderingSystem(
 			viewport,
@@ -288,6 +290,7 @@ public class GameScreen implements Screen, InputProcessor {
 		playerSystem.priority = 8;
 		cameraSystem.priority = 9;
 		animationControlSystem.priority = 10;
+		doorSystem.priority = 10;
 		renderingSystem.priority = 11;
 		
 		engine.addSystem(physicsSystem);
@@ -305,6 +308,7 @@ public class GameScreen implements Screen, InputProcessor {
 		engine.addSystem(cctvSystem);
 		engine.addSystem(gruntSystem);
 		engine.addSystem(animationControlSystem);
+		engine.addSystem(doorSystem);
 		engine.addSystem(playerSystem);
 		
 		engine.addEntityListener(

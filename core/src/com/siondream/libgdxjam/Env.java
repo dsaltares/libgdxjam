@@ -9,6 +9,8 @@ public class Env
 
 	public final static int LOG_LEVEL = Logger.INFO;
 	
+	public final static String SCENES_FOLDER = "./overlap/scenes/";
+	public final static String SCENES_TEXTURES_FOLDER = "overlap/assets/orig/pack/";
 	public final static String TEXTURES_FOLDER = "./textures";
 	public final static String SPINE_FOLDER = "./spine";
 	public final static String PHYSICS_FOLDER = "./physics";

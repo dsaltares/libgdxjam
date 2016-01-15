@@ -4,5 +4,6 @@ import com.badlogic.ashley.core.Component;
 
 public class DoorComponent implements Component
 {
-	public int openerButtonId;
+	public boolean isOpen;
+	public int id;
 }

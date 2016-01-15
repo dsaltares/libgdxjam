@@ -8,9 +8,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.World;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.systems.CameraSystem;
+import com.siondream.libgdxjam.ecs.systems.DoorSystem;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
+import com.siondream.libgdxjam.overlap.plugins.BoxPlugin;
+import com.siondream.libgdxjam.overlap.plugins.ButtonPlugin;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
 import com.siondream.libgdxjam.overlap.plugins.DoorPlugin;
 import com.siondream.libgdxjam.overlap.plugins.EndOfLevelPlugin;
@@ -37,9 +40,11 @@ public class SceneManager
 		OverlapSceneLoader.registerPlugin("player", new PlayerPlugin(
 			engine.getSystem(CameraSystem.class)
 		));
-		OverlapSceneLoader.registerPlugin("endOfLevel", new EndOfLevelPlugin(
-			engine.getSystem(PhysicsSystem.class)));
+		OverlapSceneLoader.registerPlugin("endOfLevel", new EndOfLevelPlugin(physicsSystem));
 		OverlapSceneLoader.registerPlugin("door", new DoorPlugin());
+		OverlapSceneLoader.registerPlugin("button", new ButtonPlugin(
+				physicsSystem, engine.getSystem(DoorSystem.class)));
+		OverlapSceneLoader.registerPlugin("box", new BoxPlugin(physicsSystem));
 
 	}
 	
@@ -57,7 +62,7 @@ public class SceneManager
 		sceneParameters.categories = categories;
 		sceneParameters.rayHandler = rayHandler;
 		
-		String scenePath = "overlap/scenes/" + sceneName + ".dt";
+		String scenePath = Env.SCENES_FOLDER + sceneName + ".dt";
 		
 		assetManager.load(
 			scenePath,
@@ -93,7 +98,7 @@ public class SceneManager
 	{
 		if(currentScene != null)
 		{
-			String scenePath = "overlap/scenes/" + currentScene.getName() + ".dt";
+			String scenePath = Env.SCENES_FOLDER + currentScene.getName() + ".dt";
 
 			Env.getGame().getAssetManager().unload(scenePath);
 			Env.getGame().getScreen().hide();

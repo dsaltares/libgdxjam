@@ -28,6 +28,7 @@ public class EndOfLevelPlugin implements OverlapLoaderPlugin
 		this.physicsSystem = physicsSystem;
 	}
 	
+	// TODO: MAKE IT SIMILAR TO BUTTONPLUGIN
 	@Override
 	public void load(final OverlapScene scene, Entity entity, ObjectMap<String, String> value)
 	{
@@ -57,6 +58,7 @@ public class EndOfLevelPlugin implements OverlapLoaderPlugin
 		
 		Fixture fixture = body.createFixture(fixtureDef);
 		fixture.setFilterData(filter);
+		sensor.sensorFixture = fixture;
 		
 		polygon.dispose();
 
@@ -65,7 +67,7 @@ public class EndOfLevelPlugin implements OverlapLoaderPlugin
 		physics.body = body;
 		
 		sensor.isEnabled = true;
-		sensor.sensorReaction = new Runnable()
+		sensor.sensorReactionEnter = new Runnable()
 		{
 			@Override
 			public void run()
@@ -77,6 +79,8 @@ public class EndOfLevelPlugin implements OverlapLoaderPlugin
 				}
 			}
 		};
+		sensor.isPlayerSensible = true;
+		sensor.isBoxSensible = false;
 		
 		entity.add(physics);
 		entity.add(sensor);
