@@ -1,4 +1,4 @@
-package com.siondream.libgdxjam.ecs.components.agents;
+package com.siondream.libgdxjam.ecs.components.environment;
 
 import com.badlogic.ashley.core.Component;
 

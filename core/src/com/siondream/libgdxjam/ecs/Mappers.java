@@ -15,11 +15,12 @@ import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
-import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
 import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
+import com.siondream.libgdxjam.ecs.components.environment.DoorComponent;
+import com.siondream.libgdxjam.ecs.components.environment.SensorComponent;
 
 
 public class Mappers {
@@ -38,8 +39,11 @@ public class Mappers {
 	// Agents
 	public static ComponentMapper<CCTvComponent> cctv = ComponentMapper.getFor(CCTvComponent.class);
 	public static ComponentMapper<PlayerComponent> player = ComponentMapper.getFor(PlayerComponent.class);
-	public static ComponentMapper<SensorComponent> sensor = ComponentMapper.getFor(SensorComponent.class);
 	public static ComponentMapper<GruntComponent> grunt = ComponentMapper.getFor(GruntComponent.class);
+	
+	// Environment
+	public static ComponentMapper<SensorComponent> sensor = ComponentMapper.getFor(SensorComponent.class);
+	public static ComponentMapper<DoorComponent> door = ComponentMapper.getFor(DoorComponent.class);
 	
 	// AI states
 	public static ComponentMapper<StateMachineComponent> stateMachine = ComponentMapper.getFor(StateMachineComponent.class);

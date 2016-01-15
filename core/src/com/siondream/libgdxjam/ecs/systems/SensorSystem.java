@@ -6,7 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
-import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
+import com.siondream.libgdxjam.ecs.components.environment.SensorComponent;
 import com.siondream.libgdxjam.physics.Categories;
 import com.siondream.libgdxjam.physics.ContactAdapter;
 

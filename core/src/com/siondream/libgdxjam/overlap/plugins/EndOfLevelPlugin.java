@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
-import com.siondream.libgdxjam.ecs.components.agents.SensorComponent;
+import com.siondream.libgdxjam.ecs.components.environment.SensorComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.progression.Event;

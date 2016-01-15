@@ -12,6 +12,7 @@ import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.overlap.OverlapSceneLoader;
 import com.siondream.libgdxjam.overlap.plugins.CCTvLoader;
+import com.siondream.libgdxjam.overlap.plugins.DoorPlugin;
 import com.siondream.libgdxjam.overlap.plugins.EndOfLevelPlugin;
 import com.siondream.libgdxjam.overlap.plugins.GruntPlugin;
 import com.siondream.libgdxjam.overlap.plugins.PlayerPlugin;
@@ -38,6 +39,8 @@ public class SceneManager
 		));
 		OverlapSceneLoader.registerPlugin("endOfLevel", new EndOfLevelPlugin(
 			engine.getSystem(PhysicsSystem.class)));
+		OverlapSceneLoader.registerPlugin("door", new DoorPlugin());
+
 	}
 	
 	public static OverlapScene loadScene(String sceneName, World world, Categories categories, RayHandler rayHandler)
