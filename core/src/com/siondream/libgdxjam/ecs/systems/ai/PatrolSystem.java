@@ -50,7 +50,7 @@ public class PatrolSystem extends StateSystem
 			@Override
 			public void run() {
 				patrol.direction = patrol.direction.invert();
-				stateMachine.nextState = stateMachine.previousState;
+				stateMachine.nextState = patrol;
 			}
 			
 		};
