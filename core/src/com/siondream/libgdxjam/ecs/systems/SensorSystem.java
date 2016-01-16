@@ -50,16 +50,15 @@ public class SensorSystem extends IteratingSystem
 			{
 				SensorComponent sensor = Mappers.sensor.get(entity);
 
-				if(contact.getFixtureA() == sensor.sensorFixture)
+				if (!matches(contact, sensor.sensorFixture)) { continue; }
+
+				if(sensor.isBoxSensible &&
+						!sensor.isCollidingPlayer &&
+						sensor.sensorReactionEnter != null)
 				{
-					if(sensor.isBoxSensible &&
-							!sensor.isCollidingPlayer &&
-							sensor.sensorReactionEnter != null)
-					{
-						sensor.sensorReactionEnter.run();
-					}
-					sensor.isCollidingBox = true;
+					sensor.sensorReactionEnter.run();
 				}
+				sensor.isCollidingBox = true;
 			}
 		}
 		
@@ -70,16 +69,15 @@ public class SensorSystem extends IteratingSystem
 			{
 				SensorComponent sensor = Mappers.sensor.get(entity);
 
-				if(contact.getFixtureA() == sensor.sensorFixture)
+				if (!matches(contact, sensor.sensorFixture)) { continue; }
+
+				if(sensor.isBoxSensible && 
+						!sensor.isCollidingPlayer &&
+						sensor.sensorReactionEnter != null)
 				{
-					if(sensor.isBoxSensible && 
-							!sensor.isCollidingPlayer &&
-							sensor.sensorReactionEnter != null)
-					{
-						sensor.sensorReactionExit.run();
-					}
-					sensor.isCollidingBox = false;
+					sensor.sensorReactionExit.run();
 				}
+				sensor.isCollidingBox = false;
 			}
 		}
 	}
@@ -93,16 +91,15 @@ public class SensorSystem extends IteratingSystem
 			{
 				SensorComponent sensor = Mappers.sensor.get(entity);
 
-				if(contact.getFixtureA() == sensor.sensorFixture)
+				if (!matches(contact, sensor.sensorFixture)) { continue; }
+
+				if(sensor.isPlayerSensible && 
+						!sensor.isCollidingBox && 
+						sensor.sensorReactionEnter != null)
 				{
-					if(sensor.isPlayerSensible && 
-							!sensor.isCollidingBox && 
-							sensor.sensorReactionEnter != null)
-					{
-						sensor.sensorReactionEnter.run();
-					}
-					sensor.isCollidingPlayer = true;
+					sensor.sensorReactionEnter.run();
 				}
+				sensor.isCollidingPlayer = true;
 			}
 		}
 		
@@ -113,16 +110,15 @@ public class SensorSystem extends IteratingSystem
 			{
 				SensorComponent sensor = Mappers.sensor.get(entity);
 
-				if(contact.getFixtureA() == sensor.sensorFixture)
+				if (!matches(contact, sensor.sensorFixture)) { continue; }
+
+				if(sensor.isPlayerSensible && 
+						!sensor.isCollidingBox && 
+						sensor.sensorReactionEnter != null)
 				{
-					if(sensor.isPlayerSensible && 
-							!sensor.isCollidingBox && 
-							sensor.sensorReactionEnter != null)
-					{
-						sensor.sensorReactionExit.run();
-					}
-					sensor.isCollidingPlayer = false;
+					sensor.sensorReactionExit.run();
 				}
+				sensor.isCollidingPlayer = false;
 			}
 		}
 	}

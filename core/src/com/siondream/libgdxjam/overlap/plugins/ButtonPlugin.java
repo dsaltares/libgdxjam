@@ -42,12 +42,9 @@ public class ButtonPlugin implements OverlapLoaderPlugin
 		
 		final SensorComponent sensor = new SensorComponent();
 		
-		if(on == null || off == null)
-		{
-			sceneAtlas = Env.getGame().getAssetManager().get(Env.SCENES_TEXTURES_FOLDER + scene.getName() + "pack.atlas", TextureAtlas.class);
-			on = sceneAtlas.findRegion("GroundSG");
-			off = sceneAtlas.findRegion("GroundSR");
-		}
+		sceneAtlas = Env.getGame().getAssetManager().get(Env.SCENES_TEXTURES_FOLDER + scene.getName() + "pack.atlas", TextureAtlas.class);
+		on = sceneAtlas.findRegion("GroundSG");
+		off = sceneAtlas.findRegion("GroundSR");
 		
 		Filter filter = new Filter();
 		filter.categoryBits = physicsSystem.getCategories().getBits("sensor");
