@@ -11,7 +11,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.World;
@@ -127,9 +126,9 @@ public class GameScreen implements Screen, InputProcessor {
 
 	private void generateResetButton(TextureAtlas uiAtlas)
 	{
-		Texture resetButtonTexture = uiAtlas.findRegion("btn_reset").getTexture(); 
+		TextureRegion resetButtonRegion = uiAtlas.findRegion("btn_reset"); 
 		Button.ButtonStyle resetButtonStyle = new Button.ButtonStyle();
-		resetButtonStyle.up = new TextureRegionDrawable(new TextureRegion(resetButtonTexture));
+		resetButtonStyle.up = new TextureRegionDrawable(resetButtonRegion);
 		resetButton = new Button(resetButtonStyle);
 		
 		resetButton.addListener(new ClickListener() {

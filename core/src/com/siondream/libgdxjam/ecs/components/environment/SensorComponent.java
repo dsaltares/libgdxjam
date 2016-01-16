@@ -12,6 +12,8 @@ public class SensorComponent implements Component
 	// Bit-masking this might be better in the future
 	public boolean isPlayerSensible;
 	public boolean isBoxSensible;
+	public boolean isCollidingPlayer;
+	public boolean isCollidingBox;
 	
 	public Fixture sensorFixture;
 }

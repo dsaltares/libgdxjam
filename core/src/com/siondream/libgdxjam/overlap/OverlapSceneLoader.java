@@ -278,6 +278,8 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		return entity;
 	}
 	
+	
+	
 	private Entity loadImage(OverlapScene scene, JsonValue value) {
 		Entity entity = new Entity();
 		
@@ -295,11 +297,18 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		size.width = texture.region.getRegionWidth() * parameters.units;
 		size.height = texture.region.getRegionHeight() * parameters.units;
 		
+		loadPolygon(entity, transform, value);
+		
 		entity.add(node);
 		entity.add(size);
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(index);
+		
+		if(value.has("customVars"))
+		{
+			loadTypeProperties(scene, entity, getExtraInfo(value.getString("customVars")));
+		}
 		
 		return entity;
 	}
@@ -358,9 +367,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		// Parse vertices
 		JsonValue shapeInfo = polygonInfo.get("polygons");
 		JsonValue physicsInfo = value.get("physics");
-		
-		Array<Vector2[]> mesh = Array.of(Vector2[].class);
-		
+				
 		Body body;
 		BodyDef bodyDef = new BodyDef();
 		
