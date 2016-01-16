@@ -1,7 +1,7 @@
 {
     "spine": "./spine/Grunt.json",
     "tags": {
-        "movement": [ "idle", "move", "shoot" ]
+        "movement": [ "idle", "move", "shoot", "sleep", "wakeup" ]
     },
     "layers": {
         "fullBody": [
@@ -18,6 +18,16 @@
             {
                 "tags": [ "shoot" ],
                 "name": "Shoot",
+                "loop": false,
+            },
+            {
+                "tags": [ "sleep" ],
+                "name": "Sleep",
+                "loop": true,
+            },
+            {
+                "tags": [ "wakeup" ],
+                "name": "Wakeup",
                 "loop": false,
             },
         ]

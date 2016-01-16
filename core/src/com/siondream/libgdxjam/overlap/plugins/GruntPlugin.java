@@ -18,6 +18,7 @@ import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
+import com.siondream.libgdxjam.ecs.components.ai.SleepComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
@@ -58,8 +59,6 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
-		spine.state.setAnimation(0, "Idle", true);
-		spine.state.getData().setDefaultMix(0.1f);
 		size.width = 2.0f;
 		size.height = 2.0f;
 		
@@ -78,18 +77,20 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		String initialState = map.get("initialState", "patrol");
 		StateComponent state = null;
 		
-		switch(initialState)
-		{
-			case "patrol":
-				PatrolComponent patrol = new PatrolComponent();
-				patrol.maxX = grunt.center + grunt.rightWalkableArea;
-				patrol.minX = grunt.center - grunt.leftWalkableArea;
-				patrol.speed = grunt.walkSpeed;
-				patrol.direction = grunt.direction;
-				patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
-				patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
-				state = patrol;
-				break;
+		if (initialState.equals("patrol") ||
+			initialState.equals("sleep")) {
+			PatrolComponent patrol = new PatrolComponent();
+			patrol.maxX = grunt.center + grunt.rightWalkableArea;
+			patrol.minX = grunt.center - grunt.leftWalkableArea;
+			patrol.speed = grunt.walkSpeed;
+			patrol.direction = grunt.direction;
+			patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
+			patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
+			state = patrol;
+		}
+		
+		if (initialState.equals("sleep")) {
+			stateMachine.nextState = new SleepComponent();
 		}
 		
 		stateMachine.currentState = state;

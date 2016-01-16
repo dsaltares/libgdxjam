@@ -45,6 +45,7 @@ import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.ecs.systems.ai.AttackSystem;
 import com.siondream.libgdxjam.ecs.systems.ai.IdleSystem;
 import com.siondream.libgdxjam.ecs.systems.ai.PatrolSystem;
+import com.siondream.libgdxjam.ecs.systems.ai.SleepSystem;
 import com.siondream.libgdxjam.ecs.systems.ai.StateMachineSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.physics.Categories;
@@ -254,6 +255,7 @@ public class GameScreen implements Screen, InputProcessor {
 		PatrolSystem patrolSystem = new PatrolSystem();
 		IdleSystem idleSystem = new IdleSystem();
 		AttackSystem attackSystem = new AttackSystem();
+		SleepSystem sleepSystem = new SleepSystem(Env.getGame().getTags());
 		GruntSystem gruntSystem = new GruntSystem(physicsSystem.getWorld(), Env.getGame().getTags());
 		CCTvSystem cctvSystem = new CCTvSystem(
 			physicsSystem.getWorld(),
@@ -280,6 +282,7 @@ public class GameScreen implements Screen, InputProcessor {
 		patrolSystem.priority = 2;
 		idleSystem.priority = 2;
 		attackSystem.priority = 2;
+		sleepSystem.priority = 2;
 		sensorSystem.priority = 2;
 		lightSystem.priority = 3;
 		particleSystem.priority = 4;
@@ -298,6 +301,7 @@ public class GameScreen implements Screen, InputProcessor {
 		engine.addSystem(patrolSystem);
 		engine.addSystem(idleSystem);
 		engine.addSystem(attackSystem);
+		engine.addSystem(sleepSystem);
 		engine.addSystem(sensorSystem);
 		engine.addSystem(cameraSystem);
 		engine.addSystem(lightSystem);

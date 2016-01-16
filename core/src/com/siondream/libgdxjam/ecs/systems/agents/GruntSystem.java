@@ -92,7 +92,6 @@ public class GruntSystem extends IteratingSystem {
 		else if(Mappers.attack.has(entity)) {
 			control.set(gruntTags.shoot);
 		}
-		// TODO: Sleep
 	}
 	
 	private void updateDetection(Entity entity, GruntComponent grunt) {
@@ -187,7 +186,7 @@ public class GruntSystem extends IteratingSystem {
 		private float minFraction;
 		
 		public void prepare(Entity target) {
-			logger.info("Direccionado y viendole... comprobando si hay obstáculos");
+			logger.info("Direccionado y viendole... comprobando si hay obstï¿½culos");
 			this.target = target;
 			exposed = false;
 			minFraction = Float.MAX_VALUE;
