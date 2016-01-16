@@ -45,6 +45,7 @@ public class EndOfLevelPlugin implements OverlapLoaderPlugin
 		bodyDef.type = BodyType.StaticBody;
 		
 		body = physicsSystem.getWorld().createBody(bodyDef);
+		body.setUserData(entity);
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.isSensor = true;

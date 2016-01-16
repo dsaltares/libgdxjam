@@ -13,6 +13,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ObserverComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
@@ -43,6 +44,7 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		SpineComponent spine = new SpineComponent();
 		AnimationControlComponent animControl = new AnimationControlComponent();
 		StateMachineComponent stateMachine = new StateMachineComponent();
+		ObserverComponent observer = new ObserverComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
@@ -66,7 +68,7 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		
 		PhysicsData physicsData = assetManager.get(Env.PHYSICS_FOLDER + "/grunt-idle.json", PhysicsData.class);
 		physics.body = physicsData.createBody(physicsSystem.getWorld(), entity);
-		
+
 		NodeComponent node = Mappers.node.get(entity);
 		NodeUtils.computeWorld(entity);
 		
@@ -102,5 +104,6 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		entity.add(stateMachine);
 		entity.add(state);
 		entity.add(animControl);
+		entity.add(observer);
 	}
 }

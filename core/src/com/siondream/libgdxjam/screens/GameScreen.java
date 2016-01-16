@@ -38,6 +38,7 @@ import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.ecs.systems.RenderingSystem;
 import com.siondream.libgdxjam.ecs.systems.SensorSystem;
 import com.siondream.libgdxjam.ecs.systems.SpineSystem;
+import com.siondream.libgdxjam.ecs.systems.VisionSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.CCTvSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.GruntSystem;
 import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
@@ -250,14 +251,18 @@ public class GameScreen implements Screen, InputProcessor {
 		ParticleSystem particleSystem = new ParticleSystem(Env.UI_TO_WORLD);
 		LayerSystem layerSystem = new LayerSystem();
 		SpineSystem spineSystem = new SpineSystem();
+		VisionSystem visionSystem = new VisionSystem(physicsSystem.getWorld());
 		StateMachineSystem stateMachineSystem = new StateMachineSystem();
 		PatrolSystem patrolSystem = new PatrolSystem();
 		IdleSystem idleSystem = new IdleSystem();
 		AttackSystem attackSystem = new AttackSystem();
 		SleepSystem sleepSystem = new SleepSystem(Env.getGame().getTags());
-		GruntSystem gruntSystem = new GruntSystem(physicsSystem.getWorld(), Env.getGame().getTags());
+		GruntSystem gruntSystem = new GruntSystem(
+			visionSystem,
+			Env.getGame().getTags()
+		);
 		CCTvSystem cctvSystem = new CCTvSystem(
-			physicsSystem.getWorld(),
+			visionSystem,
 			Env.getGame().getTags()
 		);
 		PlayerSystem playerSystem = new PlayerSystem(
@@ -279,21 +284,22 @@ public class GameScreen implements Screen, InputProcessor {
 		physicsSystem.priority = 1;
 		stateMachineSystem.priority = 1;
 		patrolSystem.priority = 2;
-		idleSystem.priority = 2;
-		attackSystem.priority = 2;
-		sleepSystem.priority = 2;
-		sensorSystem.priority = 2;
-		lightSystem.priority = 3;
-		particleSystem.priority = 4;
-		layerSystem.priority = 5;
-		spineSystem.priority = 6;
-		cctvSystem.priority = 7;
-		gruntSystem.priority = 7;
-		playerSystem.priority = 8;
-		cameraSystem.priority = 9;
-		animationControlSystem.priority = 10;
-		doorSystem.priority = 10;
-		renderingSystem.priority = 11;
+		idleSystem.priority = 3;
+		attackSystem.priority = 4;
+		sleepSystem.priority = 5;
+		sensorSystem.priority = 6;
+		lightSystem.priority = 7;
+		particleSystem.priority = 8;
+		layerSystem.priority = 9;
+		spineSystem.priority = 10;
+		visionSystem.priority = 11;
+		cctvSystem.priority = 12;
+		gruntSystem.priority = 13;
+		playerSystem.priority = 14;
+		cameraSystem.priority = 15;
+		animationControlSystem.priority = 16;
+		doorSystem.priority = 16;
+		renderingSystem.priority = 18;
 		
 		engine.addSystem(physicsSystem);
 		engine.addSystem(stateMachineSystem);
@@ -313,6 +319,7 @@ public class GameScreen implements Screen, InputProcessor {
 		engine.addSystem(animationControlSystem);
 		engine.addSystem(doorSystem);
 		engine.addSystem(playerSystem);
+		engine.addSystem(visionSystem);
 		
 		engine.addEntityListener(
 			Family.all(NodeComponent.class).get(),

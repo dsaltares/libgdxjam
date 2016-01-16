@@ -34,7 +34,7 @@ public class AttackSystem extends StateSystem
 							   .getAnimation()
 							   .getName()
 							   .equals("Shoot")) {
-					StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
+					StateMachineComponent stateMachine = Mappers.fsm.get(entity);
 					stateMachine.nextState = stateMachine.previousState;
 				}
 			}

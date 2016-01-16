@@ -13,6 +13,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ObserverComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
@@ -21,23 +22,16 @@ import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
 import com.siondream.libgdxjam.physics.PhysicsData;
 
-public class CCTvLoader implements OverlapLoaderPlugin
+public class CCTvPlugin implements OverlapLoaderPlugin
 {
-	private PhysicsSystem physicsSystem;
-
-	public CCTvLoader(PhysicsSystem physicsSystem)
-	{
-		this.physicsSystem = physicsSystem;
-	}
 	
 	@Override
-	public void load(OverlapScene scene, Entity entity, ObjectMap<String, String> map)
-	{
+	public void load(OverlapScene scene, Entity entity, ObjectMap<String, String> map) {
 		CCTvComponent cctv = new CCTvComponent();
-		//PhysicsComponent physics = new PhysicsComponent();
 		SizeComponent size = new SizeComponent();
 		SpineComponent spine = new SpineComponent();
 		AnimationControlComponent control = new AnimationControlComponent();
+		ObserverComponent observer = new ObserverComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
@@ -59,18 +53,13 @@ public class CCTvLoader implements OverlapLoaderPlugin
 		
 		control.data = assetManager.get("./anims/cctv.json", AnimationControl.class);
 		
-		PhysicsData physicsData = assetManager.get(Env.PHYSICS_FOLDER + "/beholder-stand.json", PhysicsData.class);
-		//physics.body = physicsData.createBody(physicsSystem.getWorld(), entity);
+		observer.fovAngle = 20.0f;
+		observer.distance = 4.5f;
 		
-		NodeComponent node = Mappers.node.get(entity);
-		NodeUtils.computeWorld(entity);
-		
-		//physics.body.setTransform(node.position, node.angle);
-		
-		//entity.add(physics);
 		entity.add(size);
 		entity.add(spine);
 		entity.add(cctv);
 		entity.add(control);
+		entity.add(observer);
 	}
 }

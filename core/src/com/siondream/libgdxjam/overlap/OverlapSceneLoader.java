@@ -38,6 +38,7 @@ import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.components.IDComponent;
 import com.siondream.libgdxjam.ecs.components.LayerComponent;
 import com.siondream.libgdxjam.ecs.components.LightComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
@@ -252,11 +253,14 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		NodeComponent node = new NodeComponent();
 		TransformComponent transform = new TransformComponent();
 		ZIndexComponent index = new ZIndexComponent();
+		IDComponent id = new IDComponent();
 		
 		entity.add(node);
 		entity.add(transform);
 		entity.add(index);
+		entity.add(id);
 		
+		id.value = value.getInt("uniqueId");
 		index.layer = value.getString("layerName");
 		
 		loadTransform(transform, value);
@@ -290,7 +294,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		TextureComponent texture = new TextureComponent();
 		ZIndexComponent index = new ZIndexComponent();
 		SizeComponent size = new SizeComponent();
+		IDComponent id = new IDComponent();
 		
+		id.value = value.getInt("uniqueId");
 		loadTransform(transform, value);
 		index.layer = value.getString("layerName");
 		texture.region = atlas.findRegion(value.getString("imageName"));
@@ -304,6 +310,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(transform);
 		entity.add(texture);
 		entity.add(index);
+		entity.add(id);
 		
 		if(value.has("customVars"))
 		{
@@ -323,6 +330,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		ParticleComponent particle = new ParticleComponent();
 		ZIndexComponent index = new ZIndexComponent();
 		SizeComponent size = new SizeComponent();
+		IDComponent id = new IDComponent();
+		
+		id.value = value.getInt("uniqueId");
 		
 		loadTransform(transform, value);
 		index.layer = value.getString("layerName");
@@ -345,6 +355,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(transform);
 		entity.add(particle);
 		entity.add(index);
+		entity.add(id);
 		
 		return entity;
 	}
@@ -388,6 +399,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		
 		// Create the body
 		body = this.parameters.world.createBody(bodyDef);
+		body.setUserData(entity);
 		
 		for (JsonValue vertices = shapeInfo.child; vertices != null; vertices = vertices.next) {
 			Array<Vector2> points = Array.of(Vector2.class);
@@ -478,6 +490,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		TransformComponent transform = new TransformComponent();
 		ZIndexComponent index = new ZIndexComponent();
 		LightComponent light = new LightComponent();
+		IDComponent id = new IDComponent();
+		
+		id.value = value.getInt("uniqueId");
 		
 		loadTransform(transform, value);
 		
@@ -490,6 +505,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(transform);
 		entity.add(index);
 		entity.add(light);
+		entity.add(id);
 		
 		return entity;
 	}
@@ -564,6 +580,9 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		ZIndexComponent index = new ZIndexComponent();
 		SizeComponent size = new SizeComponent();
 		SpineComponent spine = new SpineComponent();
+		IDComponent id = new IDComponent();
+		
+		id.value = value.getInt("uniqueId");
 		
 		loadTransform(transform, value);
 		index.layer = value.getString("layerName");
@@ -608,6 +627,7 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		entity.add(transform);
 		entity.add(index);
 		entity.add(spine);
+		entity.add(id);
 		
 		return entity;
 	}

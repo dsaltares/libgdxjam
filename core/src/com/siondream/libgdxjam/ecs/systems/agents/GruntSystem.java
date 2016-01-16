@@ -5,50 +5,44 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
+import com.siondream.libgdxjam.ecs.components.ObserverComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
-import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
-import com.siondream.libgdxjam.utils.Direction;
+import com.siondream.libgdxjam.ecs.systems.VisionSystem;
 
 public class GruntSystem extends IteratingSystem {
 	private Logger logger = new Logger(
 		GruntSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
-	
-	private World world;
-	
+
 	private Tags tags;
 	private GruntTags gruntTags;
-	
 	private ImmutableArray<Entity> players;
-	private Vector2 direction = new Vector2();
 	
-	private GruntCallback callback = new GruntCallback();
+	VisionSystem visionSystem;
 	
-	public GruntSystem(World world, Tags tags) {
+	public GruntSystem(VisionSystem visionSystem, Tags tags) {
 		super(Family.all(
 			GruntComponent.class,
 			SpineComponent.class,
-			AnimationControlComponent.class
+			AnimationControlComponent.class,
+			ObserverComponent.class
 		).get());
 		
 		logger.info("initialize");
-		this.world = world;
+		this.visionSystem = visionSystem;
 		this.tags = tags;
 		this.gruntTags = new GruntTags();
 	}
@@ -64,7 +58,8 @@ public class GruntSystem extends IteratingSystem {
 		GruntComponent grunt = Mappers.grunt.get(entity);
 		updateDirection(entity, grunt);
 		updateAnimation(entity, grunt);
-		updateDetection(entity, grunt);
+		updateObserver(entity);
+		updateAlert(entity, grunt);
 		updateAnimationControl(entity);
 	}
 	
@@ -81,6 +76,15 @@ public class GruntSystem extends IteratingSystem {
 		spine.skeleton.setFlipX(grunt.direction.value() < 0);	
 	}
 	
+	private void updateObserver(Entity entity) {
+		GruntComponent grunt = Mappers.grunt.get(entity);
+		ObserverComponent observer = Mappers.observer.get(entity);
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		Body body = physics.body;
+		observer.position.set(body.getWorldCenter());
+		observer.angle = grunt.direction.value() < 0 ? 180.0f : 0.0f;
+	}
+	
 	private void updateAnimationControl(final Entity entity) {
 		AnimationControlComponent control = Mappers.animControl.get(entity);
 		if (Mappers.patrol.has(entity)) {
@@ -94,7 +98,7 @@ public class GruntSystem extends IteratingSystem {
 		}
 	}
 	
-	private void updateDetection(Entity entity, GruntComponent grunt) {
+	private void updateAlert(Entity entity, GruntComponent grunt) {
 		if (Mappers.patrol.has(entity)) {
 			grunt.isAwake = true;
 			grunt.isAlerted = false;
@@ -105,10 +109,10 @@ public class GruntSystem extends IteratingSystem {
 		}
 		else if(Mappers.attack.has(entity)) {
 			grunt.isAwake = false;
+			grunt.isAlerted = false;
 		}
 		
-		if(grunt.isAwake)
-		{
+		if(grunt.isAwake) {
 			for (Entity target : players) {
 				updateDetection(entity, target);
 				
@@ -120,98 +124,21 @@ public class GruntSystem extends IteratingSystem {
 		}
 	}
 	
-	private void updateDetection(Entity entity, Entity target)
-	{
-		final StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
-		PhysicsComponent gruntPhysics = Mappers.physics.get(entity);
-		PhysicsComponent targetPhysics = Mappers.physics.get(target);
+	private void updateDetection(Entity entity, Entity target) {
+		StateMachineComponent fsm = Mappers.fsm.get(entity);
 		GruntComponent grunt = Mappers.grunt.get(entity);
 		
-		if( isLookingAtTarget(entity, target) &&
-				isWithinVisionRange(entity, target))
-		{
-			callback.prepare(target);
-			world.rayCast(callback, gruntPhysics.body.getPosition(), targetPhysics.body.getPosition());
+		if (visionSystem.canSee(entity, target)) {
+			grunt.isAlerted = true;
 			
-			if (callback.exposed) {
-				logger.info("Grunt: exposed!!!!");
-
-				grunt.isAlerted = true;
-				
-				AttackComponent attackComponent = new AttackComponent();
-				stateMachine.nextState = attackComponent;
-			}
+			AttackComponent attackComponent = new AttackComponent();
+			fsm.nextState = attackComponent;
 		}
-	}
-	
-	private boolean isWithinVisionRange(Entity entity, Entity target)
-	{
-		PhysicsComponent gruntPhysics = Mappers.physics.get(entity);
-		PhysicsComponent targetPhysics = Mappers.physics.get(target);
-		GruntComponent grunt = Mappers.grunt.get(entity);
-		
-		direction.set(gruntPhysics.body.getPosition());
-		direction.sub(targetPhysics.body.getPosition());
-		
-		return Math.abs(direction.len2()) < (grunt.sightDistance * grunt.sightDistance);
-	}
-	
-	private boolean isLookingAtTarget(Entity entity, Entity target)
-	{
-		TransformComponent gruntTransform = Mappers.transform.get(entity);
-		TransformComponent targetTransform = Mappers.transform.get(target);
-		GruntComponent grunt = Mappers.grunt.get(entity);
-		
-		// TODO: Maybe this should be done with dot product if we include direction in matrix
-		if( 	(gruntTransform.position.x > targetTransform.position.x &&
-					grunt.direction == Direction.COUNTERCLOCKWISE) ||
-				(gruntTransform.position.x < targetTransform.position.x &&
-					grunt.direction == Direction.CLOCKWISE) )
-		{
-			return true;
-		}
-		
-		return false;
 	}
 	
 	private class GruntTags {
 		int idle = tags.get("idle");
 		int move = tags.get("move");
 		int shoot = tags.get("shoot");
-	}
-	
-	private class GruntCallback implements RayCastCallback {
-		public Entity target;
-		public boolean exposed;
-		private float minFraction;
-		
-		public void prepare(Entity target) {
-			logger.info("Direccionado y viendole... comprobando si hay obst�culos");
-			this.target = target;
-			exposed = false;
-			minFraction = Float.MAX_VALUE;
-		}
-		
-		@Override
-		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-			PlayerComponent player = Mappers.player.get(target);
-
-			minFraction = Math.min(minFraction, fraction);
-			
-			/*
-			// I dunno why this doesn't work:
-			if (minFraction == fraction) 
-			{
-				exposed = fixture == player.fixture ? true : false;
-			}*/
-			
-			// Quick hack:
-			if (minFraction == fraction) 
-			{
-				exposed = fixture.getBody().getPosition() == player.fixture.getBody().getPosition() ? true : false;
-			}
-			
-			return fraction;
-		}
 	}
 }

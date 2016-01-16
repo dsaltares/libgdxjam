@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.ecs.systems;
 import box2dLight.RayHandler;
 
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
@@ -242,13 +243,14 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	private void renderDebug() {
 		if (!debug) return;
 		
+		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		renderGrid();
 		box2DRenderer.render(world, viewport.getCamera().combined);
 		renderCameraDebug();
+		renderSystems();
 	}
 	
 	private void renderGrid() {
-		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.setColor(Color.PINK);
 		shapeRenderer.begin(ShapeType.Line);
 		
@@ -288,5 +290,14 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 			0.1f
 		);
 		shapeRenderer.end();
+	}
+	
+	private void renderSystems() {
+		for (EntitySystem system : getEngine().getSystems()) {
+			if (system instanceof DebugRenderer) {
+				DebugRenderer renderer = (DebugRenderer)system;
+				renderer.render(shapeRenderer);
+			}
+		}
 	}
 }

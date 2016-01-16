@@ -141,7 +141,7 @@ public class SleepSystem extends StateSystem {
 			grunt.direction = pos1.x > pos2.x ? Direction.COUNTERCLOCKWISE : Direction.CLOCKWISE;
 			patrol.direction = grunt.direction;
 			
-			StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
+			StateMachineComponent stateMachine = Mappers.fsm.get(entity);
 			stateMachine.nextState = patrol;
 		}
 	}

@@ -42,7 +42,7 @@ public class PatrolSystem extends StateSystem
 	}
 	
 	private void changeToIdle(final PatrolComponent patrol, final Entity entity, float secondsToChange) {
-		final StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
+		final StateMachineComponent stateMachine = Mappers.fsm.get(entity);
 		IdleComponent idle = new IdleComponent();
 		idle.secondsToRunRunnable = secondsToChange;
 		idle.runnable = new Runnable() {

@@ -23,7 +23,7 @@ public class StateMachineSystem extends IteratingSystem
 	@Override
 	protected void processEntity(Entity entity, float deltaTime)
 	{
-		StateMachineComponent stateMachine = Mappers.stateMachine.get(entity);
+		StateMachineComponent stateMachine = Mappers.fsm.get(entity);
 	    if(stateMachine.nextState != null)
 	    {
 	    	logger.info("Changing from: " + stateMachine.currentState.getClass().getSimpleName() + " to " + stateMachine.nextState.getClass().getSimpleName());

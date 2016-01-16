@@ -1,7 +1,5 @@
 package com.siondream.libgdxjam.ecs.systems.agents;
 
-import box2dLight.ConeLight;
-
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -9,19 +7,17 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.RayCastCallback;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
-import com.siondream.libgdxjam.ecs.components.LightComponent;
-import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ObserverComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.CCTvComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.ecs.systems.VisionSystem;
 import com.siondream.libgdxjam.progression.Event;
 import com.siondream.libgdxjam.progression.EventManager;
 import com.siondream.libgdxjam.progression.EventType;
@@ -32,17 +28,15 @@ public class CCTvSystem extends IteratingSystem {
 	
 	private ImmutableArray<Entity> players;
 	private Vector2 position = new Vector2();
-	private Vector2 lightToPlayer = new Vector2();
-	private World world;
 	private Tags tags;
 	private CCTVTags cctvTags;
 	private Logger logger = new Logger(
 		CCTvSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
-	private CCTVCallback callback = new CCTVCallback();
+	private VisionSystem visionSystem;
 	
-	public CCTvSystem(World world, Tags tags) {
+	public CCTvSystem(VisionSystem visionSystem, Tags tags) {
 		super(Family.all(
 			CCTvComponent.class,
 			TransformComponent.class,
@@ -50,7 +44,7 @@ public class CCTvSystem extends IteratingSystem {
 		).get());
 		
 		logger.info("initialize");
-		this.world = world;
+		this.visionSystem = visionSystem;
 		this.tags = tags;
 		this.cctvTags = new CCTVTags();
 	}
@@ -63,9 +57,18 @@ public class CCTvSystem extends IteratingSystem {
 	
 	@Override
 	protected void processEntity(Entity entity, float deltaTime) {
-		updateDetection(entity, deltaTime);
 		moveCamera(entity, deltaTime);
+		updateObserver(entity);
+		updateDetection(entity, deltaTime);
 		updateAnimation(entity);
+	}
+	
+	private void updateObserver(Entity entity) {
+		NodeUtils.getPosition(entity, position);
+		CCTvComponent cctv = Mappers.cctv.get(entity);
+		ObserverComponent observer = Mappers.observer.get(entity);
+		observer.position.set(position);
+		observer.angle = cctv.currentAngle;
 	}
 	
 	private void updateDetection(Entity entity, float deltaTime) {
@@ -94,38 +97,14 @@ public class CCTvSystem extends IteratingSystem {
 	
 	private void updateDetection(Entity entity, Entity target) {
 		Vector2 targetPos = Mappers.physics.get(target).body.getPosition();
-		NodeComponent node = Mappers.node.get(entity);
-		LightComponent light = findLight(entity);
 		CCTvComponent cctv = Mappers.cctv.get(entity);
 		
 		cctv.alerted = false;
 		cctv.targetPosition.set(0.0f, 0.0f);
 		
-		if (light == null || !(light.light instanceof ConeLight)) { return; }
-		
-		ConeLight coneLight = (ConeLight)light.light;
-		Vector2 lightPosition = coneLight.getPosition();
-		
-		lightToPlayer.set(targetPos);
-		lightToPlayer.sub(lightPosition);
-		
-		float lightToPlayerDistance = lightToPlayer.len();
-		
-		lightToPlayer.nor();
-		
-		float lightToPlayerAngle = lightToPlayer.angle();
-		float angleDifference = Math.abs(lightToPlayerAngle - node.angle);
-		boolean inCone = lightToPlayerDistance < coneLight.getDistance() &&
-						 angleDifference < (coneLight.getConeDegree() * 2.0f);
-		
-		if (inCone) {
-			callback.prepare(target);	
-			world.rayCast(callback, lightPosition, targetPos);
-			
-			if (callback.exposed) {
-				cctv.alerted = true;
-				cctv.targetPosition.set(targetPos);
-			}
+		if (visionSystem.canSee(entity, target)) {
+			cctv.alerted = true;
+			cctv.targetPosition.set(targetPos);
 		}
 	}
 	
@@ -188,21 +167,6 @@ public class CCTvSystem extends IteratingSystem {
 		);
 	}
 	
-	private LightComponent findLight(Entity entity) {
-		if (Mappers.node.has(entity)) {
-			for (Entity child : Mappers.node.get(entity).children) {
-				if (Mappers.light.has(child)) {
-					return Mappers.light.get(child);
-				}
-			}
-			
-			return null;
-		}
-		else {
-			return Mappers.light.get(entity);
-		}
-	}
-	
 	private void updateAnimation(Entity entity) {
 		AnimationControlComponent control = Mappers.animControl.get(entity);
 		CCTvComponent cctv = Mappers.cctv.get(entity);
@@ -214,37 +178,7 @@ public class CCTvSystem extends IteratingSystem {
 			control.set(cctvTags.patrol);
 		}
 	}
-	
-	private class CCTVCallback implements RayCastCallback {
-		public Entity target;
-		public boolean exposed;
-		private float minFraction;
 
-		public void prepare(Entity target) {
-			this.target = target;
-			exposed = false;
-			minFraction = Float.MAX_VALUE;
-		}
-		
-		@Override
-		public float reportRayFixture(Fixture fixture,
-									  Vector2 point,
-									  Vector2 normal,
-									  float fraction) {
-			
-			minFraction = Math.min(minFraction, fraction);
-			
-			PlayerComponent player = Mappers.player.get(target);
-			
-			if (minFraction == fraction) 
-			{
-				exposed = fixture == player.fixture ? true : false;
-			}
-			
-			return fraction;
-		}	
-	}
-	
 	private class CCTVTags {
 		final int patrol = tags.get("patrol");
 		final int alert = tags.get("alert");

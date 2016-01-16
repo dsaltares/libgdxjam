@@ -9,6 +9,7 @@ import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
+import com.siondream.libgdxjam.ecs.components.ObservableComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
@@ -31,6 +32,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		SpineComponent spine = new SpineComponent();
 		SizeComponent size = new SizeComponent();
 		AnimationControlComponent animControl = new AnimationControlComponent();
+		ObservableComponent observable = new ObservableComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
@@ -49,6 +51,7 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		entity.add(spine);
 		entity.add(size);
 		entity.add(animControl);
+		entity.add(observable);
 		
 		cameraSystem.setTarget(entity);
 	}

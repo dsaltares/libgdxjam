@@ -10,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -22,6 +23,7 @@ import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.AnimationControlComponent;
 import com.siondream.libgdxjam.ecs.components.NodeComponent;
+import com.siondream.libgdxjam.ecs.components.ObservableComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
@@ -55,7 +57,8 @@ public class PlayerSystem extends IteratingSystem
 				PhysicsComponent.class,
 				TransformComponent.class,
 				AnimationControlComponent.class,
-				SpineComponent.class
+				SpineComponent.class,
+				ObservableComponent.class
 			).get()
 		);
 
@@ -117,6 +120,7 @@ public class PlayerSystem extends IteratingSystem
 		limitVelocity(entity);
 		updateDirection(entity);
 		updateAnimation(entity);
+		updateObservable(entity);
 	}
 
 	@Override
@@ -351,6 +355,13 @@ public class PlayerSystem extends IteratingSystem
 		
 		// Flip according to speed
 		spine.skeleton.setFlipX(player.direction < 0);	
+	}
+	
+	public void updateObservable(Entity entity) {
+		ObservableComponent observable = Mappers.observable.get(entity);
+		PhysicsComponent physics = Mappers.physics.get(entity);
+		Body body = physics.body;
+		observable.position.set(body.getWorldCenter());
 	}
 	
 	public boolean isInputBlocked()
