@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.EntityListener;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.ObservableComponent;
 import com.siondream.libgdxjam.ecs.components.ObserverComponent;
@@ -29,7 +31,7 @@ public class VisionSystem extends IteratingSystem
 	private Vector2 tmp2 = new Vector2();
 	private Logger logger = new Logger(
 		VisionSystem.class.getSimpleName(),
-		Logger.INFO
+		Env.LOG_LEVEL
 	);
 	
 	private ImmutableArray<Entity> observables;
@@ -79,6 +81,10 @@ public class VisionSystem extends IteratingSystem
 
 	@Override
 	protected void processEntity(Entity observer, float deltaTime) {
+		updateVision(observer);
+	}
+	
+	private void updateVision(Entity observer) {
 		for (Entity observable : observables) {
 			updateVision(observer, observable);
 		}
@@ -86,6 +92,7 @@ public class VisionSystem extends IteratingSystem
 
 	private void updateVision(Entity observer, Entity observable) {
 		if (!inFov(observer, observable)) {
+			removeFromVision(observer, observable);
 			return;
 		}
 		
@@ -129,10 +136,22 @@ public class VisionSystem extends IteratingSystem
 		);
 		
 		if (callback.canSee()) {
-			vision.get(entity).add(target);
+			addToVision(entity, target);
 		}
 		else {
-			vision.get(entity).remove(target);
+			removeFromVision(entity, target);
+		}
+	}
+	
+	private void addToVision(Entity observer, Entity observable) {
+		if (vision.get(observer).add(observable)) {
+			logger.info("Can now see");
+		}
+	}
+	
+	private void removeFromVision(Entity observer, Entity observable) {
+		if (vision.get(observer).remove(observable)) {
+			logger.info("Can't see anymore");
 		}
 	}
 	
