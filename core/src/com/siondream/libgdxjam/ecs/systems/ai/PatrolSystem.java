@@ -2,7 +2,9 @@ package com.siondream.libgdxjam.ecs.systems.ai;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
@@ -42,20 +44,21 @@ public class PatrolSystem extends StateSystem
 	}
 	
 	private void changeToIdle(final PatrolComponent patrol, final Entity entity, float secondsToChange) {
-		final StateMachineComponent stateMachine = Mappers.fsm.get(entity);
-		IdleComponent idle = new IdleComponent();
+		final StateMachineComponent fsm = Mappers.fsm.get(entity);
+		IdleComponent idle = fsm.get(IdleComponent.class);
 		idle.secondsToRunRunnable = secondsToChange;
 		idle.runnable = new Runnable() {
 
 			@Override
 			public void run() {
 				patrol.direction = patrol.direction.invert();
-				stateMachine.nextState = patrol;
+				Gdx.app.log("", "will now go: " + patrol.direction);
+				fsm.next(PatrolComponent.class);
 			}
 			
 		};
 		
-		stateMachine.nextState = idle;
+		fsm.next(IdleComponent.class);
 	}
 	
 	@Override

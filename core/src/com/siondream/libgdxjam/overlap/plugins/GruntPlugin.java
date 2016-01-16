@@ -18,6 +18,8 @@ import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.SizeComponent;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
+import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
+import com.siondream.libgdxjam.ecs.components.ai.IdleComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 import com.siondream.libgdxjam.ecs.components.ai.SleepComponent;
 import com.siondream.libgdxjam.ecs.components.ai.StateComponent;
@@ -43,7 +45,7 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		SizeComponent size = new SizeComponent();
 		SpineComponent spine = new SpineComponent();
 		AnimationControlComponent animControl = new AnimationControlComponent();
-		StateMachineComponent stateMachine = new StateMachineComponent();
+		StateMachineComponent fsm = new StateMachineComponent();
 		ObserverComponent observer = new ObserverComponent();
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
@@ -79,30 +81,38 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		String initialState = map.get("initialState", "patrol");
 		StateComponent state = null;
 		
-		if (initialState.equals("patrol") ||
-			initialState.equals("sleep")) {
-			PatrolComponent patrol = new PatrolComponent();
-			patrol.maxX = grunt.center + grunt.rightWalkableArea;
-			patrol.minX = grunt.center - grunt.leftWalkableArea;
-			patrol.speed = grunt.walkSpeed;
-			patrol.direction = grunt.direction;
-			patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
-			patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
-			state = patrol;
-		}
 		
-		if (initialState.equals("sleep")) {
-			stateMachine.nextState = new SleepComponent();
-		}
+		PatrolComponent patrol = new PatrolComponent();
+		patrol.maxX = grunt.center + grunt.rightWalkableArea;
+		patrol.minX = grunt.center - grunt.leftWalkableArea;
+		patrol.speed = grunt.walkSpeed;
+		patrol.direction = grunt.direction;
+		patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
+		patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
 		
-		stateMachine.currentState = state;
+		IdleComponent idle = new IdleComponent();
+		AttackComponent attack = new AttackComponent();
+		SleepComponent sleep = new SleepComponent();
+		
+		fsm.add(sleep);
+		fsm.add(attack);
+		fsm.add(idle);
+		fsm.add(patrol);
+		
+		switch(initialState) {
+		case "patrol":
+			fsm.next(PatrolComponent.class);
+			break;
+		case "sleep":
+			fsm.next(SleepComponent.class);
+			break;
+		}
 		
 		entity.add(physics);
 		entity.add(size);
 		entity.add(spine);
 		entity.add(grunt);
-		entity.add(stateMachine);
-		entity.add(state);
+		entity.add(fsm);
 		entity.add(animControl);
 		entity.add(observer);
 	}

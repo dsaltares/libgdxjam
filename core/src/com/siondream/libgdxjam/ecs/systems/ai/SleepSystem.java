@@ -121,28 +121,8 @@ public class SleepSystem extends StateSystem {
 					   .getAnimation()
 					   .getName()
 					   .equals("Wakeup")) {
-				configurePatrol();
+				Mappers.fsm.get(entity).next(PatrolComponent.class);
 			}
-		}
-		
-		private void configurePatrol() {
-			GruntComponent grunt = Mappers.grunt.get(entity);
-			
-			PatrolComponent patrol = new PatrolComponent();
-			patrol.maxX = grunt.center + grunt.rightWalkableArea;
-			patrol.minX = grunt.center - grunt.leftWalkableArea;
-			patrol.speed = grunt.walkSpeed;
-			
-			patrol.maxXwaitSeconds = grunt.rightAreaWaitSeconds;
-			patrol.minXwaitSeconds = grunt.leftAreaWaitSeconds;
-			
-			NodeUtils.getPosition(entity, pos1);
-			NodeUtils.getPosition(target, pos2);
-			grunt.direction = pos1.x > pos2.x ? Direction.COUNTERCLOCKWISE : Direction.CLOCKWISE;
-			patrol.direction = grunt.direction;
-			
-			StateMachineComponent stateMachine = Mappers.fsm.get(entity);
-			stateMachine.nextState = patrol;
 		}
 	}
 }

@@ -3,12 +3,12 @@ package com.siondream.libgdxjam.ecs.systems.ai;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.utils.ObjectMap;
+import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.AnimationState.AnimationStateListener;
-import com.esotericsoftware.spine.Event;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
 import com.siondream.libgdxjam.ecs.components.ai.AttackComponent;
-import com.siondream.libgdxjam.ecs.components.ai.StateMachineComponent;
+import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 
 public class AttackSystem extends StateSystem
 {
@@ -25,7 +25,7 @@ public class AttackSystem extends StateSystem
 		}
 		
 		final SpineComponent spine = Mappers.spine.get(entity);
-		AnimationStateListener listener = new AnimationStateListener() {
+		AnimationStateAdapter listener = new AnimationStateAdapter() {
 			
 			@Override
 			public void end(int trackIndex) {
@@ -34,19 +34,9 @@ public class AttackSystem extends StateSystem
 							   .getAnimation()
 							   .getName()
 							   .equals("Shoot")) {
-					StateMachineComponent stateMachine = Mappers.fsm.get(entity);
-					stateMachine.nextState = stateMachine.previousState;
+					Mappers.fsm.get(entity).next(PatrolComponent.class);
 				}
 			}
-
-			@Override
-			public void event(int trackIndex, Event event) {}
-			
-			@Override
-			public void start(int trackIndex) {}
-			
-			@Override
-			public void complete(int trackIndex, int loopCount) { }
 		};
 		
 		spine.state.addListener(listener);

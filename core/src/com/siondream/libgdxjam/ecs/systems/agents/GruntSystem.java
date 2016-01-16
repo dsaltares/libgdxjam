@@ -112,7 +112,8 @@ public class GruntSystem extends IteratingSystem {
 			grunt.isAlerted = false;
 		}
 		
-		if(grunt.isAwake) {
+		if(!Mappers.sleep.has(entity) && 
+		   !Mappers.attack.has(entity)) {
 			for (Entity target : players) {
 				updateDetection(entity, target);
 				
@@ -130,9 +131,7 @@ public class GruntSystem extends IteratingSystem {
 		
 		if (visionSystem.canSee(entity, target)) {
 			grunt.isAlerted = true;
-			
-			AttackComponent attackComponent = new AttackComponent();
-			fsm.nextState = attackComponent;
+			fsm.next(AttackComponent.class);
 		}
 	}
 	
