@@ -11,7 +11,6 @@ import com.siondream.libgdxjam.overlap.OverlapScene;
 
 public class BoxPlugin implements OverlapLoaderPlugin
 {
-
 	private PhysicsSystem physicsSystem;
 	
 	public BoxPlugin(PhysicsSystem physicsSystem)

@@ -27,7 +27,7 @@ public class SceneConfigPlugin implements OverlapLoaderPlugin
 	{
 		Event event = null;
 		
-		switch(condition)
+		switch(condition.toLowerCase())
 		{
 			case "rescue":
 				event = new Event(EventType.RESCUE_FOLK, true, true);

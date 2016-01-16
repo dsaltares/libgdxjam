@@ -76,6 +76,12 @@ public class PlayerSystem extends IteratingSystem
 		
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
+			categories.getBits("box"),
+			new PlayerLevelContactListener()
+		);
+		
+		physicsSystem.getHandler().add(
+			categories.getBits("player"),
 			categories.getBits("enemy"),
 			new PlayerLevelContactListener()
 		);

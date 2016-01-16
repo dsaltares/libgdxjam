@@ -15,6 +15,8 @@ public class DoorPlugin implements OverlapLoaderPlugin
 		DoorComponent door = new DoorComponent();
 		door.isOpen = false;
 		door.id = Integer.parseInt(map.get("doorId", "0"));
+		
+		entity.add(door);
 	}
 
 }

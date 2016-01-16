@@ -33,7 +33,6 @@ public class ButtonPlugin implements OverlapLoaderPlugin
 		this.doorSystem = doorSystem;
 	}
 	
-	
 	@Override
 	public void load(OverlapScene scene, Entity entity,
 			final ObjectMap<String, String> map)
@@ -43,9 +42,12 @@ public class ButtonPlugin implements OverlapLoaderPlugin
 		
 		final SensorComponent sensor = new SensorComponent();
 		
-		sceneAtlas = Env.getGame().getAssetManager().get(Env.SCENES_TEXTURES_FOLDER + scene.getName() + "pack.atlas", TextureAtlas.class);
-		on = new TextureRegion(sceneAtlas.findRegion("GroundSG").getTexture());
-		off = new TextureRegion(sceneAtlas.findRegion("GroundSR").getTexture());
+		if(on == null || off == null)
+		{
+			sceneAtlas = Env.getGame().getAssetManager().get(Env.SCENES_TEXTURES_FOLDER + scene.getName() + "pack.atlas", TextureAtlas.class);
+			on = sceneAtlas.findRegion("GroundSG");
+			off = sceneAtlas.findRegion("GroundSR");
+		}
 		
 		Filter filter = new Filter();
 		filter.categoryBits = physicsSystem.getCategories().getBits("sensor");
@@ -63,12 +65,9 @@ public class ButtonPlugin implements OverlapLoaderPlugin
 			@Override
 			public void run()
 			{
-				if(sensor.isEnabled)
-				{
-					logger.info("Opening door: " + Integer.parseInt(map.get("doorId", "0.0")));
-					doorSystem.toggleDoor(Integer.parseInt(map.get("doorId", "0.0")));
-					//texture.region = on;
-				}
+				logger.info("Opening door: " + Integer.parseInt(map.get("doorId", "0")));
+				doorSystem.openDoor(Integer.parseInt(map.get("doorId", "0")));
+				texture.region = on;
 			}
 		};
 		
@@ -77,12 +76,9 @@ public class ButtonPlugin implements OverlapLoaderPlugin
 			@Override
 			public void run()
 			{
-				if(sensor.isEnabled)
-				{
-					logger.info("Closing door: " + Integer.parseInt(map.get("doorId", "0.0")));
-					doorSystem.toggleDoor(Integer.parseInt(map.get("doorId", "0.0")));
-					//texture.region = off;
-				}
+				logger.info("Closing door: " + Integer.parseInt(map.get("doorId", "0")));
+				doorSystem.closeDoor(Integer.parseInt(map.get("doorId", "0")));
+				texture.region = off;
 			}
 		};
 		
