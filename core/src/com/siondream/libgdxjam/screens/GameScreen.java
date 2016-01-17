@@ -5,22 +5,26 @@ import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -65,7 +69,10 @@ public class GameScreen implements Screen, InputProcessor {
 	private OverlapScene scene;
 	private Logger logger = new Logger(GameScreen.class.getSimpleName(), Env.LOG_LEVEL);
 	
-	private Button resetButton;
+	private Button optionsButton;
+	private Window optionsWindow;
+	private Window victoryWindow;
+	private Window defeatWindow;
 	private Music music;
 	
 	public GameScreen() {
@@ -101,7 +108,7 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		scene = SceneManager.loadScene("Level1", world, categories, rayHandler);
 		
-		loadUI();
+		setupUI();
 		
 		addInputProcessors();
 		
@@ -121,47 +128,190 @@ public class GameScreen implements Screen, InputProcessor {
 		music.stop();
 	}
 	
-	private void loadUI()
+	private void setupUI()
 	{
 		AssetManager assetMgr = Env.getGame().getAssetManager();
 		Stage stage = Env.getGame().getStage();
 		
-		Table table = new Table();
-		table.setFillParent(true);
+		Table mainTable = new Table();
+		mainTable.setFillParent(true);
 		
-		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
+		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		
-		generateResetButton(uiAtlas);
+		createOptionsDialog(skin, mainTable);
+		createVictoryDialog(skin, mainTable);
+		createDefeatDialog(skin, mainTable);
+		
+		mainTable.row().padTop(30f).colspan(2).expand();
+		createOptionsButton(skin, mainTable);		
+		mainTable.row().colspan(1);
 
-		table.row().padTop(30f).colspan(2).expand();
-		table.add(resetButton).top().right();
-		table.row().colspan(1);
-				
-		table.debug();
+		//mainTable.debug();
 		
-		stage.addActor(table);
+		stage.addActor(mainTable);
 	}
 	
-	public void loadVictoryUI()
+	public void showVictoryUI()
 	{
 		
 	}
-	
 
-	private void generateResetButton(TextureAtlas uiAtlas)
+	//TODO: TO BE IMPROVED
+	private void createVictoryDialog(Skin skin, Table mainTable)
 	{
-		TextureRegion resetButtonRegion = uiAtlas.findRegion("btn_reset"); 
-		Button.ButtonStyle resetButtonStyle = new Button.ButtonStyle();
-		resetButtonStyle.up = new TextureRegionDrawable(resetButtonRegion);
-		resetButton = new Button(resetButtonStyle);
+		victoryWindow = new Window("", skin, "options");
+		victoryWindow.setSize(700f, 500f);
+		victoryWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
 		
-		resetButton.addListener(new ClickListener() {
+		Label title = new Label("DEFEAT", skin, "dialogtitle");
+		title.setColor(Color.RED);
+		TextButton againBtn = new TextButton("TRY AGAIN", skin, "optionsmenu");
+		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
+		
+		victoryWindow.row().pad(30f).center().uniformX();
+		victoryWindow.add(title).center();
+		
+		Table buttonsGroup = new Table();
+		buttonsGroup.row().center().fillX();
+		buttonsGroup.add(againBtn);
+		buttonsGroup.row().center().fillX().spaceTop(30f);
+		buttonsGroup.add(exitBtn);
+		
+		victoryWindow.row().pad(50).center();
+		victoryWindow.add(buttonsGroup);
+
+		mainTable.addActor(optionsWindow);
+		
+		againBtn.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				optionsButton.setVisible(true);
 				SceneManager.resetCurrentScene();
 			};
 		});
+		
+		exitBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Gdx.app.exit();
+			};
+		});
+		
+		victoryWindow.setVisible(false);
+		
+		//optionsWindow.debug();
+	}
+	
+	//TODO: TO BE IMPROVED
+	private void createDefeatDialog(Skin skin, Table mainTable)
+	{
+		defeatWindow = new Window("", skin, "options");
+		defeatWindow.setSize(700f, 500f);
+		defeatWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
+		
+		Label title = new Label("VICTORY", skin, "dialogtitle");
+		title.setColor(Color.GREEN);
+		TextButton againBtn = new TextButton("PLAY AGAIN", skin, "optionsmenu");
+		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
+		
+		defeatWindow.row().pad(30f).center().uniformX();
+		defeatWindow.add(title).center();
+		
+		Table buttonsGroup = new Table();
+		buttonsGroup.row().center().fillX();
+		buttonsGroup.add(againBtn);
+		buttonsGroup.row().center().fillX().spaceTop(30f);
+		buttonsGroup.add(exitBtn);
+		
+		defeatWindow.row().pad(50).center();
+		defeatWindow.add(buttonsGroup);
+
+		mainTable.addActor(defeatWindow);
+		
+		againBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(true);
+				SceneManager.resetCurrentScene();
+			};
+		});
+		
+		exitBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Gdx.app.exit();
+			};
+		});
+		
+		defeatWindow.setVisible(false);
+		
+		//optionsWindow.debug();
+	}
+	
+	//TODO: TO BE IMPROVED
+	private void createOptionsDialog(Skin skin, Table mainTable)
+	{
+		optionsWindow = new Window("", skin, "options");
+		optionsWindow.setSize(700f, 500f);
+		optionsWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
+		
+		Label title = new Label("SETTINGS", skin, "dialogtitle");
+		TextButton resetBtn = new TextButton("RESET", skin, "optionsmenu");
+		TextButton continueBtn = new TextButton("CONTINUE", skin, "optionsmenu");
+		
+		optionsWindow.row().pad(30f).center().uniformX();
+		optionsWindow.add(title).center();
+		
+		Table buttonsGroup = new Table();
+		buttonsGroup.row().center().fillX();
+		buttonsGroup.add(resetBtn);
+		buttonsGroup.row().center().fillX().spaceTop(30f);
+		buttonsGroup.add(continueBtn);
+		
+		optionsWindow.row().pad(50).center();
+		optionsWindow.add(buttonsGroup);
+
+		mainTable.addActor(optionsWindow);
+		
+		resetBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(true);
+				SceneManager.resetCurrentScene();
+			};
+		});
+		
+		continueBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(true);
+				optionsWindow.setVisible(false);
+			};
+		});
+		
+		optionsWindow.setVisible(false);
+		
+		//optionsWindow.debug();
+	}
+
+	private void createOptionsButton(Skin skin, final Table mainTable)
+	{
+		optionsButton = new ImageButton(skin, "options");
+		optionsButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(false);
+				optionsWindow.setVisible(true);
+			};
+		});
+		mainTable.add(optionsButton).size(75f).top().right();
 	}
 	
 	@Override

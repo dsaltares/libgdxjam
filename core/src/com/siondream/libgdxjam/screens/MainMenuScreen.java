@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -31,6 +32,7 @@ public class MainMenuScreen implements Screen
 	private SpriteBatch batch;
 	private TiledDrawable background;
 	private Music music;
+	private Sound click;
 	
 	public MainMenuScreen()
 	{
@@ -42,6 +44,8 @@ public class MainMenuScreen implements Screen
 		
 		music = assetMgr.get(Env.MUSIC_FOLDER + "/metaphysik.ogg", Music.class);
 		music.setLooping(true);
+		
+		click = assetMgr.get(Env.SFX_FOLDER + "/click3.ogg", Sound.class);
 	}
 	
 	@Override
@@ -90,6 +94,7 @@ public class MainMenuScreen implements Screen
 		{
 			public void clicked (InputEvent event, float x, float y)
 			{
+				click.play();
 				Env.getGame().setScreen( Screens.getGameScreen() );
 			}
 		});
@@ -98,6 +103,7 @@ public class MainMenuScreen implements Screen
 		{
 			public void clicked (InputEvent event, float x, float y)
 			{
+				click.play();
 				Gdx.app.exit();
 			}
 		});
