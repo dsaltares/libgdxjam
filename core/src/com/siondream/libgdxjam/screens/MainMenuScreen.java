@@ -89,7 +89,7 @@ public class MainMenuScreen implements Screen
 			public void clicked (InputEvent event, float x, float y)
 			{
 				click.play();
-				Env.getGame().setScreen( Screens.getGameScreen() );
+				Env.getGame().setScreen( Screens.getIntroScreen() );
 			}
 		});
 		

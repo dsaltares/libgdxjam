@@ -13,6 +13,10 @@ public class Screens
 		return new MainMenuScreen();
 	}
 	
+	public final static Screen getIntroScreen() {
+		return new IntroScreen();
+	}
+	
 	public final static Screen getGameScreen() {
 		return new GameScreen();
 	}

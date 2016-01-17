@@ -19,9 +19,7 @@
 	    dialogtitle_black: { font: medium, fontColor: black  }
 	    dialogtitle_green: { font: medium, fontColor: green  },
 	    dialogtitle_red: { font: medium, fontColor: red  }
-	},
-
-	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+	    paragraph: { font: small, fontColor: white  }
 	},
 
 	com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
@@ -36,6 +34,10 @@
         optionsmenu: {
             down: panel, up: panel_dark
             font: small, fontColor: black
+        },
+        intro: {
+            down: button, up: button_dark
+            font: small, fontColor: white
         }
     },
 
@@ -43,11 +45,16 @@
         options: {
             imageUp: settings, down: button_dark, up: button_light, over: button
         }
-    }
+    },
 
 	com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
         options: {
             background: button_light, titleFont: small
         }
-    }
+    },
+
+	com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+    	introPanel: { background: Monitor }
+	}
+
 }
