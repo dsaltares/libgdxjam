@@ -9,6 +9,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -84,6 +85,9 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				}
 				else if (extension.equals("skin")) {
 					assetMgr.load(file.path(), Skin.class);
+				}
+				else if (extension.equals("fnt")) {
+					assetMgr.load(file.path(), BitmapFont.class);
 				}
 				else if (extension.equals("json") &&
 						 path.equals(Env.SPINE_FOLDER)) {
