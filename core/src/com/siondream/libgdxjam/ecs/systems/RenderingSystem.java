@@ -211,7 +211,7 @@ public class RenderingSystem extends IteratingSystem implements Disposable {
 	
 	private boolean inFrustum(NodeComponent node, SizeComponent size, Vector2 origin) {
 		float scale = Math.max(node.scale.x, node.scale.y);
-		float radius = Math.max(size.width, size.height) * scale * 0.5f;
+		float radius = Math.max(size.width, size.height) * scale;
 		
 		bounds.max.x = node.position.x + origin.x + radius;
 		bounds.max.y = node.position.y + origin.y + radius;

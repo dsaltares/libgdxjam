@@ -95,7 +95,8 @@ public class SleepSystem extends StateSystem {
 		
 		NodeUtils.getPosition(playerEntity, pos2);
 		
-		if (entityPos.dst2(pos2) > sleep.detectionDistance * sleep.detectionDistance) {
+		if (Math.abs(entityPos.x - pos2.x) > sleep.detectionDistanceHor ||
+			Math.abs(entityPos.y - pos2.y) > sleep.detectionDistanceVer) {
 			return false;
 		}
 		

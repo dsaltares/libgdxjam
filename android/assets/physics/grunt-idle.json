@@ -25,7 +25,10 @@
 			},
 			"filter": {
 				"categoryBits": "enemy",
-				"maskBits":  []
+				"maskBits":  {
+					"collide": [ "level" ],
+					"filter": [ "player" ]
+				}
 			}
 		}
 	]
