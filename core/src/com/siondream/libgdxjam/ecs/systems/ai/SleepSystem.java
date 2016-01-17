@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -14,7 +16,6 @@ import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
 import com.siondream.libgdxjam.ecs.components.SpineComponent;
-import com.siondream.libgdxjam.ecs.components.agents.GruntComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.components.ai.PatrolComponent;
 import com.siondream.libgdxjam.ecs.components.ai.SleepComponent;
@@ -33,6 +34,10 @@ public class SleepSystem extends StateSystem {
 		Env.LOG_LEVEL
 	);
 	
+	private Sound wakeupSfx;
+	private Sound snoreSfx;
+	private long snoreId = 0l;
+	
 	public SleepSystem(Tags tags) {
 		super(Family.all(SleepComponent.class, SpineComponent.class).get());
 		
@@ -40,6 +45,10 @@ public class SleepSystem extends StateSystem {
 		
 		this.sleep = tags.get("sleep");
 		this.wakeup = tags.get("wakeup");
+		
+		AssetManager manager = Env.getGame().getAssetManager();
+		wakeupSfx = manager.get(Env.SFX_FOLDER + "/wakeup.ogg", Sound.class);
+		snoreSfx = manager.get(Env.SFX_FOLDER + "/snore.ogg", Sound.class);
 	}
 	
 	@Override
@@ -73,7 +82,7 @@ public class SleepSystem extends StateSystem {
 		for (Entity player : players) {
 			boolean detected = updateDetection(sleep, pos1, player);
 			
-			if (detected) {
+			if (detected && !Mappers.animControl.get(entity).get(wakeup)) {
 				wakeup(entity, player);
 				break;
 			}
@@ -96,6 +105,8 @@ public class SleepSystem extends StateSystem {
 	
 	private void wakeup(Entity entity, Entity player) {
 		logger.info("grunt " + entity + " woke up");
+		
+		wakeupSfx.play();
 		
 		AnimationStateListener listener = new WakeUpListener(entity, player);
 		listeners.put(entity, listener);
@@ -121,7 +132,14 @@ public class SleepSystem extends StateSystem {
 					   .getAnimation()
 					   .getName()
 					   .equals("Wakeup")) {
-				Mappers.fsm.get(entity).next(PatrolComponent.class);
+				StateMachineComponent fsm = Mappers.fsm.get(entity);
+				fsm.next(PatrolComponent.class);
+				
+				NodeUtils.getPosition(entity, pos1);
+				NodeUtils.getPosition(target, pos2);
+
+				PatrolComponent patrol = fsm.get(PatrolComponent.class);
+				patrol.direction = pos1.x < pos2.x ? Direction.CLOCKWISE : Direction.COUNTERCLOCKWISE;
 			}
 		}
 	}
