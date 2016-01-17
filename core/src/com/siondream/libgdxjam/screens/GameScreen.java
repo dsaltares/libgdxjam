@@ -12,6 +12,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.World;
@@ -74,6 +75,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private Window victoryWindow;
 	private Window defeatWindow;
 	private Music music;
+	private Sound click;
 	
 	public GameScreen() {
 		logger.info("initialize");
@@ -95,6 +97,8 @@ public class GameScreen implements Screen, InputProcessor {
 		AssetManager manager = Env.getGame().getAssetManager();
 		music = manager.get(Env.MUSIC_FOLDER + "/danger-storm.ogg", Music.class);
 		music.setLooping(true);
+		
+		click = manager.get(Env.SFX_FOLDER + "/click3.ogg", Sound.class);
 	}
 	
 	@Override
@@ -145,15 +149,18 @@ public class GameScreen implements Screen, InputProcessor {
 		mainTable.row().padTop(30f).colspan(2).expand();
 		createOptionsButton(skin, mainTable);		
 		mainTable.row().colspan(1);
-
-		//mainTable.debug();
 		
 		stage.addActor(mainTable);
 	}
 	
-	public void showVictoryUI()
+	public void showVictory()
 	{
-		
+		victoryWindow.setVisible(true);
+	}
+	
+	public void showDefeat()
+	{
+		defeatWindow.setVisible(true);
 	}
 
 	//TODO: TO BE IMPROVED
@@ -163,9 +170,9 @@ public class GameScreen implements Screen, InputProcessor {
 		victoryWindow.setSize(700f, 500f);
 		victoryWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
 		
-		Label title = new Label("DEFEAT", skin, "dialogtitle");
-		title.setColor(Color.RED);
-		TextButton againBtn = new TextButton("TRY AGAIN", skin, "optionsmenu");
+		Label title = new Label("VICTORY", skin, "dialogtitle_green");
+		title.setColor(Color.GREEN);
+		TextButton againBtn = new TextButton("PLAY AGAIN", skin, "optionsmenu");
 		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
 		
 		victoryWindow.row().pad(30f).center().uniformX();
@@ -186,7 +193,9 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				optionsButton.setVisible(true);
+				victoryWindow.setVisible(false);
 				SceneManager.resetCurrentScene();
 			};
 		});
@@ -195,13 +204,12 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				Gdx.app.exit();
 			};
 		});
 		
 		victoryWindow.setVisible(false);
-		
-		//optionsWindow.debug();
 	}
 	
 	//TODO: TO BE IMPROVED
@@ -211,9 +219,8 @@ public class GameScreen implements Screen, InputProcessor {
 		defeatWindow.setSize(700f, 500f);
 		defeatWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
 		
-		Label title = new Label("VICTORY", skin, "dialogtitle");
-		title.setColor(Color.GREEN);
-		TextButton againBtn = new TextButton("PLAY AGAIN", skin, "optionsmenu");
+		Label title = new Label("DEFEAT", skin, "dialogtitle_red");
+		TextButton againBtn = new TextButton("TRY AGAIN", skin, "optionsmenu");
 		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
 		
 		defeatWindow.row().pad(30f).center().uniformX();
@@ -234,7 +241,9 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				optionsButton.setVisible(true);
+				defeatWindow.setVisible(false);
 				SceneManager.resetCurrentScene();
 			};
 		});
@@ -243,13 +252,12 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				Gdx.app.exit();
 			};
 		});
 		
 		defeatWindow.setVisible(false);
-		
-		//optionsWindow.debug();
 	}
 	
 	//TODO: TO BE IMPROVED
@@ -259,7 +267,7 @@ public class GameScreen implements Screen, InputProcessor {
 		optionsWindow.setSize(700f, 500f);
 		optionsWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
 		
-		Label title = new Label("SETTINGS", skin, "dialogtitle");
+		Label title = new Label("SETTINGS", skin, "dialogtitle_black");
 		TextButton resetBtn = new TextButton("RESET", skin, "optionsmenu");
 		TextButton continueBtn = new TextButton("CONTINUE", skin, "optionsmenu");
 		
@@ -281,6 +289,7 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				optionsButton.setVisible(true);
 				SceneManager.resetCurrentScene();
 			};
@@ -290,14 +299,13 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				optionsButton.setVisible(true);
 				optionsWindow.setVisible(false);
 			};
 		});
 		
 		optionsWindow.setVisible(false);
-		
-		//optionsWindow.debug();
 	}
 
 	private void createOptionsButton(Skin skin, final Table mainTable)
@@ -307,6 +315,7 @@ public class GameScreen implements Screen, InputProcessor {
 			@Override
 			public void clicked(InputEvent event, float x, float y)
 			{
+				click.play();
 				optionsButton.setVisible(false);
 				optionsWindow.setVisible(true);
 			};

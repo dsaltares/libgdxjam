@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.systems.agents.PlayerSystem;
 import com.siondream.libgdxjam.overlap.OverlapScene;
+import com.siondream.libgdxjam.screens.GameScreen;
 
 public class EventManager 
 {
@@ -36,14 +37,12 @@ public class EventManager
 				if( satisfiesWinCondition(scene.getWinCondition()) )
 				{
 					engine.getSystem(PlayerSystem.class).setBlockInput(true);
-					logger.info("VICTORY"); // SHOW VICTORY
-					// Callback -> show level screen
+					((GameScreen) Env.getGame().getScreen()).showVictory();
 				}
 				break;
 			case YOU_HAVE_BEEN_KILLED:
 				engine.getSystem(PlayerSystem.class).setBlockInput(true);
-				logger.info("DEFEAT"); // SHOW DEFEAT
-				// Callback -> scene.reset();
+				((GameScreen) Env.getGame().getScreen()).showDefeat();
 				eventsQueue.clear();
 				break;
 		}

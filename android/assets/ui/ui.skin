@@ -15,7 +15,9 @@
 
 	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	    title: { font: big, fontColor: white, background: title_background  },
-	    dialogtitle: { font: medium, fontColor: black  }
+	    dialogtitle_black: { font: medium, fontColor: black  }
+	    dialogtitle_green: { font: medium, fontColor: green  },
+	    dialogtitle_red: { font: medium, fontColor: red  }
 	},
 
 	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
