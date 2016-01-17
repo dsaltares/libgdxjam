@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -29,6 +30,7 @@ public class MainMenuScreen implements Screen
 	private Stage stage;
 	private SpriteBatch batch;
 	private TiledDrawable background;
+	private Music music;
 	
 	public MainMenuScreen()
 	{
@@ -37,12 +39,21 @@ public class MainMenuScreen implements Screen
 		assetMgr = Env.getGame().getAssetManager();
 		stage = Env.getGame().getStage();
 		batch = new SpriteBatch();
+		
+		music = assetMgr.get(Env.MUSIC_FOLDER + "/metaphysik.ogg", Music.class);
+		music.setLooping(true);
 	}
 	
 	@Override
 	public void show()
 	{
 		loadUI();
+		music.play();
+	}
+	
+	@Override
+	public void hide() {
+		music.stop();
 	}
 	
 	private void loadUI()
@@ -59,9 +70,7 @@ public class MainMenuScreen implements Screen
 		createTitle(skin, mainTable);
 		mainTable.row().expand().padTop(100f);
 		createButtons(skin, mainTable);
-		
-		//mainTable.debug();
-		
+
 		stage.addActor(mainTable);
 	}
 	
@@ -128,11 +137,6 @@ public class MainMenuScreen implements Screen
 
 	@Override
 	public void resume() {
-		
-	}
-
-	@Override
-	public void hide() {
 		
 	}
 
