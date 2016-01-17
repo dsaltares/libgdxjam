@@ -13,12 +13,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Logger;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonDataLoader.SkeletonDataLoaderParameter;
@@ -47,7 +45,6 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		assetMgr = Env.getGame().getAssetManager();
 		stage = Env.getGame().getStage();
 		batch = new SpriteBatch();
-		//assetMgr.setErrorListener(this);
 		
 		loadUI();
 		loadAllAssets();
@@ -128,9 +125,13 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	}
 	
 	@Override
-	public void show()
-	{
+	public void show() {
 		setupUI();
+	}
+	
+	@Override
+	public void hide() {
+		stage.clear();
 	}
 
 	private void setupUI()
@@ -138,24 +139,15 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
 		
-		background = new TiledDrawable( uiAtlas.findRegion("space_background") );
+		background = new TiledDrawable( uiAtlas.findRegion("title") );
 		
 		Table mainTable = new Table();
 		mainTable.setFillParent(true);
 
-		mainTable.row().expandX().top().padTop(50f);
-		createTitle(skin, mainTable);
-		mainTable.row().expand().padTop(100f).padLeft(150f).padRight(150f);
+		mainTable.row().expand().padTop(350f).padLeft(150f).padRight(150f);
 		createProgressBar(skin, mainTable);
 
 		stage.addActor(mainTable);
-	}
-	
-	private void createTitle(Skin skin, Table mainTable)
-	{
-		Label title = new Label("SLOPPYNAUTS", skin, "title");
-		title.setAlignment(Align.center);
-		mainTable.add(title).fillX();
 	}
 	
 	private void createProgressBar(Skin skin, Table mainTable)
@@ -203,13 +195,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	}
 
 	@Override
-	public void hide() {
-		
-	}
-
-	@Override
-	public void dispose()
-	{
+	public void dispose() {
 		batch.dispose();
 	}
 	

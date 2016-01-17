@@ -51,38 +51,30 @@ public class MainMenuScreen implements Screen
 	@Override
 	public void show()
 	{
-		loadUI();
+		setupUI();
 		music.play();
 	}
 	
 	@Override
 	public void hide() {
 		music.stop();
+		stage.clear();
 	}
 	
-	private void loadUI()
+	private void setupUI()
 	{
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
 		
-		background = new TiledDrawable( uiAtlas.findRegion("space_background") );
+		background = new TiledDrawable( uiAtlas.findRegion("title") );
 		
 		Table mainTable = new Table();
 		mainTable.setFillParent(true);
 
-		mainTable.row().expandX().top().padTop(50f);
-		createTitle(skin, mainTable);
-		mainTable.row().expand().padTop(100f);
+		mainTable.row().expand().padTop(350f);
 		createButtons(skin, mainTable);
 
 		stage.addActor(mainTable);
-	}
-	
-	private void createTitle(Skin skin, Table mainTable)
-	{
-		Label title = new Label("SLOPPYNAUTS", skin, "title");
-		title.setAlignment(Align.center);
-		mainTable.add(title).fillX();
 	}
 	
 	private void createButtons(Skin skin, Table mainTable)
@@ -112,7 +104,7 @@ public class MainMenuScreen implements Screen
 		Table buttonsTable = new Table();
 		buttonsTable.row().fillX();
 		buttonsTable.add(playBtn);
-		buttonsTable.row().fillX().padTop(50f);
+		buttonsTable.row().fillX().padTop(20f);
 		buttonsTable.add(exitBtn);
 		
 		mainTable.add(buttonsTable).fillY();
