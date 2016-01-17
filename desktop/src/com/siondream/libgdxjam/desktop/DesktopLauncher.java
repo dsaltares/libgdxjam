@@ -18,6 +18,9 @@ public class DesktopLauncher {
 		Settings settings = new Settings();
 		settings.maxWidth = 2048;
 		settings.maxHeight = 2048;
+		settings.edgePadding = true;
+		settings.paddingX = 0;
+		settings.paddingY = 0;
 		
 		// Pack textures
 		RuntimeTexturePacker.generateAtlases(settings);

@@ -1,0 +1,96 @@
+
+ui.png
+size: 2048,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Button
+  rotate: false
+  xy: 1281, 378
+  size: 99, 99
+  split: 24, 26, 24, 26
+  orig: 99, 99
+  offset: 0, 0
+  index: -1
+Monitor
+  rotate: false
+  xy: 0, 98
+  size: 98, 98
+  split: 24, 25, 24, 25
+  orig: 98, 98
+  offset: 0, 0
+  index: -1
+Monitor_blue
+  rotate: false
+  xy: 256, 226
+  size: 98, 98
+  split: 24, 25, 24, 25
+  orig: 98, 98
+  offset: 0, 0
+  index: -1
+btn_reset
+  rotate: false
+  xy: 354, 246
+  size: 100, 78
+  orig: 100, 78
+  offset: 0, 0
+  index: -1
+panel
+  rotate: false
+  xy: 1380, 379
+  size: 98, 98
+  split: 24, 25, 24, 25
+  orig: 98, 98
+  offset: 0, 0
+  index: -1
+panel_dark
+  rotate: false
+  xy: 0, 0
+  size: 98, 98
+  split: 24, 25, 24, 25
+  orig: 98, 98
+  offset: 0, 0
+  index: -1
+panel_light
+  rotate: false
+  xy: 98, 98
+  size: 98, 98
+  split: 24, 25, 24, 25
+  orig: 98, 98
+  offset: 0, 0
+  index: -1
+space_background
+  rotate: false
+  xy: 1281, 334
+  size: 70, 44
+  orig: 70, 44
+  offset: 0, 0
+  index: -1
+title_background
+  rotate: false
+  xy: 0, 324
+  size: 1281, 153
+  orig: 1281, 153
+  offset: 0, 0
+  index: -1
+xirod25
+  rotate: false
+  xy: 0, 196
+  size: 256, 128
+  orig: 256, 128
+  offset: 0, 0
+  index: -1
+xirod60
+  rotate: false
+  xy: 0, 477
+  size: 2048, 128
+  orig: 2048, 128
+  offset: 0, 0
+  index: -1
+xirod90
+  rotate: false
+  xy: 0, 605
+  size: 2048, 256
+  orig: 2048, 256
+  offset: 0, 0
+  index: -1
