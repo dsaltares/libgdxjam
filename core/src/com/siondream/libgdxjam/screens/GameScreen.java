@@ -187,7 +187,7 @@ public class GameScreen implements Screen, InputProcessor {
 		victoryWindow.row().pad(50).center();
 		victoryWindow.add(buttonsGroup);
 
-		mainTable.addActor(optionsWindow);
+		mainTable.addActor(victoryWindow);
 		
 		againBtn.addListener(new ClickListener() {
 			@Override
