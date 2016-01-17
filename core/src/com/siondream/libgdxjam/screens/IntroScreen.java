@@ -10,12 +10,14 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 
@@ -114,6 +116,15 @@ public class IntroScreen implements Screen
 	{
 		TextButton startBtn = new TextButton("START", skin, "intro");
 		mainTable.add(startBtn);
+		
+		startBtn.addListener(new ClickListener()
+		{
+			public void clicked (InputEvent event, float x, float y)
+			{
+				click.play();
+				Env.getGame().setScreen( Screens.getGameScreen() );
+			}
+		});
 	}
 	
 	@Override
