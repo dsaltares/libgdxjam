@@ -1,11 +1,16 @@
 package com.siondream.libgdxjam.physics.listeners;
 
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
+import com.siondream.libgdxjam.ecs.systems.agents.PlayerFootsteps;
 import com.siondream.libgdxjam.physics.ContactAdapter;
 
 public class PlayerLevelContactListener extends ContactAdapter {
@@ -13,6 +18,12 @@ public class PlayerLevelContactListener extends ContactAdapter {
 		PlayerLevelContactListener.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
+	
+	private PlayerFootsteps footsteps;
+	
+	public PlayerLevelContactListener(PlayerFootsteps footsteps) {
+		this.footsteps = footsteps;
+	}
 	
 	@Override
 	public void beginContact(Contact contact) {
@@ -26,6 +37,7 @@ public class PlayerLevelContactListener extends ContactAdapter {
 
 		if (player.feetContacts == 1) {
 			logger.info("landed");
+			footsteps.play();
 		}
 	}
 

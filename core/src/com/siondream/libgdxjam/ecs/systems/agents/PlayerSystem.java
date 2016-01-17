@@ -9,12 +9,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
+import com.esotericsoftware.spine.Event;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.animation.Tags;
 import com.siondream.libgdxjam.ecs.Mappers;
@@ -43,12 +47,18 @@ public class PlayerSystem extends IteratingSystem
 	
 	private boolean isInputBlocked;
 	
+	private Sound jumpSfx;
+	private PlayerFootsteps footsteps;
+	
 	private Logger logger = new Logger(
 			PlayerSystem.class.getSimpleName(),
 		Env.LOG_LEVEL
 	);
 	
-	public PlayerSystem(PhysicsSystem physicsSystem, Tags tags) {
+	private ObjectMap<Entity, PlayerAnimationListener> listeners = new ObjectMap<Entity, PlayerAnimationListener>();
+	
+	public PlayerSystem(PhysicsSystem physicsSystem,
+						Tags tags) {
 		super(
 			Family.all(
 				PlayerComponent.class,
@@ -69,23 +79,28 @@ public class PlayerSystem extends IteratingSystem
 		Categories categories = physicsSystem.getCategories();
 		playerTags = new PlayerTags();
 		
+		this.footsteps = new PlayerFootsteps();
+		
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
 			categories.getBits("level"),
-			new PlayerLevelContactListener()
+			new PlayerLevelContactListener(footsteps)
 		);
 		
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
 			categories.getBits("box"),
-			new PlayerLevelContactListener()
+			new PlayerLevelContactListener(footsteps)
 		);
 		
 		physicsSystem.getHandler().add(
 			categories.getBits("player"),
 			categories.getBits("enemy"),
-			new PlayerLevelContactListener()
+			new PlayerLevelContactListener(footsteps)
 		);
+		
+		AssetManager manager = Env.getGame().getAssetManager();
+		jumpSfx = manager.get(Env.SFX_FOLDER + "/jump.ogg");
 	}
 	
 	@Override
@@ -103,11 +118,24 @@ public class PlayerSystem extends IteratingSystem
 	@Override
 	public void entityAdded(Entity entity) {
 		setStance(entity, standStance);
+		
+		PlayerAnimationListener listener = new PlayerAnimationListener();
+		Mappers.spine.get(entity).state.addListener(listener);
+		listeners.put(entity, listener);
 	}
 
 	@Override
 	public void entityRemoved(Entity entity) {
-		
+		PlayerAnimationListener listener = listeners.remove(entity);
+		Mappers.spine.get(entity).state.removeListener(listener);
+	}
+	
+	public boolean isInputBlocked() {
+		return this.isInputBlocked;
+	}
+	
+	public void setBlockInput(boolean blockInput) {
+		this.isInputBlocked = blockInput;
 	}
 
 	@Override
@@ -296,6 +324,8 @@ public class PlayerSystem extends IteratingSystem
 				position.x, position.y,
 				true
 			);
+			
+			jumpSfx.play();
 		}
 	}
 	
@@ -355,21 +385,11 @@ public class PlayerSystem extends IteratingSystem
 		spine.skeleton.setFlipX(player.direction < 0);	
 	}
 	
-	public void updateObservable(Entity entity) {
+	private void updateObservable(Entity entity) {
 		ObservableComponent observable = Mappers.observable.get(entity);
 		PhysicsComponent physics = Mappers.physics.get(entity);
 		Body body = physics.body;
 		observable.position.set(body.getWorldCenter());
-	}
-	
-	public boolean isInputBlocked()
-	{
-		return this.isInputBlocked;
-	}
-	
-	public void setBlockInput(boolean blockInput)
-	{
-		this.isInputBlocked = blockInput;
 	}
 	
 	private class PlayerTags {
@@ -379,5 +399,14 @@ public class PlayerSystem extends IteratingSystem
 		int crouch = tags.get("crouch");
 		int idle = tags.get("idle");
 		int run = tags.get("run");
+	}
+	
+	private class PlayerAnimationListener extends AnimationStateAdapter {
+		@Override
+		public void event(int trackIndex, Event event) {
+			if (event.getData().getName().equals("step")) {
+				footsteps.play();
+			}
+		}
 	}
 }
