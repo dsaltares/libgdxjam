@@ -5,12 +5,14 @@ import box2dLight.RayHandler;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.ashley.core.Family;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -21,7 +23,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
@@ -70,6 +71,8 @@ public class GameScreen implements Screen, InputProcessor {
 	
 	private Button optionsButton;
 	private Window optionsWindow;
+	private Window victoryWindow;
+	private Window defeatWindow;
 	private Music music;
 	
 	public GameScreen() {
@@ -136,6 +139,8 @@ public class GameScreen implements Screen, InputProcessor {
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		
 		createOptionsDialog(skin, mainTable);
+		createVictoryDialog(skin, mainTable);
+		createDefeatDialog(skin, mainTable);
 		
 		mainTable.row().padTop(30f).colspan(2).expand();
 		createOptionsButton(skin, mainTable);		
@@ -146,11 +151,107 @@ public class GameScreen implements Screen, InputProcessor {
 		stage.addActor(mainTable);
 	}
 	
-	public void loadVictoryUI()
+	public void showVictoryUI()
 	{
 		
 	}
 
+	//TODO: TO BE IMPROVED
+	private void createVictoryDialog(Skin skin, Table mainTable)
+	{
+		victoryWindow = new Window("", skin, "options");
+		victoryWindow.setSize(700f, 500f);
+		victoryWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
+		
+		Label title = new Label("DEFEAT", skin, "dialogtitle");
+		title.setColor(Color.RED);
+		TextButton againBtn = new TextButton("TRY AGAIN", skin, "optionsmenu");
+		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
+		
+		victoryWindow.row().pad(30f).center().uniformX();
+		victoryWindow.add(title).center();
+		
+		Table buttonsGroup = new Table();
+		buttonsGroup.row().center().fillX();
+		buttonsGroup.add(againBtn);
+		buttonsGroup.row().center().fillX().spaceTop(30f);
+		buttonsGroup.add(exitBtn);
+		
+		victoryWindow.row().pad(50).center();
+		victoryWindow.add(buttonsGroup);
+
+		mainTable.addActor(optionsWindow);
+		
+		againBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(true);
+				SceneManager.resetCurrentScene();
+			};
+		});
+		
+		exitBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Gdx.app.exit();
+			};
+		});
+		
+		victoryWindow.setVisible(false);
+		
+		//optionsWindow.debug();
+	}
+	
+	//TODO: TO BE IMPROVED
+	private void createDefeatDialog(Skin skin, Table mainTable)
+	{
+		defeatWindow = new Window("", skin, "options");
+		defeatWindow.setSize(700f, 500f);
+		defeatWindow.setPosition((Env.MAX_UI_WIDTH - 700f) * .5f, (Env.MAX_UI_HEIGHT - 500f) * .5f);
+		
+		Label title = new Label("VICTORY", skin, "dialogtitle");
+		title.setColor(Color.GREEN);
+		TextButton againBtn = new TextButton("PLAY AGAIN", skin, "optionsmenu");
+		TextButton exitBtn = new TextButton("EXIT", skin, "optionsmenu");
+		
+		defeatWindow.row().pad(30f).center().uniformX();
+		defeatWindow.add(title).center();
+		
+		Table buttonsGroup = new Table();
+		buttonsGroup.row().center().fillX();
+		buttonsGroup.add(againBtn);
+		buttonsGroup.row().center().fillX().spaceTop(30f);
+		buttonsGroup.add(exitBtn);
+		
+		defeatWindow.row().pad(50).center();
+		defeatWindow.add(buttonsGroup);
+
+		mainTable.addActor(defeatWindow);
+		
+		againBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				optionsButton.setVisible(true);
+				SceneManager.resetCurrentScene();
+			};
+		});
+		
+		exitBtn.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y)
+			{
+				Gdx.app.exit();
+			};
+		});
+		
+		defeatWindow.setVisible(false);
+		
+		//optionsWindow.debug();
+	}
+	
 	//TODO: TO BE IMPROVED
 	private void createOptionsDialog(Skin skin, Table mainTable)
 	{
@@ -197,7 +298,6 @@ public class GameScreen implements Screen, InputProcessor {
 		optionsWindow.setVisible(false);
 		
 		//optionsWindow.debug();
-
 	}
 
 	private void createOptionsButton(Skin skin, final Table mainTable)

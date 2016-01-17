@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -30,7 +31,7 @@ public class MainMenuScreen implements Screen
 	private Stage stage;
 	private SpriteBatch batch;
 	private TiledDrawable background;
-	
+	private Music music;
 	private Sound click;
 	
 	public MainMenuScreen()
@@ -41,16 +42,25 @@ public class MainMenuScreen implements Screen
 		stage = Env.getGame().getStage();
 		batch = new SpriteBatch();
 		
+		music = assetMgr.get(Env.MUSIC_FOLDER + "/metaphysik.ogg", Music.class);
+		music.setLooping(true);
+		
 		click = assetMgr.get(Env.SFX_FOLDER + "/click3.ogg", Sound.class);
 	}
 	
 	@Override
 	public void show()
 	{
-		setupUI();
+		loadUI();
+		music.play();
 	}
 	
-	private void setupUI()
+	@Override
+	public void hide() {
+		music.stop();
+	}
+	
+	private void loadUI()
 	{
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
@@ -64,9 +74,7 @@ public class MainMenuScreen implements Screen
 		createTitle(skin, mainTable);
 		mainTable.row().expand().padTop(100f);
 		createButtons(skin, mainTable);
-		
-		//mainTable.debug();
-		
+
 		stage.addActor(mainTable);
 	}
 	
@@ -86,8 +94,8 @@ public class MainMenuScreen implements Screen
 		{
 			public void clicked (InputEvent event, float x, float y)
 			{
-				Env.getGame().setScreen( Screens.getGameScreen() );
 				click.play();
+				Env.getGame().setScreen( Screens.getGameScreen() );
 			}
 		});
 		
@@ -95,8 +103,8 @@ public class MainMenuScreen implements Screen
 		{
 			public void clicked (InputEvent event, float x, float y)
 			{
-				Gdx.app.exit();
 				click.play();
+				Gdx.app.exit();
 			}
 		});
 		
@@ -135,11 +143,6 @@ public class MainMenuScreen implements Screen
 
 	@Override
 	public void resume() {
-		
-	}
-
-	@Override
-	public void hide() {
 		
 	}
 

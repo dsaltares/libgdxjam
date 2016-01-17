@@ -147,9 +147,7 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		createTitle(skin, mainTable);
 		mainTable.row().expand().padTop(100f).padLeft(150f).padRight(150f);
 		createProgressBar(skin, mainTable);
-		
-		mainTable.debug();
-		
+
 		stage.addActor(mainTable);
 	}
 	
