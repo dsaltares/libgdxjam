@@ -25,8 +25,8 @@ public class RuntimeTexturePacker
 		
 		// Process folders
 		System.out.println("--- Packaging textures...");
+		processFolder(settings, Env.UI_FOLDER);
 		processFolder(settings, Env.TEXTURES_FOLDER);
-
 		System.out.println("--- Packaging done");
 	}
 	

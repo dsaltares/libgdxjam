@@ -129,11 +129,10 @@ public class GameScreen implements Screen, InputProcessor {
 		Table table = new Table();
 		table.setFillParent(true);
 		
-		TextureAtlas uiAtlas = assetMgr.get(Env.TEXTURES_FOLDER + "/ui/ui.atlas", TextureAtlas.class);
+		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
 		
 		generateResetButton(uiAtlas);
 
-		
 		table.row().padTop(30f).colspan(2).expand();
 		table.add(resetButton).top().right();
 		table.row().colspan(1);
@@ -142,6 +141,12 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		stage.addActor(table);
 	}
+	
+	public void loadVictoryUI()
+	{
+		
+	}
+	
 
 	private void generateResetButton(TextureAtlas uiAtlas)
 	{
