@@ -4,17 +4,9 @@ size: 2048,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Button
-  rotate: false
-  xy: 1281, 378
-  size: 99, 99
-  split: 24, 26, 24, 26
-  orig: 99, 99
-  offset: 0, 0
-  index: -1
 Monitor
   rotate: false
-  xy: 0, 98
+  xy: 1380, 423
   size: 98, 98
   split: 24, 25, 24, 25
   orig: 98, 98
@@ -22,22 +14,39 @@ Monitor
   index: -1
 Monitor_blue
   rotate: false
-  xy: 256, 226
+  xy: 0, 43
   size: 98, 98
   split: 24, 25, 24, 25
   orig: 98, 98
   offset: 0, 0
   index: -1
-btn_reset
+button
   rotate: false
-  xy: 354, 246
-  size: 100, 78
-  orig: 100, 78
+  xy: 1281, 422
+  size: 99, 99
+  split: 24, 26, 24, 26
+  orig: 99, 99
+  offset: 0, 0
+  index: -1
+button_dark
+  rotate: false
+  xy: 0, 141
+  size: 99, 99
+  split: 24, 26, 24, 26
+  orig: 99, 99
+  offset: 0, 0
+  index: -1
+button_light
+  rotate: false
+  xy: 256, 269
+  size: 99, 99
+  split: 24, 26, 24, 26
+  orig: 99, 99
   offset: 0, 0
   index: -1
 panel
   rotate: false
-  xy: 1380, 379
+  xy: 99, 142
   size: 98, 98
   split: 24, 25, 24, 25
   orig: 98, 98
@@ -45,7 +54,7 @@ panel
   index: -1
 panel_dark
   rotate: false
-  xy: 0, 0
+  xy: 355, 270
   size: 98, 98
   split: 24, 25, 24, 25
   orig: 98, 98
@@ -53,43 +62,57 @@ panel_dark
   index: -1
 panel_light
   rotate: false
-  xy: 98, 98
+  xy: 1478, 423
   size: 98, 98
   split: 24, 25, 24, 25
   orig: 98, 98
   offset: 0, 0
   index: -1
+reset
+  rotate: false
+  xy: 453, 290
+  size: 100, 78
+  orig: 100, 78
+  offset: 0, 0
+  index: -1
+settings
+  rotate: false
+  xy: 0, 0
+  size: 44, 43
+  orig: 44, 43
+  offset: 0, 0
+  index: -1
 space_background
   rotate: false
-  xy: 1281, 334
+  xy: 1281, 378
   size: 70, 44
   orig: 70, 44
   offset: 0, 0
   index: -1
 title_background
   rotate: false
-  xy: 0, 324
+  xy: 0, 368
   size: 1281, 153
   orig: 1281, 153
   offset: 0, 0
   index: -1
 xirod25
   rotate: false
-  xy: 0, 196
+  xy: 0, 240
   size: 256, 128
   orig: 256, 128
   offset: 0, 0
   index: -1
 xirod60
   rotate: false
-  xy: 0, 477
+  xy: 0, 521
   size: 2048, 128
   orig: 2048, 128
   offset: 0, 0
   index: -1
 xirod90
   rotate: false
-  xy: 0, 605
+  xy: 0, 649
   size: 2048, 256
   orig: 2048, 256
   offset: 0, 0

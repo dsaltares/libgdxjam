@@ -14,7 +14,11 @@
 	},
 
 	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
-	    title: { font: big, fontColor: white, background: title_background  }
+	    title: { font: big, fontColor: white, background: title_background  },
+	    dialogtitle: { font: medium, fontColor: black  }
+	},
+
+	com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	},
 
 	com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
@@ -25,6 +29,22 @@
         mainmenu: {
             down: panel_dark, up: panel_light, over: panel
             font: medium, fontColor: white
+        },
+        optionsmenu: {
+            down: panel, up: panel_dark
+            font: small, fontColor: black
+        }
+    },
+
+	com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
+        options: {
+            imageUp: settings, down: button_dark, up: button_light, over: button
+        }
+    }
+
+	com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
+        options: {
+            background: button_light, titleFont: small
         }
     }
 }

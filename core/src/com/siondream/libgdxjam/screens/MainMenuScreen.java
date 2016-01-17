@@ -3,6 +3,7 @@ package com.siondream.libgdxjam.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -30,6 +31,8 @@ public class MainMenuScreen implements Screen
 	private SpriteBatch batch;
 	private TiledDrawable background;
 	
+	private Sound click;
+	
 	public MainMenuScreen()
 	{
 		logger.info("initialize");
@@ -37,15 +40,17 @@ public class MainMenuScreen implements Screen
 		assetMgr = Env.getGame().getAssetManager();
 		stage = Env.getGame().getStage();
 		batch = new SpriteBatch();
+		
+		click = assetMgr.get(Env.SFX_FOLDER + "/click3.ogg", Sound.class);
 	}
 	
 	@Override
 	public void show()
 	{
-		loadUI();
+		setupUI();
 	}
 	
-	private void loadUI()
+	private void setupUI()
 	{
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
@@ -82,6 +87,7 @@ public class MainMenuScreen implements Screen
 			public void clicked (InputEvent event, float x, float y)
 			{
 				Env.getGame().setScreen( Screens.getGameScreen() );
+				click.play();
 			}
 		});
 		
@@ -90,6 +96,7 @@ public class MainMenuScreen implements Screen
 			public void clicked (InputEvent event, float x, float y)
 			{
 				Gdx.app.exit();
+				click.play();
 			}
 		});
 		
