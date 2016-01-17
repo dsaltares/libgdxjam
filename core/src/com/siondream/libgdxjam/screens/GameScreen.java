@@ -369,7 +369,7 @@ public class GameScreen implements Screen, InputProcessor {
 	@Override
 	public boolean keyDown(int keycode) {
 		if (keycode == Keys.D) {
-			engine.getSystem(RenderingSystem.class).toggleDebug();
+			//engine.getSystem(RenderingSystem.class).toggleDebug();
 			return true;
 		}
 		
@@ -502,7 +502,7 @@ public class GameScreen implements Screen, InputProcessor {
 			new NodeSystem(engine)
 		);
 		
-		renderingSystem.setDebug(true);
+		//renderingSystem.setDebug(true);
 		renderingSystem.setProcessing(false);
 	}
 	
