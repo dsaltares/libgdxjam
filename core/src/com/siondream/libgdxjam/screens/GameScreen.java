@@ -10,6 +10,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -65,6 +66,7 @@ public class GameScreen implements Screen, InputProcessor {
 	private Logger logger = new Logger(GameScreen.class.getSimpleName(), Env.LOG_LEVEL);
 	
 	private Button resetButton;
+	private Music music;
 	
 	public GameScreen() {
 		logger.info("initialize");
@@ -82,7 +84,10 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		SceneManager.init(engine);
 		EventManager.init(engine);
-
+		
+		AssetManager manager = Env.getGame().getAssetManager();
+		music = manager.get(Env.MUSIC_FOLDER + "/danger-storm.ogg", Music.class);
+		music.setLooping(true);
 	}
 	
 	@Override
@@ -102,6 +107,18 @@ public class GameScreen implements Screen, InputProcessor {
 		
 		camera.position.set(0f,0f,0f);
 		engine.getSystem(PlayerSystem.class).setBlockInput(false);
+		
+		music.play();
+	}
+	
+	@Override
+	public void hide() {
+		logger.info("hide");
+		
+		scene.removeFromEngine(engine);
+		engine.removeAllEntities();
+		removeInputProcessors();
+		music.stop();
 	}
 	
 	private void loadUI()
@@ -172,15 +189,6 @@ public class GameScreen implements Screen, InputProcessor {
 
 	@Override
 	public void resume() {
-	}
-
-	@Override
-	public void hide() {
-		logger.info("hide");
-		
-		scene.removeFromEngine(engine);
-		engine.removeAllEntities();
-		removeInputProcessors();
 	}
 
 	@Override

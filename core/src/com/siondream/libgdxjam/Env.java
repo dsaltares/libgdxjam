@@ -16,6 +16,7 @@ public class Env
 	public final static String PHYSICS_FOLDER = "./physics";
 	public final static String ANIMATION_CONTROL_FOLDER = "./anims";
 	public final static String SFX_FOLDER = "./sfx";
+	public final static String MUSIC_FOLDER = "./music";
 	public final static Vector2 GRAVITY = new Vector2(0.0f, -10.0f);
 	public final static boolean DO_SLEEP = true;
 
