@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
 import com.siondream.libgdxjam.ecs.NodeUtils;
@@ -19,6 +21,10 @@ import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.ZIndexComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.physics.ContactAdapter;
+import com.siondream.libgdxjam.progression.Event;
+import com.siondream.libgdxjam.progression.EventManager;
+import com.siondream.libgdxjam.progression.EventType;
+import com.siondream.libgdxjam.progression.SceneManager;
 
 public class PlayerBulletContactListener extends ContactAdapter {
 	private Engine engine;
@@ -38,6 +44,18 @@ public class PlayerBulletContactListener extends ContactAdapter {
 		spawnSmoke(entity);
 		laserHit.play();
 		engine.removeEntity(entity);
+		Timer.instance().scheduleTask(
+			new Task() {
+				@Override
+				public void run() {
+					EventManager.fireEvent(
+						SceneManager.getCurrentScene(),
+						new Event(EventType.YOU_HAVE_BEEN_KILLED, false, false)
+					);
+				}
+			},
+			2.0f
+		);
 	}
 	
 	private void spawnSmoke(Entity entity) {
