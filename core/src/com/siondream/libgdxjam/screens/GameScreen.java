@@ -255,7 +255,11 @@ public class GameScreen implements Screen, InputProcessor {
 		StateMachineSystem stateMachineSystem = new StateMachineSystem();
 		PatrolSystem patrolSystem = new PatrolSystem();
 		IdleSystem idleSystem = new IdleSystem();
-		AttackSystem attackSystem = new AttackSystem();
+		AttackSystem attackSystem = new AttackSystem(
+			physicsSystem.getWorld(),
+			physicsSystem.getCategories(),
+			physicsSystem.getHandler()
+		);
 		SleepSystem sleepSystem = new SleepSystem(Env.getGame().getTags());
 		GruntSystem gruntSystem = new GruntSystem(
 			visionSystem,

@@ -63,4 +63,11 @@ public class NodeUtils {
 		v2.nor();
 		node.angle = v2.angle();
 	}
+	
+	public static Entity getParent(Entity entity) {
+		if (!Mappers.node.has(entity)) { return null; }
+		
+		NodeComponent node = Mappers.node.get(entity);
+		return node.parent;
+	}
 }

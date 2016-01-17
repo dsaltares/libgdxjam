@@ -1,5 +1,7 @@
 package com.siondream.libgdxjam.physics;
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -23,5 +25,29 @@ public abstract class ContactAdapter implements ContactListener {
 	protected boolean matches(Contact contact, Fixture fixture) {
 		return contact.getFixtureA() == fixture ||
 			   contact.getFixtureB() == fixture;
+	}
+	
+	protected Entity getEntity(Contact contact,
+							   Class<? extends Component> componentClass) {
+		Object dataA = contact.getFixtureA().getBody().getUserData();
+		Object dataB = contact.getFixtureB().getBody().getUserData();
+		
+		if (dataA instanceof Entity) {
+			Entity entity = (Entity)dataA;
+			
+			if (entity.getComponent(componentClass) != null) {
+				return entity;
+			}
+		}
+		
+		if (dataB instanceof Entity) {
+			Entity entity = (Entity)dataB;
+			
+			if (entity.getComponent(componentClass) != null) {
+				return entity;
+			}	
+		}
+		
+		return null;
 	}
 }

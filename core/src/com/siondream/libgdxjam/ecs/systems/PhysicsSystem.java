@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.siondream.libgdxjam.Env;
 import com.siondream.libgdxjam.ecs.Mappers;
+import com.siondream.libgdxjam.ecs.NodeUtils;
+import com.siondream.libgdxjam.ecs.components.NodeComponent;
 import com.siondream.libgdxjam.ecs.components.PhysicsComponent;
 import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.physics.Categories;
@@ -100,8 +102,22 @@ public class PhysicsSystem extends EntitySystem implements EntityListener, Dispo
 		transforms.put(entity, new TransformComponent());
 		
 		PhysicsComponent physics = Mappers.physics.get(entity);
-		TransformComponent transform = Mappers.transform.get(entity);
-		physics.body.setTransform(transform.position, transform.angle);
+		
+		if (Mappers.node.has(entity)) {
+			NodeUtils.computeWorld(entity);
+			NodeComponent node = Mappers.node.get(entity);
+			physics.body.setTransform(
+				node.position,
+				node.angle * MathUtils.degreesToRadians
+			);
+		}
+		else if (Mappers.transform.has(entity)) {
+			TransformComponent transform = Mappers.transform.get(entity);
+			physics.body.setTransform(
+				transform.position,
+				transform.angle * MathUtils.degreesToRadians
+			);
+		}
 	}
 
 	@Override

@@ -11,9 +11,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Logger;
@@ -30,8 +28,8 @@ import com.siondream.libgdxjam.ecs.components.TransformComponent;
 import com.siondream.libgdxjam.ecs.components.agents.PlayerComponent;
 import com.siondream.libgdxjam.ecs.systems.PhysicsSystem;
 import com.siondream.libgdxjam.physics.Categories;
-import com.siondream.libgdxjam.physics.ContactAdapter;
 import com.siondream.libgdxjam.physics.PhysicsData;
+import com.siondream.libgdxjam.physics.listeners.PlayerLevelContactListener;
 
 public class PlayerSystem extends IteratingSystem
 						  implements InputProcessor,
@@ -372,54 +370,6 @@ public class PlayerSystem extends IteratingSystem
 	public void setBlockInput(boolean blockInput)
 	{
 		this.isInputBlocked = blockInput;
-	}
-	
-	private class PlayerLevelContactListener extends ContactAdapter {
-		@Override
-		public void beginContact(Contact contact) {
-			for (Entity entity : getEntities()) {
-				PlayerComponent player = Mappers.player.get(entity);
-				
-				if (!matches(contact, player.feetSensor)) { continue; }
-				
-				player.feetContacts++;
-				player.grounded = player.feetContacts > 0;
-				player.fixture.setFriction(player.groundFriction);
-	
-				if (player.feetContacts == 1) {
-					logger.info("landed");
-				}
-			}
-		}
-
-		@Override
-		public void endContact(Contact contact) {
-			for (Entity entity : getEntities()) {
-				PlayerComponent player = Mappers.player.get(entity);
-				
-				if (!matches(contact, player.feetSensor)) { continue; }
-				
-				player.feetContacts = Math.max(0, player.feetContacts - 1);
-				player.grounded = player.feetContacts > 0;
-
-				if (!player.grounded) {
-					player.fixture.setFriction(0.0f);
-				}
-			}
-		}
-		
-		@Override
-		public void preSolve(Contact contact, Manifold oldManifold) {
-			for (Entity entity : getEntities()) {
-				PlayerComponent player = Mappers.player.get(entity);
-				
-				if (!matches(contact, player.fixture)) { continue; }
-				
-				if (player.grounded && contact.isTouching()) {
-					contact.resetFriction();
-				}
-			}
-		}
 	}
 	
 	private class PlayerTags {

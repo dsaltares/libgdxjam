@@ -24,9 +24,9 @@ public class NodeSystem implements EntityListener {
 	
 	@Override
 	public void entityAdded(Entity entity) {
-		nodes.put(entity, Mappers.node.get(entity));
+		NodeComponent node = Mappers.node.get(entity);
 		
-		NodeComponent node = nodes.remove(entity);
+		nodes.put(entity, node);
 		
 		for (Entity child : node.children) {
 			engine.addEntity(child);

@@ -1,5 +1,5 @@
 {
-"skeleton": { "hash": "IXcMYUVUmrWqB27LGvSjl5f+FKM", "spine": "2.1.27", "width": 188.5, "height": 175.62, "images": "" },
+"skeleton": { "hash": "7cJIic39543Q6Xb3SKgLoXqGufA", "spine": "2.1.27", "width": 188.5, "height": 175.62, "images": "" },
 "bones": [
 	{ "name": "root" },
 	{ "name": "Hip", "parent": "root", "length": 44.7, "x": -4.16, "y": 29.66, "rotation": 98.5 },
@@ -20,7 +20,8 @@
 	{ "name": "FootR2", "parent": "FootR", "length": 12.86, "x": 21.8, "y": 0.48, "rotation": 4.51 },
 	{ "name": "HandL", "parent": "ArmL2", "length": 20.46, "x": 50.17, "y": -0.05, "rotation": 35.02 },
 	{ "name": "Gun", "parent": "HandL", "length": 87.08, "x": 17.26, "y": 12.77, "rotation": 21.09 },
-	{ "name": "HandR", "parent": "Gun", "length": 16, "x": 66.73, "y": -3.15, "rotation": -37.93 }
+	{ "name": "HandR", "parent": "Gun", "length": 16, "x": 66.73, "y": -3.15, "rotation": -37.93 },
+	{ "name": "bullet", "parent": "Gun", "x": 99.06, "y": -1.51 }
 ],
 "slots": [
 	{ "name": "GruntFoot2", "bone": "root", "attachment": "GruntFoot2" },
@@ -146,6 +147,9 @@
 			"GruntTeeth": { "x": 29.91, "y": 20.76, "rotation": 53.18, "width": 44, "height": 21 }
 		}
 	}
+},
+"events": {
+	"shoot": {}
 },
 "animations": {
 	"Idle": {
@@ -538,7 +542,10 @@
 					]
 				}
 			}
-		}
+		},
+		"events": [
+			{ "time": 0.8333, "name": "shoot" }
+		]
 	},
 	"Sleep": {
 		"bones": {
