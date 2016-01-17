@@ -42,8 +42,8 @@ public class IntroScreen implements Screen
 	private float currentTime;
 	private float endTime;
 	private final float SCROLLSPEED = 10f;
-	private final float INITIAL_WAIT = 3f;
-	private final float FINAL_WAIT = 3f;
+	private final float INITIAL_WAIT = 8f;
+	private final float FINAL_WAIT = 5f;
 	
 	public IntroScreen()
 	{
