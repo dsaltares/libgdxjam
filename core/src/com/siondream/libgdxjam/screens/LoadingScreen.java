@@ -5,6 +5,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -62,6 +64,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		loadFolder(Env.SPINE_FOLDER);
 		loadFolder(Env.PHYSICS_FOLDER);
 		loadFolder(Env.ANIMATION_CONTROL_FOLDER);
+		loadFolder(Env.SFX_FOLDER);
+		loadFolder(Env.MUSIC_FOLDER);
 	}
 	
 	private void loadFolder(String path) {
@@ -100,6 +104,14 @@ public class LoadingScreen implements Screen, AssetErrorListener
 				else if (extension.equals("json") &&
 						 path.equals(Env.ANIMATION_CONTROL_FOLDER)) {
 					assetMgr.load(file.path(), AnimationControl.class);
+				}
+				else if (extension.equals("ogg") &&
+						 path.equals(Env.SFX_FOLDER)) {
+					assetMgr.load(file.path(), Sound.class);
+				}
+				else if (extension.equals("ogg") &&
+						 path.equals(Env.MUSIC_FOLDER)) {
+					assetMgr.load(file.path(), Music.class);
 				}
 				else {
 					logger.error("unknown resource type: " + file.name());

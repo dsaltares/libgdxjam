@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -44,6 +45,7 @@ public class AttackSystem extends StateSystem
 	private World world;
 	private Categories categories;
 	private CollisionHandler handler;
+	private Sound laserSfx;
 	
 	public AttackSystem(World world,
 						Categories categories,
@@ -57,6 +59,9 @@ public class AttackSystem extends StateSystem
 		this.world = world;
 		this.categories = categories;
 		this.handler = handler;
+		
+		AssetManager manager = Env.getGame().getAssetManager();
+		laserSfx = manager.get(Env.SFX_FOLDER + "/laser.ogg", Sound.class);
 	}
 	
 	@Override
@@ -171,6 +176,7 @@ public class AttackSystem extends StateSystem
 		public void event (int trackIndex, Event event) {
 			if (event.getData().getName().equals("shoot")) {
 				spawnBullet(entity);
+				laserSfx.play();
 			}
 		}
 		
