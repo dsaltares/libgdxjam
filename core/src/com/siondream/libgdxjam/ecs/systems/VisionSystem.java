@@ -116,6 +116,8 @@ public class VisionSystem extends IteratingSystem
 		float toObservableAngle = toObservable.angle();
 		float angleDifference = Math.abs(toObservableAngle - observer.angle);
 		
+		angleDifference = Math.min(angleDifference, 360.0f - angleDifference);
+		
 		if (angleDifference > observer.fovAngle) {
 			return false;
 		}
