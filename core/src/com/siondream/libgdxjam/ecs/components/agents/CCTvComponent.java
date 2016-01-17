@@ -18,5 +18,6 @@ public class CCTvComponent implements Component
 	public boolean patrolStarted = false;
 	public boolean alerted = false;
 	public float detectionTime = 0.0f;
+	public boolean playerReported = false;
 	public Vector2 targetPosition = new Vector2();
 }

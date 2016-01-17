@@ -5,6 +5,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Logger;
@@ -35,6 +37,8 @@ public class CCTvSystem extends IteratingSystem {
 		Env.LOG_LEVEL
 	);
 	private VisionSystem visionSystem;
+	private Sound foundSfx;
+	private Sound alarmSfx;
 	
 	public CCTvSystem(VisionSystem visionSystem, Tags tags) {
 		super(Family.all(
@@ -47,6 +51,10 @@ public class CCTvSystem extends IteratingSystem {
 		this.visionSystem = visionSystem;
 		this.tags = tags;
 		this.cctvTags = new CCTVTags();
+		
+		AssetManager manager = Env.getGame().getAssetManager();
+		foundSfx = manager.get(Env.SFX_FOLDER + "/found.ogg");
+		alarmSfx = manager.get(Env.SFX_FOLDER + "/alarm.ogg");
 	}
 	
 	@Override
@@ -74,6 +82,7 @@ public class CCTvSystem extends IteratingSystem {
 	private void updateDetection(Entity entity, float deltaTime) {
 		CCTvComponent cctv = Mappers.cctv.get(entity);
 		
+		boolean wasAlerted = cctv.alerted;
 		cctv.alerted = false;
 		
 		for (Entity target : players) {
@@ -86,12 +95,20 @@ public class CCTvSystem extends IteratingSystem {
 		
 		cctv.detectionTime = cctv.alerted ? cctv.detectionTime + deltaTime : 0.0f;
 		
-		if (cctv.detectionTime > DETECTION_TIME) {
+		if (cctv.detectionTime > DETECTION_TIME &&
+			!cctv.playerReported) {
+			
 			logger.info("exposed");
+			alarmSfx.play();
+			cctv.playerReported = true;
 			EventManager.fireEvent(
 				SceneManager.getCurrentScene(),
 				new Event(EventType.YOU_HAVE_BEEN_KILLED, false, false)
 			);
+		}
+		
+		if (!wasAlerted && cctv.alerted) {
+			foundSfx.play();
 		}
 	}
 	
