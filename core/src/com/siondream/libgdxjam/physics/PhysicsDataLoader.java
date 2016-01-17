@@ -160,6 +160,30 @@ public class PhysicsDataLoader extends AsynchronousAssetLoader<PhysicsData, Phys
 		filter.categoryBits = categories.getBits(filterValue.getString("categoryBits", ""));
 		filter.groupIndex = (short)filterValue.getInt("groupIndex", 0);
 		
+		if (filterValue.has("maskBits")) {	
+			JsonValue maskBits = filterValue.get("maskBits");		
+			
+			if (maskBits.has("collide")) {
+				JsonValue collide = maskBits.get("collide");
+				JsonIterator collideIt = collide.iterator();		
+								
+				while (collideIt.hasNext()) {
+					short bits = categories.getBits(collideIt.next().asString());
+					filter.maskBits |= bits;
+				}
+			}
+			
+			if (maskBits.has("filter")) {
+				JsonValue skip = maskBits.get("filter");
+				JsonIterator skipIt = skip.iterator();		
+				
+				while (skipIt.hasNext()) {
+					short bits = categories.getBits(skipIt.next().asString());
+					filter.maskBits &= ~bits;		
+				}
+			}
+		}
+		
 		return filter;
 	}
 	
