@@ -35,7 +35,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 
 	private Stage stage;
 	private SpriteBatch batch;
-	private TiledDrawable background;
+	private TiledDrawable title;
+	private TiledDrawable stars;
 	
 	private ProgressBar progressBar;
 	
@@ -139,7 +140,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
 		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
 		
-		background = new TiledDrawable( uiAtlas.findRegion("title") );
+		title = new TiledDrawable( uiAtlas.findRegion("title") );
+		stars = new TiledDrawable( uiAtlas.findRegion("space_background") );
 		
 		Table mainTable = new Table();
 		mainTable.setFillParent(true);
@@ -170,7 +172,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 			
 			batch.setProjectionMatrix( stage.getCamera().combined );
 			batch.begin();
-			background.draw(batch, 0f, 0f, Env.MAX_UI_WIDTH, Env.MAX_UI_HEIGHT);
+			stars.draw(batch, 0f, 0f, Env.MAX_UI_WIDTH, Env.MAX_UI_HEIGHT);
+			title.draw(batch, 0f, 0f, Env.MAX_UI_WIDTH, Env.MAX_UI_HEIGHT);
 			batch.end();
 			
 			stage.getViewport().getCamera().update();
