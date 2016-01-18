@@ -59,14 +59,14 @@ public class GruntPlugin implements OverlapLoaderPlugin
 		grunt.rightAreaWaitSeconds = Float.parseFloat(map.get("rightAreaWaitSeconds", "1.0"));
 		
 		// Load spine animation
-		SkeletonData skeletonData = assetManager.get("./spine/Grunt.json", SkeletonData.class);
+		SkeletonData skeletonData = assetManager.get("spine/Grunt.json", SkeletonData.class);
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
 		size.width = 2.0f;
 		size.height = 2.0f;
 		
-		animControl.data = assetManager.get("./anims/grunt.json", AnimationControl.class);
+		animControl.data = assetManager.get("anims/grunt.json", AnimationControl.class);
 		
 		PhysicsData physicsData = assetManager.get(Env.PHYSICS_FOLDER + "/grunt-idle.json", PhysicsData.class);
 		physics.body = physicsData.createBody(physicsSystem.getWorld(), entity);

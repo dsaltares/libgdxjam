@@ -1,5 +1,5 @@
 {
-    "spine": "./spine/Player.json",
+    "spine": "spine/Player.json",
     "tags": {
         "vertical": [ "ground", "jump" ],
         "stance": [ "stand", "crouch" ],

@@ -1,5 +1,5 @@
 {
-    "spine": "./spine/Beholder.json",
+    "spine": "spine/Beholder.json",
     "tags": {
         "agent": [ "patrol", "alert" ]
     },

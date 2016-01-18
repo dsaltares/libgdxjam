@@ -36,12 +36,12 @@ public class PlayerPlugin implements OverlapLoaderPlugin {
 		
 		AssetManager assetManager = Env.getGame().getAssetManager();
 		
-		SkeletonData skeletonData = assetManager.get("./spine/Player.json", SkeletonData.class);
+		SkeletonData skeletonData = assetManager.get("spine/Player.json", SkeletonData.class);
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
 		
-		animControl.data = assetManager.get("./anims/player.json", AnimationControl.class);
+		animControl.data = assetManager.get("anims/player.json", AnimationControl.class);
 		
 		size.width = 0.5f;
 		size.height = 1.4f;

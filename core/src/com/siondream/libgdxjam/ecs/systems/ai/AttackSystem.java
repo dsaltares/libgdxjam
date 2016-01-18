@@ -125,7 +125,7 @@ public class AttackSystem extends StateSystem
 
 		AssetManager manager = Env.getGame().getAssetManager();
 		TextureAtlas atlas = manager.get(
-			"./textures/characters/characters.atlas",
+			"textures/characters/characters.atlas",
 			TextureAtlas.class
 		);
 		texture.region = atlas.findRegion("laser");

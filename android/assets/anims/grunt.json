@@ -1,5 +1,5 @@
 {
-    "spine": "./spine/Grunt.json",
+    "spine": "spine/Grunt.json",
     "tags": {
         "movement": [ "idle", "move", "shoot", "sleep", "wakeup" ]
     },

@@ -609,9 +609,10 @@ public class OverlapSceneLoader extends AsynchronousAssetLoader<OverlapScene, Ov
 		spine.state = new AnimationState(stateData);
 		spine.skeleton.setSkin(skeletonData.getSkins().first());
 		spine.state.setAnimation(
-				0, 
-				value.getString("currentAnimationName"), 
-				extraInfo.containsKey("loop") ? Boolean.valueOf(extraInfo.get("loop")) : false);
+			0, 
+			value.getString("currentAnimationName"), 
+			true
+		);
 
 		// Update bounds and origin
 		spine.skeleton.updateWorldTransform();

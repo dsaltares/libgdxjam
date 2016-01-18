@@ -43,7 +43,7 @@ public class CCTvPlugin implements OverlapLoaderPlugin
 		cctv.waitTimeMinAngle = Float.parseFloat(map.get("waitTimeMinAngle", "0.0"));
 		
 		// Load spine animation
-		SkeletonData skeletonData = assetManager.get("./spine/Beholder.json", SkeletonData.class);
+		SkeletonData skeletonData = assetManager.get("spine/Beholder.json", SkeletonData.class);
 		spine.skeleton = new Skeleton(skeletonData);
 		AnimationStateData stateData = new AnimationStateData(skeletonData);
 		spine.state = new AnimationState(stateData);
@@ -51,7 +51,7 @@ public class CCTvPlugin implements OverlapLoaderPlugin
 		size.width = 0.5f;
 		size.height = 0.5f;
 		
-		control.data = assetManager.get("./anims/cctv.json", AnimationControl.class);
+		control.data = assetManager.get("anims/cctv.json", AnimationControl.class);
 		
 		observer.fovAngle = 20.0f;
 		observer.distance = 4.5f;

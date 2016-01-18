@@ -12,13 +12,13 @@ public class Env
 	public final static String SCENES_FOLDER = "overlap/scenes/";
 	public final static String OVERLAP_ASSETS = "overlap/assets/orig/";
 	public final static String SCENES_TEXTURES_FOLDER = OVERLAP_ASSETS + "pack/";
-	public final static String TEXTURES_FOLDER = "./textures";
-	public final static String SPINE_FOLDER = "./spine";
-	public final static String PHYSICS_FOLDER = "./physics";
-	public final static String ANIMATION_CONTROL_FOLDER = "./anims";
-	public final static String UI_FOLDER = "./ui";
-    public final static String SFX_FOLDER = "./sfx";
-    public final static String MUSIC_FOLDER = "./music";
+	public final static String TEXTURES_FOLDER = "textures";
+	public final static String SPINE_FOLDER = "spine";
+	public final static String PHYSICS_FOLDER = "physics";
+	public final static String ANIMATION_CONTROL_FOLDER = "anims";
+	public final static String UI_FOLDER = "ui";
+    public final static String SFX_FOLDER = "sfx";
+    public final static String MUSIC_FOLDER = "music";
     public final static String PARTICLES_FOLDER = OVERLAP_ASSETS + "particles/";
 
 	

@@ -53,76 +53,61 @@ public class LoadingScreen implements Screen, AssetErrorListener
 	
 	private void loadUI()
 	{
-		loadFolder(Env.UI_FOLDER);
+		assetMgr.load("ui/ui.skin", Skin.class);
 		assetMgr.finishLoading();
 	}
 	
 	private void loadAllAssets() {
-		logger.info("loading Textures");
-		loadFolder(Env.TEXTURES_FOLDER);
-		loadFolder(Env.SPINE_FOLDER);
-		loadFolder(Env.PHYSICS_FOLDER);
-		loadFolder(Env.ANIMATION_CONTROL_FOLDER);
-		loadFolder(Env.SFX_FOLDER);
-		loadFolder(Env.MUSIC_FOLDER);
-	}
-	
-	private void loadFolder(String path) {
-		for(FileHandle file : Gdx.files.internal(path).list()) {
-			if(file.isDirectory()) {
-				loadFolder(file.path());
-			}
-			else {
-				String extension = file.extension();
-				
-				if (extension.equals("png")) {
-					assetMgr.load(file.path(), Texture.class);
-				}
-				else if (extension.equals("atlas")) {
-					assetMgr.load(file.path(), TextureAtlas.class);
-				}
-				else if (extension.equals("skin")) {
-					assetMgr.load(file.path(), Skin.class);
-				}
-				else if (extension.equals("fnt")) {
-					assetMgr.load(file.path(), BitmapFont.class);
-				}
-				else if (extension.equals("json") &&
-						 path.equals(Env.SPINE_FOLDER)) {
-					String atlas = file.parent().path() +
-								   "/" +
-								   file.nameWithoutExtension() +
-								   ".atlas";
-					
-					SkeletonDataLoaderParameter parameter = new SkeletonDataLoaderParameter();
-					parameter.atlasName = atlas;
-					parameter.scale = Env.UI_TO_WORLD;
-					assetMgr.load(file.path(), SkeletonData.class, parameter);
-				}
-				else if (extension.equals("json") &&
-						 path.equals(Env.PHYSICS_FOLDER)) {
-					assetMgr.load(file.path(), PhysicsData.class);
-				}
-				else if (extension.equals("json") &&
-						 path.equals(Env.ANIMATION_CONTROL_FOLDER)) {
-					assetMgr.load(file.path(), AnimationControl.class);
-				}
-				else if (extension.equals("ogg") &&
-						 path.equals(Env.SFX_FOLDER)) {
-					assetMgr.load(file.path(), Sound.class);
-				}
-				else if (extension.equals("ogg") &&
-						 path.equals(Env.MUSIC_FOLDER)) {
-					assetMgr.load(file.path(), Music.class);
-				}
-				else {
-					logger.error("unknown resource type: " + file.name());
-					continue;
-				}
-
-				logger.info(file.name() + " loaded");
-			}
-		}
+		logger.info("loading all assets");
+		
+		assetMgr.load("textures/characters/characters.atlas", TextureAtlas.class);
+		assetMgr.load("overlap/assets/orig/pack/pack.atlas", TextureAtlas.class);
+		
+		assetMgr.load("sfx/alarm.ogg", Sound.class);
+		assetMgr.load("sfx/click3.ogg", Sound.class);
+		assetMgr.load("sfx/footstep00.ogg", Sound.class);
+		assetMgr.load("sfx/footstep01.ogg", Sound.class);
+		assetMgr.load("sfx/footstep02.ogg", Sound.class);
+		assetMgr.load("sfx/footstep03.ogg", Sound.class);
+		assetMgr.load("sfx/footstep04.ogg", Sound.class);
+		assetMgr.load("sfx/footstep05.ogg", Sound.class);
+		assetMgr.load("sfx/footstep06.ogg", Sound.class);
+		assetMgr.load("sfx/footstep07.ogg", Sound.class);
+		assetMgr.load("sfx/footstep08.ogg", Sound.class);
+		assetMgr.load("sfx/footstep09.ogg", Sound.class);
+		assetMgr.load("sfx/found.ogg", Sound.class);
+		assetMgr.load("sfx/jump.ogg", Sound.class);
+		assetMgr.load("sfx/laser.ogg", Sound.class);
+		assetMgr.load("sfx/laserhit.ogg", Sound.class);
+		assetMgr.load("sfx/snore.ogg", Sound.class);
+		assetMgr.load("sfx/wakeup.ogg", Sound.class);
+		
+		assetMgr.load("music/danger-storm.ogg", Music.class);
+		assetMgr.load("music/metaphysik.ogg", Music.class);
+		
+		assetMgr.load("anims/cctv.json", AnimationControl.class);
+		assetMgr.load("anims/grunt.json", AnimationControl.class);
+		assetMgr.load("anims/player.json", AnimationControl.class);
+		
+		assetMgr.load("physics/beholder-stand.json", PhysicsData.class);
+		assetMgr.load("physics/grunt-idle.json", PhysicsData.class);
+		assetMgr.load("physics/player-stand.json", PhysicsData.class);
+		assetMgr.load("physics/player-crouch.json", PhysicsData.class);
+		
+		SkeletonDataLoaderParameter parameter = new SkeletonDataLoaderParameter();
+		parameter.atlasName = "spine/Beholder.atlas";
+		parameter.scale = Env.UI_TO_WORLD;
+		assetMgr.load("spine/Beholder.json", SkeletonData.class, parameter);
+		
+		parameter = new SkeletonDataLoaderParameter();
+		parameter.atlasName = "spine/Grunt.atlas";
+		parameter.scale = Env.UI_TO_WORLD;
+		assetMgr.load("spine/Grunt.json", SkeletonData.class, parameter);
+		
+		parameter = new SkeletonDataLoaderParameter();
+		parameter.atlasName = "spine/Player.atlas";
+		parameter.scale = Env.UI_TO_WORLD;
+		assetMgr.load("spine/Player.json", SkeletonData.class, parameter);
 	}
 	
 	@Override
@@ -137,8 +122,8 @@ public class LoadingScreen implements Screen, AssetErrorListener
 
 	private void setupUI()
 	{
-		Skin skin = assetMgr.get(Env.UI_FOLDER + "/ui.skin", Skin.class);
-		TextureAtlas uiAtlas = assetMgr.get(Env.UI_FOLDER + "/ui.atlas", TextureAtlas.class);
+		Skin skin = assetMgr.get("ui/ui.skin", Skin.class);
+		TextureAtlas uiAtlas = assetMgr.get("ui/ui.atlas", TextureAtlas.class);
 		
 		title = new TiledDrawable( uiAtlas.findRegion("title") );
 		stars = new TiledDrawable( uiAtlas.findRegion("space_background") );

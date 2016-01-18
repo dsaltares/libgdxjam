@@ -23,7 +23,7 @@ public class DesktopLauncher {
 		settings.paddingY = 0;
 		
 		// Pack textures
-		RuntimeTexturePacker.generateAtlases(settings);
+		//RuntimeTexturePacker.generateAtlases(settings);
 
 		new LwjglApplication(new LibgdxJam(), config);
 	}
